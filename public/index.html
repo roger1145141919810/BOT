@@ -1,14 +1,42 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>BOT - Big Old Two</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="/style.css" />
-</head>
+    <meta charset="utf-8" />
+    <title>BOT - Big Old Two</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/style.css" /> </head>
 <body>
-  <h1>BOT</h1>
-  <p>Big Old Two</p>
-  <script src="/client.js"></script>
+    <div class="center">
+        <h1>BOT - 大老二多人連線版</h1>
+
+        <div id="lobby">
+            <input id="roomId" placeholder="房間ID">
+            <input id="name" placeholder="你的名字">
+            <button id="createBtn">建立房間</button>
+            <button id="joinBtn">加入房間</button>
+        </div>
+
+        <div id="roomArea" class="hidden">
+            <h3>房間: <span id="curRoom">-</span></h3>
+            <div id="playersList"></div>
+            <button id="startBtn">開始遊戲</button>
+            <button id="backLobby">返回大廳</button>
+        </div>
+
+        <div id="game" class="hidden">
+            <div id="status">等待開局...</div>
+            <div id="lastPlay">上次出牌: <span id="lastPlayContent">無</span></div>
+            
+            <div id="hand"></div>
+            
+            <div id="controls">
+                <button id="playBtn">出牌</button>
+                <button id="passBtn">過牌 (Pass)</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script> 
+    <script src="/client.js"></script>
 </body>
 </html>
