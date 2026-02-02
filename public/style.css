@@ -1,0 +1,19 @@
+* { box-sizing: border-box; font-family: system-ui, sans-serif; }
+body { margin: 0; padding: 12px; background: #0b3b2e; color: #fff; }
+.center { max-width: 960px; margin: 0 auto; }
+.hidden { display: none; }
+#playersList > div { padding: 6px; background: rgba(255,255,255,0.06); margin-bottom: 6px; border-radius: 6px; }
+#hand { display: flex; gap: 8px; padding: 12px; overflow-x: auto; }
+.card {
+  min-width: 56px; min-height: 80px;
+  background: #fff; color: #000; border-radius: 6px;
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  padding:6px; cursor:pointer; user-select:none;
+}
+.card.selected { transform: translateY(-8px); box-shadow: 0 6px 12px rgba(0,0,0,0.4); }
+#controls { margin-top: 8px; display:flex; gap:8px; }
+button { padding: 8px 12px; border-radius:6px; border: none; cursor: pointer; }
+@media (max-width:600px) {
+  .card { min-width: 44px; min-height: 68px; font-size: 14px; }
+  body { padding: 8px; }
+}
