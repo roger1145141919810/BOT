@@ -103,10 +103,7 @@ $('createBtn').addEventListener('click', () => {
     const name = $('name').value.trim() || 'Player';
     if (!roomId) return alert('請填房間ID');
     socket.emit('create_room', { roomId, name });
-    currentRoom = roomId;
-    $('curRoom').textContent = roomId;
-    $('lobby').classList.add('hidden');
-    $('roomArea').classList.remove('hidden');
+    // 移除這裡的 classList.add('hidden')，交給 socket 監聽器處理
 });
 
 $('joinBtn').addEventListener('click', () => {
@@ -114,10 +111,7 @@ $('joinBtn').addEventListener('click', () => {
     const name = $('name').value.trim() || 'Player';
     if (!roomId) return alert('請填房間ID');
     socket.emit('join_room', { roomId, name });
-    currentRoom = roomId;
-    $('curRoom').textContent = roomId;
-    $('lobby').classList.add('hidden');
-    $('roomArea').classList.remove('hidden');
+    // 移除這裡的 classList.add('hidden')
 });
 
 // 新增：添加 AI
@@ -145,14 +139,13 @@ $('passBtn').addEventListener('click', () => {
 
 // --- Socket 監聽 ---
 
-socket.on('room_update', players => renderPlayers(players));
-
-socket.on('deal', hand => {
-    myHand = hand.sort((a, b) => {
-        if (a.rank !== b.rank) return a.rank - b.rank;
-        return SUIT_DATA[a.suit].weight - SUIT_DATA[b.suit].weight;
-    });
-    renderHand();
+socket.on('room_update', players => {
+    // 只有收到伺服器資料，才切換畫面
+    $('lobby').classList.add('hidden');
+    $('roomArea').classList.remove('hidden');
+    $('curRoom').textContent = currentRoom; // 更新畫面上顯示的房號
+    
+    renderPlayers(players);
 });
 
 socket.on('game_start', ({ currentPlayerId, players }) => {
