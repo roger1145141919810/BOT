@@ -144,21 +144,24 @@ $('passBtn').addEventListener('click', () => {
 // --- Socket 監聽 ---
 
 socket.on('room_update', players => {
-    // 確保進入房間後才切換 UI
+    // 1. 確保 UI 切換 (解決你之前按鈕沒反應的問題)
     $('lobby').classList.add('hidden');
     $('roomArea').classList.remove('hidden');
     
-    // 更新畫面上顯示的房間 ID
-    $('curRoom').textContent = currentRoom; 
+    // 2. 更新房號顯示 (截圖 ECC96868 顯示房號 ID 是空的，就是漏了這行)
+    if (currentRoom) $('curRoom').textContent = currentRoom;
     
     renderPlayers(players);
 });
 
-socket.on('game_start', ({ currentPlayerId, players }) => {
-    $('roomArea').classList.add('hidden');
-    $('game').classList.remove('hidden');
-    updateSeats(players, currentPlayerId);
-    $('status').textContent = '遊戲開始！';
+// 3. 確保 deal 事件能正確接收
+socket.on('deal', hand => {
+    console.log("收到手牌數據:", hand); // 除錯用
+    myHand = hand.sort((a, b) => {
+        if (a.rank !== b.rank) return a.rank - b.rank;
+        return SUIT_DATA[a.suit].weight - SUIT_DATA[b.suit].weight;
+    });
+    renderHand(); // 呼叫你寫好的渲染函數
 });
 
 socket.on('turn_update', ({ currentPlayerId }) => {
