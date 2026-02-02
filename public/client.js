@@ -102,16 +102,20 @@ $('createBtn').addEventListener('click', () => {
     const roomId = $('roomId').value.trim();
     const name = $('name').value.trim() || 'Player';
     if (!roomId) return alert('請填房間ID');
+    
+    // 這裡只負責發送，不負責切換畫面
     socket.emit('create_room', { roomId, name });
-    // 移除這裡的 classList.add('hidden')，交給 socket 監聽器處理
+    currentRoom = roomId; 
 });
 
 $('joinBtn').addEventListener('click', () => {
     const roomId = $('roomId').value.trim();
     const name = $('name').value.trim() || 'Player';
     if (!roomId) return alert('請填房間ID');
+    
+    // 這裡只負責發送
     socket.emit('join_room', { roomId, name });
-    // 移除這裡的 classList.add('hidden')
+    currentRoom = roomId; 
 });
 
 // 新增：添加 AI
@@ -140,10 +144,12 @@ $('passBtn').addEventListener('click', () => {
 // --- Socket 監聽 ---
 
 socket.on('room_update', players => {
-    // 只有收到伺服器資料，才切換畫面
+    // 確保進入房間後才切換 UI
     $('lobby').classList.add('hidden');
     $('roomArea').classList.remove('hidden');
-    $('curRoom').textContent = currentRoom; // 更新畫面上顯示的房號
+    
+    // 更新畫面上顯示的房間 ID
+    $('curRoom').textContent = currentRoom; 
     
     renderPlayers(players);
 });
