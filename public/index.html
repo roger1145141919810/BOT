@@ -2,46 +2,13 @@
 <html>
 <head>
   <meta charset="utf-8" />
+  <title>BOT - Big Old Two</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Big Two Online - Lobby</title>
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-  <div id="lobby" class="center">
-    <h1>大老二（測試骨架）</h1>
-    <div>
-      <input id="roomId" placeholder="房間ID (任意字串)" />
-      <input id="name" placeholder="玩家名稱" />
-      <button id="createBtn">建立房間</button>
-      <button id="joinBtn">加入房間</button>
-    </div>
-    <div id="roomArea" class="hidden">
-      <h2>房間: <span id="curRoom"></span></h2>
-      <div id="playersList"></div>
-      <button id="startBtn">開始遊戲</button>
-    </div>
-  </div>
-
-  <div id="game" class="hidden">
-    <div id="topBar">
-      <div id="status">等候中…</div>
-      <button id="backLobby">返回大廳</button>
-    </div>
-    <div id="playArea">
-      <div id="tableArea">
-        <div id="lastPlay">場上最近出牌：<span id="lastPlayContent">—</span></div>
-      </div>
-      <div id="handArea">
-        <div id="hand"></div>
-        <div id="controls">
-          <button id="playBtn">出牌</button>
-          <button id="passBtn">過</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="/socket.io/socket.io.js"></script>
+  <h1>BOT</h1>
+  <p>Big Old Two</p>
   <script src="/client.js"></script>
 </body>
 </html>
