@@ -71,23 +71,12 @@ io.on('connection', (socket) => {
             passCount: 0,
             hands: {} 
         };
-        // 通知大廳：目前玩家名單
         io.to(roomId).emit('room_update', rooms[roomId].players);
-    });
-
-    // 添加 AI 機器人 (這就是你的 AI 按鈕後端邏輯)
-    socket.on('add_ai', ({ roomId }) => {
-        const room = rooms[roomId];
-        if (room && room.players.length < 4 && !room.gameStarted) {
-            const aiId = `AI-${Math.random().toString(36).substr(2, 5)}`;
-            room.players.push({ id: aiId, name: `機器人 ${room.players.length}`, isAI: true });
-            // 即時同步給大廳的所有人，讓他們看到 AI 加入了
-            io.to(roomId).emit('room_update', room.players);
-        }
     });
 
     socket.on('join_room', ({ roomId, name }) => {
         const room = rooms[roomId];
+        // 真人上限維持 4 人
         if (room && room.players.length < 4 && !room.gameStarted) {
             socket.join(roomId);
             room.players.push({ id: socket.id, name, isAI: false });
@@ -97,13 +86,23 @@ io.on('connection', (socket) => {
         }
     });
 
-    // 開始遊戲：從大廳切換到遊戲畫面
+    // 修改後：自動補齊 4 人並開始遊戲
     socket.on('start_game', ({ roomId }) => {
         const room = rooms[roomId];
-        if (!room || room.players.length < 3) return socket.emit('error_msg', '人數不足 3 人無法開局');
+        if (!room) return;
 
+        // 1. 自動補足 AI 到 4 人
+        while (room.players.length < 4) {
+            const aiId = `AI-${Math.random().toString(36).substr(2, 5)}`;
+            room.players.push({ id: aiId, name: `機器人 ${room.players.length + 1}`, isAI: true });
+        }
+
+        // 通知所有人最新的玩家名單（座位排布會用到）
+        io.to(roomId).emit('room_update', room.players);
+
+        // 2. 固定以 4 人模式發牌 (每人 13 張)
         const deck = shuffle(generateDeck()); 
-        const hands = deal(deck, room.players.length); 
+        const hands = deal(deck, 4); 
         
         room.gameStarted = true;
         room.lastPlay = null;
@@ -115,20 +114,24 @@ io.on('connection', (socket) => {
             if (!player.isAI) {
                 io.to(player.id).emit('deal', hands[i]);
             }
+            // 尋找首家 (梅花 3)
             if (hands[i].some(c => c.id === 'clubs-3')) {
                 room.turnIndex = i; 
             }
         });
 
-        // 關鍵：發送 game_start 告知前端切換 UI
-        io.to(roomId).emit('game_start', { 
-            currentPlayerId: room.players[room.turnIndex].id,
-            players: room.players // 讓前端知道所有玩家的名單(包含AI)
-        });
-        
-        if (room.players[room.turnIndex].isAI) {
-            setTimeout(() => handleAiAction(roomId, room.players[room.turnIndex]), 1000);
-        }
+        // 3. 發送開始信號
+        setTimeout(() => {
+            io.to(roomId).emit('game_start', { 
+                currentPlayerId: room.players[room.turnIndex].id,
+                players: room.players 
+            });
+            
+            // 如果首家是 AI，啟動行動
+            if (room.players[room.turnIndex].isAI) {
+                handleAiAction(roomId, room.players[room.turnIndex]);
+            }
+        }, 500); 
     });
 
     socket.on('play_cards', ({ roomId, cards }) => {
