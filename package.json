@@ -1,0 +1,1 @@
+{\n  "name": "big-two-online",\n  "version": "0.1.0",\n  "main": "server/index.js",\n  "scripts": {\n    "start": "node server/index.js"\n  },\n  "dependencies": {\n    "express": "^4.18.2",\n    "socket.io": "^4.7.1"\n  }\n}
