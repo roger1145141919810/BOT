@@ -118,11 +118,6 @@ $('joinBtn').addEventListener('click', () => {
     currentRoom = roomId; 
 });
 
-// 新增：添加 AI
-$('addAiBtn').addEventListener('click', () => {
-    if (!currentRoom) return;
-    socket.emit('add_ai', { roomId: currentRoom });
-});
 
 $('startBtn').addEventListener('click', () => {
     if (!currentRoom) return;
@@ -162,6 +157,22 @@ socket.on('deal', hand => {
         return SUIT_DATA[a.suit].weight - SUIT_DATA[b.suit].weight;
     });
     renderHand(); // 呼叫你寫好的渲染函數
+});
+
+socket.on('game_start', ({ currentPlayerId, players }) => {
+    console.log("遊戲正式開始！切換畫面...");
+    
+    // 1. 隱藏準備區與大廳，顯示遊戲桌布
+    if ($('lobby')) $('lobby').classList.add('hidden');
+    if ($('roomArea')) $('roomArea').classList.add('hidden');
+    if ($('game')) $('game').classList.remove('hidden');
+
+    // 2. 初始化數據與座位渲染
+    allPlayers = players; 
+    updateSeats(players, currentPlayerId);
+    
+    // 3. 觸發手牌渲染 (確保 deal 來的牌被畫出來)
+    renderHand();
 });
 
 socket.on('turn_update', ({ currentPlayerId }) => {
