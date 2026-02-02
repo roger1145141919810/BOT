@@ -36,6 +36,8 @@ function handleAiAction(roomId, aiPlayer) {
     if (!room) return;
 
     const aiHand = room.hands[aiPlayer.id];
+    if (!aiHand) return; // 安全檢查
+
     const opponentCounts = {};
     room.players.forEach(p => opponentCounts[p.id] = room.hands[p.id].length);
 
@@ -76,7 +78,6 @@ io.on('connection', (socket) => {
 
     socket.on('join_room', ({ roomId, name }) => {
         const room = rooms[roomId];
-        // 真人上限維持 4 人
         if (room && room.players.length < 4 && !room.gameStarted) {
             socket.join(roomId);
             room.players.push({ id: socket.id, name, isAI: false });
@@ -86,25 +87,12 @@ io.on('connection', (socket) => {
         }
     });
 
-    // 修改後：自動補齊 4 人並開始遊戲
+    // --- 修正後的開始遊戲邏輯 ---
     socket.on('start_game', ({ roomId }) => {
         const room = rooms[roomId];
         if (!room) return;
 
         // 1. 自動補足 AI 到 4 人
-        while (room.players.length < 4) {
-            const aiId = `AI-${Math.random().toString(36).substr(2, 5)}`;
-            room.players.push({ id: aiId, name: `機器人 ${room.players.length + 1}`, isAI: true });
-        }
-
-        // 通知所有人最新的玩家名單（座位排布會用到）
-        io.to(roomId).emit('room_update', room.players);
-
-        socket.on('start_game', ({ roomId }) => {
-        const room = rooms[roomId];
-        if (!room) return;
-
-        // 1. 自動補足 AI 到 4 人 (確保每人都能領 13 張)
         while (room.players.length < 4) {
             const aiId = `AI-${Math.random().toString(36).substr(2, 5)}`;
             room.players.push({ 
@@ -114,10 +102,8 @@ io.on('connection', (socket) => {
             });
         }
 
-        // 核心修復：初始化 room.hands，防止伺服器崩潰 (502 錯誤主因)
+        // 2. 初始化物件，防止 502 錯誤
         room.hands = {}; 
-
-        // 2. 固定以 4 人模式發牌 (每人 13 張)
         const deck = shuffle(generateDeck()); 
         const hands = deal(deck, 4); 
         
@@ -126,22 +112,17 @@ io.on('connection', (socket) => {
         room.passCount = 0;
 
         room.players.forEach((player, i) => {
-            room.hands[player.id] = hands[i]; // 現在這裡不會報錯了
-            
-            // 只發牌給真人
+            room.hands[player.id] = hands[i];
             if (!player.isAI) {
                 io.to(player.id).emit('deal', hands[i]);
             }
-            
             // 尋找首家 (梅花 3)
-            // 注意：請確認你的 engine.js 產出的 id 是 'clubs-3' 還是 '♣3'
             if (hands[i].some(c => c.id === 'clubs-3')) {
                 room.turnIndex = i; 
             }
         });
 
-        // 3. 發送開始信號
-        // 先同步一次名單，確保前端知道有 AI 加入
+        // 3. 同步名單並通知遊戲開始
         io.to(roomId).emit('room_update', room.players);
 
         setTimeout(() => {
@@ -150,7 +131,6 @@ io.on('connection', (socket) => {
                 players: room.players 
             });
             
-            // 如果首家是 AI，啟動行動
             if (room.players[room.turnIndex].isAI) {
                 handleAiAction(roomId, room.players[room.turnIndex]);
             }
