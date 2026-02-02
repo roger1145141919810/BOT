@@ -1,6 +1,6 @@
+/* --- 基礎修正 --- */
 * { box-sizing: border-box; font-family: "Microsoft JhengHei", system-ui, sans-serif; }
 
-/* 背景營造深夜賭場感 */
 body { 
     margin: 0; 
     padding: 0; 
@@ -13,18 +13,50 @@ body {
 }
 
 .center { width: 100%; max-width: 1200px; position: relative; height: 100%; }
-.hidden { display: none; }
 
-/* 大廳與房間列表 */
+/* 強制隱藏，解決跳轉後元素重疊的問題 */
+.hidden { display: none !important; }
+
+/* --- 大廳與房間列表美化 --- */
 #lobby, #roomArea {
-    padding: 20px;
-    background: rgba(0,0,0,0.4);
-    border-radius: 15px;
-    margin-top: 50px;
+    padding: 30px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    margin: 50px auto;
+    width: 90%;
+    max-width: 500px;
     text-align: center;
+    backdrop-filter: blur(10px); /* 毛玻璃效果 */
 }
 
-/* --- 核心：牌桌佈局 --- */
+.player-entry {
+    background: rgba(255,255,255,0.05);
+    margin: 10px 0;
+    padding: 12px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* AI 標籤樣式 */
+.ai-tag {
+    background: #ff9800;
+    color: #fff;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.me-tag {
+    color: #ffc107;
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+/* --- 牌桌佈局修正 --- */
 #game {
     position: relative;
     width: 100%;
@@ -34,47 +66,66 @@ body {
 .table-container {
     position: relative;
     width: 100%;
-    height: 70vh;
+    height: 100vh; /* 改為滿版 */
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* 橢圓形牌桌 */
 .poker-table {
-    width: 70%;
-    height: 60%;
+    width: 80%;
+    height: 50%;
     background: #0b3b2e;
-    border: 8px solid rgba(255,255,255,0.05);
+    border: 8px solid #0f4d3d;
     border-radius: 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    box-shadow: inset 0 0 80px rgba(0,0,0,0.8), 0 0 30px rgba(0,0,0,0.5);
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.9), 0 0 50px rgba(0,0,0,0.5);
 }
 
-/* 玩家座位佈局 */
+#status {
+    font-size: 18px;
+    color: #ffc107;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255,193,7,0.5);
+}
+
+/* 玩家座位 - 確保在桌子邊緣 */
 .player-seat {
     position: absolute;
-    background: rgba(0,0,0,0.6);
-    padding: 10px 18px;
-    border-radius: 30px;
-    border: 1px solid rgba(255,255,255,0.2);
-    font-size: 14px;
+    background: rgba(0,0,0,0.8);
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.3);
+    min-width: 100px;
+    text-align: center;
 }
 
-.pos-top { top: 10%; }
-.pos-left { left: 5%; top: 40%; }
-.pos-right { right: 5%; top: 40%; }
-.pos-bottom { bottom: 10%; background: #ffc107; color: #000; font-weight: bold; border: none; box-shadow: 0 0 15px #ffc107; }
+.pos-top { top: 15%; }
+.pos-left { left: 5%; top: 50%; transform: translateY(-50%); }
+.pos-right { right: 5%; top: 50%; transform: translateY(-50%); }
+.pos-bottom { bottom: 25%; background: #ffc107; color: #000; font-weight: bold; border: none; box-shadow: 0 0 20px #ffc107; z-index: 10; }
 
-/* --- 卡牌美化 --- */
+.active-turn {
+    border: 2px solid #ffeb3b;
+    box-shadow: 0 0 15px #ffeb3b;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* --- 卡牌佈局優化 --- */
 #hand { 
     display: flex; 
-    gap: -15px; /* 讓牌稍微重疊 */
     padding: 10px; 
     justify-content: center;
+    perspective: 1000px; /* 增加 3D 感 */
 }
 
 .card {
@@ -86,57 +137,43 @@ body {
     display: flex; 
     flex-direction: column;
     align-items: center; 
-    justify-content: center; 
+    justify-content: space-around; 
     cursor: pointer; 
     user-select: none;
-    font-size: 22px;
+    font-size: 24px;
     font-weight: bold;
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-    transition: all 0.2s ease-out;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+    transition: transform 0.2s, margin 0.2s;
     border: 1px solid #ddd;
+    margin-left: -20px; /* 讓牌重疊 */
 }
 
-.card:hover { transform: translateY(-10px); }
+.card:first-child { margin-left: 0; }
 
-/* 選中時大幅跳起並發光 */
+.card:hover { 
+    transform: translateY(-15px); 
+    z-index: 100;
+}
+
 .card.selected { 
-    transform: translateY(-35px); 
+    transform: translateY(-40px); 
     box-shadow: 0 0 20px #ffeb3b;
     border: 2px solid #ffeb3b;
+    z-index: 101;
 }
 
-/* 底部操作 UI */
-.player-ui {
-    position: fixed;
-    bottom: 20px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+/* 操作按鈕美化 */
+.secondary-btn {
+    background: #3498db;
+    margin-right: 5px;
 }
 
-#controls { margin-top: 15px; display: flex; gap: 15px; }
-
-button { 
-    padding: 10px 25px; 
-    border-radius: 25px; 
-    border: none; 
-    cursor: pointer; 
-    font-weight: bold;
-    background: #444;
-    color: white;
-    transition: 0.2s;
+.primary-btn {
+    background: #e67e22;
 }
 
-#playBtn {
-    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
-    color: #2e1a00;
-}
-
-button:hover { filter: brightness(1.2); transform: scale(1.05); }
-
-@media (max-width:600px) {
-    .poker-table { width: 90%; height: 40%; }
-    .card { min-width: 50px; height: 80px; font-size: 16px; }
-    .pos-left, .pos-right { top: 35%; }
+#playBtn:disabled, #passBtn:disabled {
+    filter: grayscale(1);
+    opacity: 0.5;
+    cursor: not-allowed;
 }
