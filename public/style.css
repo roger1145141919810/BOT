@@ -1,91 +1,142 @@
 * { box-sizing: border-box; font-family: "Microsoft JhengHei", system-ui, sans-serif; }
 
-/* 1. 背景改為放射狀漸層，模擬牌桌光影 */
+/* 背景營造深夜賭場感 */
 body { 
     margin: 0; 
-    padding: 12px; 
-    background: radial-gradient(circle, #1a4a1a 0%, #0b3b2e 100%); 
+    padding: 0; 
+    background: radial-gradient(circle at center, #163e32 0%, #051a14 100%); 
     color: #fff; 
-    min-height: 100vh;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
 }
 
-/* 2. 外框加入金色邊框感 */
-.center { 
-    max-width: 960px; 
-    margin: 0 auto; 
-    border: 2px solid #ffd700; 
-    padding: 20px; 
-    border-radius: 15px; 
-    background: rgba(0, 0, 0, 0.2);
-}
-
+.center { width: 100%; max-width: 1200px; position: relative; height: 100%; }
 .hidden { display: none; }
 
-#playersList > div { 
-    padding: 8px; 
-    background: rgba(255,255,255,0.1); 
-    margin-bottom: 6px; 
-    border-radius: 6px; 
-    border-left: 4px solid #ffd700; /* 玩家列表點綴 */
+/* 大廳與房間列表 */
+#lobby, #roomArea {
+    padding: 20px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 15px;
+    margin-top: 50px;
+    text-align: center;
 }
 
-/* 3. 手牌區域優化 */
+/* --- 核心：牌桌佈局 --- */
+#game {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.table-container {
+    position: relative;
+    width: 100%;
+    height: 70vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 橢圓形牌桌 */
+.poker-table {
+    width: 70%;
+    height: 60%;
+    background: #0b3b2e;
+    border: 8px solid rgba(255,255,255,0.05);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 0 80px rgba(0,0,0,0.8), 0 0 30px rgba(0,0,0,0.5);
+}
+
+/* 玩家座位佈局 */
+.player-seat {
+    position: absolute;
+    background: rgba(0,0,0,0.6);
+    padding: 10px 18px;
+    border-radius: 30px;
+    border: 1px solid rgba(255,255,255,0.2);
+    font-size: 14px;
+}
+
+.pos-top { top: 10%; }
+.pos-left { left: 5%; top: 40%; }
+.pos-right { right: 5%; top: 40%; }
+.pos-bottom { bottom: 10%; background: #ffc107; color: #000; font-weight: bold; border: none; box-shadow: 0 0 15px #ffc107; }
+
+/* --- 卡牌美化 --- */
 #hand { 
     display: flex; 
-    gap: 10px; 
-    padding: 30px 10px; /* 增加頂部空間給跳起的卡牌 */
-    overflow-x: auto; 
+    gap: -15px; /* 讓牌稍微重疊 */
+    padding: 10px; 
     justify-content: center;
-    background: rgba(0,0,0,0.2);
-    border-radius: 10px;
 }
 
-/* 4. 卡牌細節：增加字體大小與陰影 */
 .card {
-    min-width: 65px; 
-    min-height: 95px;
+    min-width: 70px; 
+    height: 105px;
     background: #fff; 
     color: #000; 
     border-radius: 8px;
     display: flex; 
-    flex-direction: column; /* 讓數字與花色上下排列 */
+    flex-direction: column;
     align-items: center; 
     justify-content: center; 
-    text-align: center;
-    padding: 5px; 
     cursor: pointer; 
     user-select: none;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: bold;
-    box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
-    transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+    transition: all 0.2s ease-out;
+    border: 1px solid #ddd;
 }
 
-/* 5. 選中時增加發光效果 */
+.card:hover { transform: translateY(-10px); }
+
+/* 選中時大幅跳起並發光 */
 .card.selected { 
-    transform: translateY(-25px); 
-    box-shadow: 0 0 15px #ffd700; 
-    border: 2px solid #ffd700;
+    transform: translateY(-35px); 
+    box-shadow: 0 0 20px #ffeb3b;
+    border: 2px solid #ffeb3b;
 }
 
-/* 6. 按鈕改為金色亮面風格 */
-#controls { margin-top: 20px; display: flex; gap: 12px; justify-content: center; }
+/* 底部操作 UI */
+.player-ui {
+    position: fixed;
+    bottom: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#controls { margin-top: 15px; display: flex; gap: 15px; }
 
 button { 
-    padding: 10px 24px; 
-    border-radius: 50px; 
+    padding: 10px 25px; 
+    border-radius: 25px; 
     border: none; 
     cursor: pointer; 
     font-weight: bold;
-    background: linear-gradient(to bottom, #ffd700, #daa520);
-    color: #2e1a00;
-    box-shadow: 0 4px #8b6d00;
+    background: #444;
+    color: white;
+    transition: 0.2s;
 }
 
-button:hover { brightness: 1.1; }
-button:active { transform: translateY(2px); box-shadow: 0 2px #8b6d00; }
+#playBtn {
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: #2e1a00;
+}
+
+button:hover { filter: brightness(1.2); transform: scale(1.05); }
 
 @media (max-width:600px) {
-    .card { min-width: 50px; min-height: 75px; font-size: 16px; }
-    body { padding: 8px; }
+    .poker-table { width: 90%; height: 40%; }
+    .card { min-width: 50px; height: 80px; font-size: 16px; }
+    .pos-left, .pos-right { top: 35%; }
 }
