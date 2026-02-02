@@ -17,14 +17,17 @@ io.on('connection', (socket) => {
 
     socket.on('create_room', ({ roomId, name }) => {
         socket.join(roomId);
-        rooms[roomId] = { players: [{ id: socket.id, name }], gameStarted: false };
+        rooms[roomId] = { 
+            players: [{ id: socket.id, name }], 
+            gameStarted: false,
+            turnIndex: 0 // 新增：記錄當前該誰出牌
+        };
         io.to(roomId).emit('room_update', rooms[roomId].players);
     });
 
     socket.on('join_room', ({ roomId, name }) => {
         const room = rooms[roomId];
         if (room) {
-            // 限制最多 4 人
             if (room.players.length >= 4) {
                 return socket.emit('error_msg', '房間已滿 (最多 4 人)');
             }
@@ -41,29 +44,55 @@ io.on('connection', (socket) => {
         if (!room) return;
 
         const playerCount = room.players.length;
-
-        // 檢查人數限制：最少 3 人，最多 4 人
         if (playerCount < 3) {
             return socket.emit('error_msg', '人數不足 (最少 3 人才能開始)');
         }
 
         const deck = shuffle(generateDeck()); 
-        // 呼叫修改後的 deal 邏輯 (確保 engine.js 已按前述邏輯修改)
         const hands = deal(deck, playerCount); 
         
         room.gameStarted = true;
+
+        // --- 邏輯修正：尋找梅花 3 持有者作為首攻 ---
+        let starterIndex = 0;
+        hands.forEach((hand, index) => {
+            if (hand.some(card => card.id === 'clubs-3')) {
+                starterIndex = index;
+            }
+        });
+        room.turnIndex = starterIndex;
+
         room.players.forEach((player, i) => {
             io.to(player.id).emit('deal', hands[i]); 
         });
-        io.to(roomId).emit('game_start');
+
+        // 廣播遊戲開始，並告知當前回合玩家 ID
+        io.to(roomId).emit('game_start', { 
+            currentPlayerId: room.players[room.turnIndex].id 
+        });
     });
 
     socket.on('play_cards', ({ roomId, cards }) => {
-        // 這裡未來可以加入牌型判斷邏輯
+        const room = rooms[roomId];
+        if (!room) return;
+
+        // 檢查是否為該玩家的回合
+        const currentPlayer = room.players[room.turnIndex];
+        if (currentPlayer.id !== socket.id) {
+            return socket.emit('error_msg', '還沒輪到你！');
+        }
+
+        // 廣播出的牌
         io.to(roomId).emit('play_made', { playerId: socket.id, cards }); 
+
+        // --- 邏輯修正：切換到下一位玩家 ---
+        room.turnIndex = (room.turnIndex + 1) % room.players.length;
+        const nextPlayerId = room.players[room.turnIndex].id;
+
+        // 通知所有人回合更新
+        io.to(roomId).emit('turn_update', { currentPlayerId: nextPlayerId });
     });
 
-    // 處理斷線
     socket.on('disconnect', () => {
         for (const roomId in rooms) {
             const room = rooms[roomId];
@@ -71,7 +100,6 @@ io.on('connection', (socket) => {
             if (index !== -1) {
                 room.players.splice(index, 1);
                 io.to(roomId).emit('room_update', room.players);
-                // 如果房間沒人了，刪除房間
                 if (room.players.length === 0) delete rooms[roomId];
                 break;
             }
