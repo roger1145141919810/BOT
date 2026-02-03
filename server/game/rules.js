@@ -39,19 +39,21 @@ const Rules = {
 
         // 2. 對子 (PAIR)
         if (len === 2) {
-            if (cards[0].rank === cards[1].rank) {
+            // 確保兩張牌點數相同
+            if (parseInt(cards[0].rank) === parseInt(cards[1].rank)) {
                 const maxSuit = Math.max(
                     this.getSuitWeight(cards[0].suit), 
                     this.getSuitWeight(cards[1].suit)
                 );
                 return { 
                     type: 'PAIR', 
+                    // 對子的強度由點數決定，點數相同看最大花色
                     power: parseInt(cards[0].rank) * 10 + maxSuit 
                 };
             }
         }
 
-        // --- 此處未來可擴充：順子、葫蘆、鐵支、同花順 ---
+        // --- 此處未來可擴充：順子 (5張)、葫蘆 (5張)、鐵支 (5張) ---
         return null;
     },
 
@@ -59,15 +61,22 @@ const Rules = {
      * 核心判斷：是否可以出這組牌
      * @param {Array} newCards - 玩家想出的牌
      * @param {Array} lastPlay - 場上最後一組牌
+     * @param {Boolean} isFirstTurn - 是否為整場遊戲的第一手
      * @returns {Boolean}
      */
-   canPlay(newCards, lastPlay) {
+    canPlay(newCards, lastPlay, isFirstTurn = false) {
         const next = this.getPlayInfo(newCards);
-    
-        // 如果出的牌型根本不合法，直接出不了
+        
+        // 如果出的牌型不合法，直接不允許出牌
         if (!next) return false; 
 
-        // 情況 A：發球權 (場上沒牌，或是大家都過牌回到自己)
+        // 規則 A：整場遊戲第一手，必須包含「梅花 3」
+        if (isFirstTurn) {
+            const hasClubs3 = newCards.some(c => c.rank === 3 && c.suit === 'clubs');
+            if (!hasClubs3) return false;
+        }
+
+        // 規則 B：發球權 (場上沒牌，或是大家都過牌回到自己)
         if (!lastPlay || (Array.isArray(lastPlay) && lastPlay.length === 0)) {
             return true; 
         }
@@ -75,19 +84,16 @@ const Rules = {
         const prev = this.getPlayInfo(lastPlay);
         if (!prev) return true;
 
-        // --- 關鍵修正區 ---
-        // 1. 張數必須相同 (大老二基本規則：單張對單張，對子對對子)
+        // 規則 C：被動壓牌
+        // 1. 張數必須完全相同
         if (newCards.length !== lastPlay.length) return false;
 
-        // 2. 牌型必須相同
+        // 2. 牌型必須相同 (例如：單張不能壓對子)
         if (next.type !== prev.type) return false;
 
         // 3. 力量比較：新出的牌必須「大於」場上的牌 (next.power > prev.power)
-        if (next.power > prev.power) {
-            return true;
-        }
-
-        return false;
+        // 這是修正「小牌壓大牌」最關鍵的一行
+        return next.power > prev.power;
     }
 };
 
