@@ -72,15 +72,16 @@ const Rules = {
             return true;
         }
 
-        // 情況 B：壓牌 (跟隨場上的牌型比較)
-        const last = this.getPlayInfo(lastPlay);
-        if (!last) return true; // 安全保底：如果解析不出場上的牌，允許出牌
+        // --- 關鍵修正區 ---
+        // 1. 張數必須相同 (大老二基本規則：單張對單張，對子對對子)
+        if (newCards.length !== lastPlay.length) return false;
 
-        // 牌型必須一致 (單張對單張，對子對對子)
-        if (next.type !== last.type) return false;
+        // 2. 牌型必須相同
+        if (next.type !== prev.type) return false;
 
-        // 比較權重值
-        return next.power > last.power;
+        // 3. 力量比較：新出的牌必須「大於」場上的牌 (next.power > prev.power)
+        if (next.power > prev.power) {
+            return true;
     }
 };
 
