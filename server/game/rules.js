@@ -61,16 +61,19 @@ const Rules = {
      * @param {Array} lastPlay - 場上最後一組牌
      * @returns {Boolean}
      */
-    canPlay(newCards, lastPlay) {
+   canPlay(newCards, lastPlay) {
         const next = this.getPlayInfo(newCards);
-        
-        // 如果出的牌型根本不合法（例如選了三張雜牌），直接出不了
+    
+        // 如果出的牌型根本不合法，直接出不了
         if (!next) return false; 
 
         // 情況 A：發球權 (場上沒牌，或是大家都過牌回到自己)
         if (!lastPlay || (Array.isArray(lastPlay) && lastPlay.length === 0)) {
-            return true;
+            return true; 
         }
+
+        const prev = this.getPlayInfo(lastPlay);
+        if (!prev) return true;
 
         // --- 關鍵修正區 ---
         // 1. 張數必須相同 (大老二基本規則：單張對單張，對子對對子)
@@ -82,6 +85,9 @@ const Rules = {
         // 3. 力量比較：新出的牌必須「大於」場上的牌 (next.power > prev.power)
         if (next.power > prev.power) {
             return true;
+        }
+
+        return false;
     }
 };
 
