@@ -171,8 +171,19 @@ socket.on('game_start', ({ currentPlayerId, players }) => {
     allPlayers = players; 
     updateSeats(players, currentPlayerId);
     
-    // 3. 觸發手牌渲染 (確保 deal 來的牌被畫出來)
+    // 3. 觸發手牌渲染
     renderHand();
+
+    // --- 關鍵新增：判斷首回合按鈕狀態 ---
+    const isMyTurn = (currentPlayerId === socket.id);
+    const statusEl = $('status');
+    if (statusEl) {
+        statusEl.textContent = isMyTurn ? '你是首家，請選牌出牌！' : '遊戲開始，等待對手...';
+    }
+    
+    // 確保按鈕在你的回合時被啟用
+    if ($('playBtn')) $('playBtn').disabled = !isMyTurn;
+    if ($('passBtn')) $('passBtn').disabled = !isMyTurn;
 });
 
 socket.on('turn_update', ({ currentPlayerId }) => {
