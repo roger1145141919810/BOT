@@ -35,34 +35,48 @@ function nextTurn(roomId) {
 // 處理 AI 出牌或過牌
 function handleAiAction(roomId, aiPlayer) {
     const room = rooms[roomId];
-    if (!room) return;
+    if (!room || !room.gameStarted) return;
 
+    // 這裡要統一抓取 room.hands[aiPlayer.id]
     const aiHand = room.hands[aiPlayer.id];
-    if (!aiHand) return; // 安全檢查
+    if (!aiHand || aiHand.length === 0) return;
 
     const opponentCounts = {};
     room.players.forEach(p => opponentCounts[p.id] = room.hands[p.id].length);
 
+    // 呼叫你的 aiDecision 邏輯
     const cardsToPlay = aiDecision(aiHand, room.lastPlay, opponentCounts);
 
     if (cardsToPlay && cardsToPlay.length > 0) {
+        // 更新手牌
         room.hands[aiPlayer.id] = aiHand.filter(c => !cardsToPlay.find(pc => pc.id === c.id));
         room.lastPlay = cardsToPlay;
         room.passCount = 0;
         io.to(roomId).emit('play_made', { playerId: aiPlayer.id, cards: cardsToPlay });
+
+        // 勝利檢查
+        if (room.hands[aiPlayer.id].length === 0) {
+            io.to(roomId).emit('game_over', { 
+                winnerName: aiPlayer.name, 
+                winnerId: aiPlayer.id,
+                allHandCounts: opponentCounts // 這裡記得補上結算用的剩餘張數
+            });
+            room.gameStarted = false;
+            return;
+        }
     } else {
+        // 過牌邏輯
         room.passCount++;
         io.to(roomId).emit('play_made', { playerId: aiPlayer.id, cards: [], isPass: true });
         
         if (room.passCount >= room.players.length - 1) {
             room.lastPlay = null;
             room.passCount = 0;
-            io.to(roomId).emit('new_round', { message: "全體過牌，新回合開始" });
+            io.to(roomId).emit('new_round');
         }
     }
     nextTurn(roomId);
 }
-
 io.on('connection', (socket) => {
     // 建立房間
     socket.on('create_room', ({ roomId, name }) => {
