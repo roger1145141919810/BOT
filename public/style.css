@@ -140,7 +140,12 @@ body {
     margin-left: 0;
 }
 .card:first-child { margin-left: 0; }
-.card.selected { transform: translateY(-30px); border: 3px solid #ffeb3b; }
+/* 修改 style.css 約第 140 行 */
+.card.selected {
+    transform: translateY(-30px); /* 向上彈起的距離 */
+    border: 2px solid #f1c40f;    /* 亮黃色邊框 */
+    z-index: 100;                 /* 確保選中的牌在最上層 */
+}
 
 /* 按鈕風格 */
 .primary-btn { background: #e67e22; border: none; padding: 10px 20px; color: white; border-radius: 5px; cursor: pointer; }
