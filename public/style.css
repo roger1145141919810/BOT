@@ -13,309 +13,169 @@ body {
 }
 
 .center { width: 100%; max-width: 1200px; position: relative; height: 100%; }
-
-/* 強制隱藏，解決跳轉後元素重疊的問題 */
 .hidden { display: none !important; }
 
-/* --- 大廳與房間列表美化 --- */
-#lobby, #roomArea {
-    padding: 30px;
-    background: rgba(0,0,0,0.6);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 20px;
-    margin: 50px auto;
-    width: 90%;
-    max-width: 500px;
-    text-align: center;
-    backdrop-filter: blur(10px); /* 毛玻璃效果 */
-}
-
-.player-entry {
-    background: rgba(255,255,255,0.05);
-    margin: 10px 0;
-    padding: 12px;
-    border-radius: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* AI 標籤樣式 */
-.ai-tag {
-    background: #ff9800;
-    color: #fff;
-    font-size: 12px;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-weight: bold;
-}
-
-.me-tag {
-    color: #ffc107;
-    font-size: 12px;
-    margin-left: 5px;
-}
-
-/* --- 牌桌佈局修正 --- */
-#game {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-
+/* --- 牌桌佈局 --- */
 .table-container {
     position: relative;
     width: 100%;
-    height: 60vh;      /* 確保給牌桌 60% 的螢幕高度 */
+    height: 60vh;
     display: flex;
     justify-content: center;
     align-items: center;
     margin-top: 20px;
 }
 
-/* 在 CSS 檔案末尾或 #game 區塊內新增 */
-.player-ui {
-    position: fixed; 
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    z-index: 2000;
-    display: flex;
-    flex-direction: column-reverse; /* 讓按鈕在牌的上方 */
-    align-items: center;
-    pointer-events: none; /* 關鍵：讓容器不擋住點擊 */
-}
-
-/* 確保按鈕跟手牌可以點擊 */
-#controls, #hand {
-    pointer-events: auto; 
-}
-
-/* 增加按鈕與牌的間距，避免重疊 */
-#controls {
-    margin-bottom: 25px; 
-}
-
-#hand {
-    display: flex;
-    justify-content: center;
-    min-height: 120px; /* 給予基本高度確保牌出現時不會閃爍 */
-    perspective: 1000px;
-}
-#status {
-    font-size: 18px;
-    color: #ffc107;
-    margin-bottom: 20px;
-    text-shadow: 0 0 10px rgba(255,193,7,0.5);
-}
-
-/* 確保座位內容垂直排列，避免重疊 */
+/* 核心修正：確保座位容器是垂直排列的 Flex */
 .player-seat {
+    position: absolute;
+    display: flex;
+    flex-direction: column; /* 讓內容由上而下排隊 */
+    align-items: center;
+    justify-content: center;
+    min-width: 130px;
+    z-index: 10;
+    gap: 5px; /* 每個元素間距 5px */
+}
+
+/* 玩家資訊的外殼 (名字、Pass、張數) */
+.player-info-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    position: absolute;
-    min-width: 120px;
-}
-
-/* 強化出牌區樣式：增加 perspective 讓牌組更有層次感 */
-.played-cards-wrapper {
-    display: flex;
-    gap: -15px; /* 稍微負值的 gap 可以讓牌像真實打牌一樣重疊，若不想要重疊可改回 5px */
-    justify-content: center;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.2); /* 改深色背景更能襯托白色的牌 */
-    padding: 15px 25px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 8px 12px;
     border-radius: 12px;
-    min-height: 90px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.3s ease;
 }
 
-.card-mini {
-    width: 50px; /* 稍微加大一點，視覺比例較好 */
-    height: 70px;
-    background: #ffffff !important; /* 強制白底，防止被父元素透明度影響 */
-    color: inherit; /* 繼承 JS 傳入的顏色 (紅/黑) */
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-    font-weight: 900;
-    box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
-    position: relative;
-    /* 讓牌組展開時有一點傾斜感（選用） */
-    transform: rotate(var(--rotate, 0deg)); 
+/* 當輪到該玩家時的發光效果 */
+.active-turn {
+    border: 2px solid #ffeb3b;
+    box-shadow: 0 0 15px #ffeb3b;
+    transform: scale(1.05);
 }
 
-/* 過牌狀態樣式：改為「標籤式」，放在玩家名字下方 */
+/* PASS 標籤樣式：顯示在名字下方 */
 .pass-overlay {
     color: #ffffff;
-    background: #ff4757; /* 醒目的紅色 */
-    font-size: 0.85rem;
+    background: #ff4757;
+    font-size: 0.8rem;
     font-weight: bold;
-    padding: 2px 12px;
-    border-radius: 20px; /* 藥丸形狀 */
-    margin-top: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    padding: 2px 10px;
+    border-radius: 20px;
+    margin: 4px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 5;
-    text-align: center;
 }
 
-/* 簡單的動畫讓 Pass 出現時更自然 */
 @keyframes popIn {
     0% { transform: scale(0.5); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* 修正玩家座位容器，確保垂直排列不重疊 */
-.player-seat {
+/* --- 出牌區修正：解決「只有紅框」 --- */
+.played-cards-wrapper {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+}
+
+.card-mini {
+    width: 45px;
+    height: 65px;
+    background: #ffffff !important; /* 強制白底 */
+    color: inherit;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+    border: 1px solid #ccc;
+}
+
+.rank-mini { font-size: 1.2rem; line-height: 1; }
+.suit-mini { font-size: 1rem; line-height: 1; }
+
+/* --- 方位定位修正 --- */
+.pos-top { top: 10%; left: 50%; transform: translateX(-50%); }
+.pos-left { left: 5%; top: 40%; transform: translateY(-50%); }
+.pos-right { right: 5%; top: 40%; transform: translateY(-50%); }
+.pos-bottom { 
+    bottom: 25%; 
+    left: 50%; 
+    transform: translateX(-50%); 
+}
+
+/* 讓底部的「你」座位區有不同顏色辨識 */
+.pos-bottom .player-info-wrapper {
+    background: rgba(255, 193, 7, 0.2);
+    border-color: #ffc107;
+}
+
+/* --- 手牌與控制項 --- */
+.player-ui {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    z-index: 2000;
+}
+
+#controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+#hand {
+    display: flex;
     justify-content: center;
-    gap: 2px;
-}
-/* 依照方位推開 */
-.pos-top { top: 10%; }
-.pos-left { left: 10%; top: 50%; transform: translateY(-50%); }
-.pos-right { right: 10%; top: 50%; transform: translateY(-50%); }
-
-/* 修正你的標籤位置，不要擋到手牌 */
-.pos-bottom { 
-    bottom: 0; 
-    transform: translateY(-180px); /* 向上彈開，避開手牌 */
-    background: #ffc107; 
-    color: #000;
-}
-
-.pos-top { top: 15%; }
-.pos-left { left: 5%; top: 50%; transform: translateY(-50%); }
-.pos-right { right: 5%; top: 50%; transform: translateY(-50%); }
-.pos-bottom { bottom: 25%; background: #ffc107; color: #000; font-weight: bold; border: none; box-shadow: 0 0 20px #ffc107; z-index: 10; }
-
-.active-turn {
-    border: 2px solid #ffeb3b;
-    box-shadow: 0 0 15px #ffeb3b;
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-/* --- 卡牌佈局優化 --- */
-#hand { 
-    display: flex; 
-    padding: 10px; 
-    justify-content: center;
-    perspective: 1000px; /* 增加 3D 感 */
+    padding: 10px;
 }
 
 .card {
-    min-width: 70px; 
+    min-width: 70px;
     height: 105px;
-    background: #fff; 
-    color: #000; 
+    background: #fff;
+    color: #000;
     border-radius: 8px;
-    display: flex; 
+    display: flex;
     flex-direction: column;
-    align-items: center; 
-    justify-content: space-around; 
-    cursor: pointer; 
-    user-select: none;
+    align-items: center;
+    justify-content: space-around;
+    cursor: pointer;
+    margin-left: -20px;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
     font-size: 24px;
     font-weight: bold;
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
-    transition: transform 0.2s, margin 0.2s;
-    border: 1px solid #ddd;
-    margin-left: -20px; /* 讓牌重疊 */
 }
 
 .card:first-child { margin-left: 0; }
+.card:hover { transform: translateY(-15px); z-index: 100; }
+.card.selected { transform: translateY(-40px); border: 3px solid #ffeb3b; z-index: 101; }
 
-.card:hover { 
-    transform: translateY(-15px); 
-    z-index: 100;
-}
-
-.card.selected { 
-    transform: translateY(-40px); 
-    box-shadow: 0 0 20px #ffeb3b;
-    border: 2px solid #ffeb3b;
-    z-index: 101;
-}
-
-/* 操作按鈕美化 */
-.secondary-btn {
-    background: #3498db;
-    margin-right: 5px;
-}
-
-.primary-btn {
-    background: #e67e22;
-}
-
-#playBtn:disabled, #passBtn:disabled {
-    filter: grayscale(1);
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* 1. 確保控制區域水平排列並置中 */
-#controls {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 20px;
-    width: 100%;
-    z-index: 2000; /* 確保高於手牌，防止無法點擊 */
-}
-
-/* 2. 定義按鈕的具體尺寸與風格 */
+/* 按鈕美化 */
 .primary-btn, .secondary-btn {
-    padding: 12px 25px;
-    font-size: 18px;
-    font-weight: bold;
-    border: none;
+    padding: 10px 25px;
     border-radius: 8px;
+    border: none;
     color: white;
+    font-weight: bold;
     cursor: pointer;
-    transition: all 0.2s;
-    min-width: 120px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
-
-/* 橘色出牌按鈕 */
-.primary-btn {
-    background: #e67e22;
-}
-.primary-btn:hover:not(:disabled) {
-    background: #d35400;
-    transform: translateY(-2px);
-}
-
-/* 藍色過牌按鈕 */
-.secondary-btn {
-    background: #3498db;
-}
-.secondary-btn:hover:not(:disabled) {
-    background: #2980b9;
-    transform: translateY(-2px);
-}
-
-/* 3. 修正禁用狀態 (當不是你的回合時) */
-#playBtn:disabled, #passBtn:disabled {
-    background: #7f8c8d !important;
-    filter: grayscale(1);
-    opacity: 0.4;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
+.primary-btn { background: #e67e22; }
+.secondary-btn { background: #3498db; }
+button:disabled { background: #7f8c8d !important; opacity: 0.5; }
