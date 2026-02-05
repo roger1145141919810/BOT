@@ -241,34 +241,55 @@ socket.on('turn_update', ({ currentPlayerId }) => {
 });
 
 socket.on('play_made', ({ playerId, cards, isPass }) => {
-    // 1. 如果是我出牌，從手牌中移除這些牌並重新渲染
+    // 1. 更新全域玩家列表中的狀態 (為了讓 updateSeats 知道誰 PASS)
+    const player = allPlayers.find(p => p.id === playerId);
+    if (player) {
+        player.hasPassed = isPass; // 記錄這個人是否過牌
+        // 同步更新張數，避免重疊顯示錯誤
+        if (!isPass && cards) {
+            player.cardCount = (player.cardCount || 13) - cards.length;
+        }
+    }
+
+    // 2. 如果是我出牌，從手牌中移除並重新渲染手牌
     if (playerId === socket.id) {
         const playedIds = new Set(cards.map(c => c.id));
         myHand = myHand.filter(c => !playedIds.has(c.id));
         renderHand();
     }
     
-    // 2. 渲染桌面上的出牌內容
+    // 3. 渲染桌面中央的出牌內容 (解決重疊與只有邊框問題)
     const contentEl = $('lastPlayContent');
     if (isPass) {
-        contentEl.innerHTML = '<span class="pass-text">PASS</span>';
+        // 桌面中央顯示淡出的 PASS 提示 (或保持清空，因為頭上已經有了)
+        contentEl.innerHTML = '<span class="pass-text-main">PASS</span>';
     } else {
-        // 使用更精緻的 HTML 結構來顯示牌組，方便觀察順子、葫蘆
         const cardsHtml = cards.map(c => {
             const suitInfo = SUIT_DATA[c.suit];
-            // 確保調用 rankText 轉換 11-15 為 J, Q, K, A, 2
+            // 加入 background: white 解決只有紅框的問題
             return `
-                <div class="card-mini" style="color: ${suitInfo.color}; border: 1px solid ${suitInfo.color}">
+                <div class="card-mini" style="color: ${suitInfo.color}; background: white; border: 1px solid #ccc;">
                     <div class="rank-mini">${rankText(c.rank)}</div>
                     <div class="suit-mini">${suitInfo.symbol}</div>
                 </div>
             `;
         }).join('');
-        
         contentEl.innerHTML = `<div class="played-cards-wrapper">${cardsHtml}</div>`;
     }
+
+    // 4. 【關鍵】立即重新渲染所有座位
+    // 這樣 PASS 字樣才會出現在頭上，且根據 turnIndex 決定是否隱藏
+    // 這裡的第二個參數帶入當前 playerId，或是等下一個 turn_update 觸發
+    updateSeats(allPlayers, playerId); 
 });
 
+// --- 補充：新回合開始時一定要重置狀態 ---
+socket.on('new_round', () => {
+    allPlayers.forEach(p => p.hasPassed = false);
+    $('lastPlayContent').innerHTML = '<span class="new-round-tip">全新開始</span>';
+    // 這裡不帶 currentPlayerId，交由後續的 turn_update 處理
+    updateSeats(allPlayers, null); 
+});
 socket.on('new_round', () => {
     $('lastPlayContent').innerHTML = '<span class="new-round">全新開始（發球權）</span>';
 });
