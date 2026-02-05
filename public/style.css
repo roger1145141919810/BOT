@@ -124,21 +124,20 @@ body {
 
 #hand { display: flex; justify-content: center; padding: 10px; }
 
+/* 修改 style.css 約第 130 行 */
 .card {
-    min-width: 60px;   /* 原本可能較寬，改為 60px */
-    height: 90px;      /* 原本可能較高，改為 90px */
+    min-width: 70px; 
+    height: 105px;
     background: #fff;
-    color: #000;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-around;
-    cursor: pointer;
-    margin-left: -35px; /* 增加負邊距（例如 -35px），讓牌疊得更緊密 */
-    border: 1px solid #ccc;
-    position: relative;
+    /* ... 其他屬性 ... */
+    
+    margin-left: -20px; /* 從原本的 -50px 或 -35px 改為 -20px (數值越小越寬鬆) */
     transition: transform 0.2s;
+}
+
+/* 確保第一張牌不要有負邊距，否則會跑出螢幕 */
+.card:first-child {
+    margin-left: 0;
 }
 .card:first-child { margin-left: 0; }
 .card.selected { transform: translateY(-30px); border: 3px solid #ffeb3b; }
