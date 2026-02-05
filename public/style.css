@@ -120,41 +120,66 @@ body {
     min-width: 120px;
 }
 
-/* 強化出牌區樣式，解決只有紅框的問題 */
+/* 強化出牌區樣式：增加 perspective 讓牌組更有層次感 */
 .played-cards-wrapper {
     display: flex;
-    gap: 5px;
+    gap: -15px; /* 稍微負值的 gap 可以讓牌像真實打牌一樣重疊，若不想要重疊可改回 5px */
     justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 10px;
-    border-radius: 8px;
-    min-height: 80px; /* 固定高度防止抖動 */
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2); /* 改深色背景更能襯托白色的牌 */
+    padding: 15px 25px;
+    border-radius: 12px;
+    min-height: 90px;
+    transition: all 0.3s ease;
 }
 
 .card-mini {
-    width: 45px;
-    height: 65px;
-    background: white; /* 確保牌面是白底 */
-    border-radius: 4px;
+    width: 50px; /* 稍微加大一點，視覺比例較好 */
+    height: 70px;
+    background: #ffffff !important; /* 強制白底，防止被父元素透明度影響 */
+    color: inherit; /* 繼承 JS 傳入的顏色 (紅/黑) */
+    border: 1px solid #ddd;
+    border-radius: 5px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
-    font-weight: bold;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    font-weight: 900;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+    position: relative;
+    /* 讓牌組展開時有一點傾斜感（選用） */
+    transform: rotate(var(--rotate, 0deg)); 
 }
 
-/* 過牌狀態樣式 */
+/* 過牌狀態樣式：改為「標籤式」，放在玩家名字下方 */
 .pass-overlay {
-    color: #ff4757;
+    color: #ffffff;
+    background: #ff4757; /* 醒目的紅色 */
+    font-size: 0.85rem;
     font-weight: bold;
-    font-size: 1.2rem;
-    background: rgba(0,0,0,0.6);
-    padding: 2px 10px;
-    border-radius: 4px;
-    margin-top: 5px;
+    padding: 2px 12px;
+    border-radius: 20px; /* 藥丸形狀 */
+    margin-top: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 5;
+    text-align: center;
 }
 
+/* 簡單的動畫讓 Pass 出現時更自然 */
+@keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* 修正玩家座位容器，確保垂直排列不重疊 */
+.player-seat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
 /* 依照方位推開 */
 .pos-top { top: 10%; }
 .pos-left { left: 10%; top: 50%; transform: translateY(-50%); }
