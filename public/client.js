@@ -195,16 +195,32 @@ socket.on('turn_update', ({ currentPlayerId }) => {
 });
 
 socket.on('play_made', ({ playerId, cards, isPass }) => {
+    // 1. 如果是我出牌，從手牌中移除這些牌並重新渲染
     if (playerId === socket.id) {
         const playedIds = new Set(cards.map(c => c.id));
         myHand = myHand.filter(c => !playedIds.has(c.id));
         renderHand();
     }
     
-    const content = isPass ? '<span class="pass-text">PASS</span>' : 
-        cards.map(c => `<span style="color:${SUIT_DATA[c.suit].color}">${rankText(c.rank)}${SUIT_DATA[c.suit].symbol}</span>`).join(' ');
-    
-    $('lastPlayContent').innerHTML = content;
+    // 2. 渲染桌面上的出牌內容
+    const contentEl = $('lastPlayContent');
+    if (isPass) {
+        contentEl.innerHTML = '<span class="pass-text">PASS</span>';
+    } else {
+        // 使用更精緻的 HTML 結構來顯示牌組，方便觀察順子、葫蘆
+        const cardsHtml = cards.map(c => {
+            const suitInfo = SUIT_DATA[c.suit];
+            // 確保調用 rankText 轉換 11-15 為 J, Q, K, A, 2
+            return `
+                <div class="card-mini" style="color: ${suitInfo.color}; border: 1px solid ${suitInfo.color}">
+                    <div class="rank-mini">${rankText(c.rank)}</div>
+                    <div class="suit-mini">${suitInfo.symbol}</div>
+                </div>
+            `;
+        }).join('');
+        
+        contentEl.innerHTML = `<div class="played-cards-wrapper">${cardsHtml}</div>`;
+    }
 });
 
 socket.on('new_round', () => {
