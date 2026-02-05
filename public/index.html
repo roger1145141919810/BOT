@@ -27,7 +27,6 @@
                 <hr>
                 <div id="playersList"></div>
                 <div class="btn-group">
-                    <button id="addAiBtn" class="secondary-btn">添加 AI 機器人</button> 
                     <button id="startBtn" class="primary-btn">開始遊戲</button>
                 </div>
                 <p class="hint">最少 2 人即可開局（會自動補足 AI）</p>
@@ -58,6 +57,18 @@
                     <button id="passBtn" class="secondary-btn" disabled>過牌 (Pass)</button>
                 </div>
                 <div id="hand"></div>
+            </div>
+        </div>
+
+        <div id="gameOverOverlay" class="overlay hidden">
+            <div class="result-box">
+                <h2 id="winnerTitle">遊戲結束</h2>
+                <div id="playerStats">
+                    </div>
+                <div class="btn-group">
+                    <button id="restartBtn" class="primary-btn">再玩一局</button>
+                    <button id="backToLobbyBtn" class="secondary-btn">回大廳</button>
+                </div>
             </div>
         </div>
     </div>
