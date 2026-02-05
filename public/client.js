@@ -152,22 +152,22 @@ socket.on('play_made', ({ playerId, cards, isPass }) => {
         }
     }
 
-    // 本地手牌同步
     if (playerId === socket.id && !isPass) {
         const playedIds = new Set(cards.map(c => c.id));
         myHand = myHand.filter(c => !playedIds.has(c.id));
         renderHand();
     }
     
-    // 中央出牌區渲染
     const contentEl = $('lastPlayContent');
+    // 關鍵修改：如果是 Pass，只更新座位狀態；如果是出牌，才替換中間內容
     if (isPass) {
-        contentEl.innerHTML = '<span class="pass-text-main">PASS</span>';
+        // 這裡可以選擇不改動 contentEl，或是只顯示一個短暫的提示
+        // 為了讓「中間永遠顯示牌」，我們在此處不清除之前的 cardsHtml
     } else {
         const cardsHtml = cards.map(c => {
             const suitInfo = SUIT_DATA[c.suit];
             return `
-                <div class="card-mini" style="color: ${suitInfo.color}; background: white;">
+                <div class="card-mini" style="color: ${suitInfo.color};">
                     <div class="rank-mini">${rankText(c.rank)}</div>
                     <div class="suit-mini">${suitInfo.symbol}</div>
                 </div>
