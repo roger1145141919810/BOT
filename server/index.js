@@ -139,26 +139,39 @@ io.on('connection', (socket) => {
     });
 
     socket.on('play_cards', ({ roomId, cards }) => {
-    const room = rooms[roomId];
-    if (!room || room.players[room.turnIndex].id !== socket.id) return;
+        const room = rooms[roomId];
+        if (!room || room.players[room.turnIndex].id !== socket.id) return;
 
-    // --- 新增驗證邏輯 ---
-    // 檢查這手牌是否符合大老二規則且比場上的牌大
-    if (!Rules.canPlay(cards, room.lastPlay)) {
-        // 如果不合法，通知該玩家出牌失敗，且不切換回合
-        socket.emit('error_msg', '牌組不合法，或必須大於場上的牌！');
-        return; 
-    }
-    // ------------------
+            // 1. 驗證邏輯：檢查是否為首回合（第一手牌必須有梅花 3）
+            const isFirstTurn = !room.lastPlay && room.passCount === 0 && Object.values(room.hands).every(h => h.length === 13);
+            
+            if (!Rules.canPlay(cards, room.lastPlay, isFirstTurn)) {
+                socket.emit('error_msg', '牌組不合法，或必須大於場上的牌！');
+                return; 
+            }
 
-    // 驗證通過才繼續執行
-    room.hands[socket.id] = room.hands[socket.id].filter(c => !cards.find(pc => pc.id === c.id));
-    room.lastPlay = cards;
-    room.passCount = 0;
-
-    io.to(roomId).emit('play_made', { playerId: socket.id, cards }); 
-    nextTurn(roomId);
-});
+            // 2. 驗證通過，執行出牌：從該玩家手中移除牌
+            room.hands[socket.id] = room.hands[socket.id].filter(c => !cards.find(pc => pc.id === c.id));
+            room.lastPlay = cards;
+            room.passCount = 0;
+    
+            // 3. 廣播這手牌
+            io.to(roomId).emit('play_made', { playerId: socket.id, cards });
+    
+            // --- 核心修改：勝利判定 ---
+            if (room.hands[socket.id].length === 0) {
+                const winner = room.players[room.turnIndex];
+                io.to(roomId).emit('game_over', { 
+                    winnerName: winner.name, 
+                    winnerId: winner.id 
+                });
+                room.gameStarted = false; // 停止遊戲
+                return; // 結束函式，不進入下一回合
+            }
+            // -----------------------
+    
+            nextTurn(roomId);
+        });
 
     socket.on('pass', ({ roomId }) => {
         const room = rooms[roomId];
