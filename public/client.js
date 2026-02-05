@@ -33,17 +33,15 @@ function renderPlayers(list) {
 
 // --- 遊戲中座位分配邏輯 ---
 
+// --- 找到 updateSeats 並完整替換 ---
 function updateSeats(players, currentPlayerId) {
     const myIndex = players.findIndex(p => p.id === socket.id);
-    
     const ordered = [];
     for (let i = 0; i < players.length; i++) {
         ordered.push(players[(myIndex + i) % players.length]);
     }
 
     const seatIds = ['me-seat', 'p1-seat', 'p2-seat', 'p3-seat'];
-    
-    // 清空所有座位內容
     seatIds.forEach(id => { if($(id)) $(id).innerHTML = ''; });
 
     ordered.forEach((p, i) => {
@@ -51,23 +49,67 @@ function updateSeats(players, currentPlayerId) {
         if (!seat) return;
 
         const isTurn = p.id === currentPlayerId;
-        
-        // --- 核心邏輯：判斷是否顯示 PASS ---
-        // 只有當玩家 hasPassed 為 true，且「不是他的回合」時才顯示
-        const passHtml = (p.hasPassed && !isTurn) ? '<div class="pass-tag">PASS</div>' : '';
+        // 核心邏輯：判定是否顯示 PASS 標籤
+        const passHtml = (p.hasPassed && !isTurn) ? '<div class="pass-overlay">PASS</div>' : '';
 
-        // 使用 Flex 容器結構來防止文字重疊
+        // 使用 player-info-wrapper 結構配合 CSS 解決重疊
         seat.innerHTML = `
             <div class="player-info-wrapper ${isTurn ? 'active-turn' : ''}">
                 <div class="seat-name">
                     ${p.name} ${p.isAI ? '[AI]' : ''}
                 </div>
-                ${passHtml} 
+                ${passHtml}
                 <div class="card-count" id="count-${p.id}">${p.cardCount || 13}張</div>
             </div>
         `;
     });
 }
+
+// --- 找到 socket.on('play_made') 並完整替換 ---
+socket.on('play_made', ({ playerId, cards, isPass }) => {
+    // 1. 更新全域玩家狀態
+    const player = allPlayers.find(p => p.id === playerId);
+    if (player) {
+        player.hasPassed = isPass;
+        if (!isPass && cards) {
+            player.cardCount = (player.cardCount || 13) - cards.length;
+        }
+    }
+
+    // 2. 我方手牌處理
+    if (playerId === socket.id) {
+        const playedIds = new Set(cards.map(c => c.id));
+        myHand = myHand.filter(c => !playedIds.has(c.id));
+        renderHand();
+    }
+    
+    // 3. 桌面中央渲染 (加上 background: white 解決紅框問題)
+    const contentEl = $('lastPlayContent');
+    if (isPass) {
+        contentEl.innerHTML = '<span class="pass-text-main">PASS</span>';
+    } else {
+        const cardsHtml = cards.map(c => {
+            const suitInfo = SUIT_DATA[c.suit];
+            return `
+                <div class="card-mini" style="color: ${suitInfo.color};">
+                    <div class="rank-mini">${rankText(c.rank)}</div>
+                    <div class="suit-mini">${suitInfo.symbol}</div>
+                </div>
+            `;
+        }).join('');
+        contentEl.innerHTML = `<div class="played-cards-wrapper">${cardsHtml}</div>`;
+    }
+
+    // 4. 立即更新座位 (讓 PASS 出現/消失)
+    updateSeats(allPlayers, playerId);
+});
+
+// --- 找到 socket.on('new_round') 並完整替換 ---
+socket.on('new_round', () => {
+    allPlayers.forEach(p => p.hasPassed = false); // 新回合重置
+    $('lastPlayContent').innerHTML = '<span class="new-round">全新開始</span>';
+    updateSeats(allPlayers, null);
+});
 
 // --- 牌面渲染 ---
 
