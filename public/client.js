@@ -7,10 +7,10 @@ let selected = new Set();
 let allPlayers = []; // 儲存所有玩家資訊（包含 AI 與斷線狀態）
 
 const SUIT_DATA = {
-    'clubs': { symbol: '♣', color: 'black', weight: 0 },
-    'diamonds': { symbol: '♦', color: 'red', weight: 1 },
-    'hearts': { symbol: '♥', color: 'red', weight: 2 },
-    'spades': { symbol: '♠', color: 'black', weight: 3 }
+    'clubs':    { symbol: '♣', color: '#2c3e50', weight: 0 }, // 深藍灰
+    'diamonds': { symbol: '♦', color: '#e74c3c', weight: 1 }, // 鮮紅
+    'hearts':   { symbol: '♥', color: '#c0392b', weight: 2 }, // 深紅
+    'spades':   { symbol: '♠', color: '#2c3e50', weight: 3 }  // 深藍灰
 };
 
 // --- 排行與輔助功能 ---
