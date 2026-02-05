@@ -136,7 +136,49 @@ $('passBtn').addEventListener('click', () => {
     selected.clear();
 });
 
+$('restartBtn').addEventListener('click', () => {
+    // 隱藏結算畫面
+    $('gameOverOverlay').classList.add('hidden');
+    // 告訴後端重新開始遊戲
+    socket.emit('start_game', { roomId: currentRoom });
+});
+
+$('backToLobbyBtn').addEventListener('click', () => {
+    // 簡單的做法是重新整理頁面回到大廳
+    location.reload();
+});
 // --- Socket 監聽 ---
+
+socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
+    console.log("遊戲結束，贏家是:", winnerName);
+    
+    const overlay = $('gameOverOverlay');
+    const statsEl = $('playerStats');
+    const winnerTitle = $('winnerTitle');
+    const isMe = (winnerId === socket.id);
+
+    // 1. 設定標題與顏色
+    winnerTitle.textContent = isMe ? "✨ 恭喜！你贏了 ✨" : `👑 贏家是：${winnerName}`;
+    winnerTitle.style.color = isMe ? "#f1c40f" : "#ffffff";
+
+    // 2. 顯示所有玩家剩餘牌數排行榜
+    statsEl.innerHTML = allPlayers.map(p => {
+        const count = allHandCounts[p.id] || 0;
+        const isWinner = (count === 0);
+        return `
+            <div class="stat-row ${isWinner ? 'winner-row' : ''}">
+                <span class="stat-name">${p.name} ${p.id === socket.id ? '(你)' : ''}</span>
+                <span class="count-tag">${isWinner ? '🏆 完賽' : count + ' 張'}</span>
+            </div>
+        `;
+    }).join('');
+
+    // 3. 顯示遮罩
+    overlay.classList.remove('hidden');
+    
+    // 4. 清除本地選擇狀態
+    selected.clear();
+});
 
 socket.on('room_update', players => {
     // 1. 確保 UI 切換 (解決你之前按鈕沒反應的問題)
