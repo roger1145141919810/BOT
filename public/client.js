@@ -34,33 +34,37 @@ function renderPlayers(list) {
 // --- 遊戲中座位分配邏輯 ---
 
 function updateSeats(players, currentPlayerId) {
-    // 找到「我」在陣列中的位置
     const myIndex = players.findIndex(p => p.id === socket.id);
     
-    // 重新排序玩家陣列，讓「我」永遠在第一個，其餘按順時針排列
     const ordered = [];
     for (let i = 0; i < players.length; i++) {
         ordered.push(players[(myIndex + i) % players.length]);
     }
 
-    // 將玩家填入對應的 HTML 座位元件
-    // ordered[0] 是「我」(Bottom)
-    // ordered[1] 是 Left 或 Top (視人數而定)
     const seatIds = ['me-seat', 'p1-seat', 'p2-seat', 'p3-seat'];
     
-    // 先清空所有座位文字
-    seatIds.forEach(id => { if($(id)) $(id).textContent = ''; });
+    // 清空所有座位內容
+    seatIds.forEach(id => { if($(id)) $(id).innerHTML = ''; });
 
     ordered.forEach((p, i) => {
         const seat = $(seatIds[i]);
         if (!seat) return;
 
         const isTurn = p.id === currentPlayerId;
+        
+        // --- 核心邏輯：判斷是否顯示 PASS ---
+        // 只有當玩家 hasPassed 為 true，且「不是他的回合」時才顯示
+        const passHtml = (p.hasPassed && !isTurn) ? '<div class="pass-tag">PASS</div>' : '';
+
+        // 使用 Flex 容器結構來防止文字重疊
         seat.innerHTML = `
-            <div class="seat-name ${isTurn ? 'active-turn' : ''}">
-                ${p.name} ${p.isAI ? '[AI]' : ''}
+            <div class="player-info-wrapper ${isTurn ? 'active-turn' : ''}">
+                <div class="seat-name">
+                    ${p.name} ${p.isAI ? '[AI]' : ''}
+                </div>
+                ${passHtml} 
+                <div class="card-count" id="count-${p.id}">${p.cardCount || 13}張</div>
             </div>
-            <div class="card-count" id="count-${p.id}">13張</div>
         `;
     });
 }
