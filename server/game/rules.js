@@ -92,17 +92,13 @@ getPlayInfo(cards) {
 }
     canPlay(newCards, lastPlay, isFirstTurn = false) {
         const next = this.getPlayInfo(newCards);
-        
-        // 如果出的牌型不合法，直接不允許出牌
         if (!next) return false; 
 
-        // 規則 A：整場遊戲第一手，必須包含「梅花 3」
         if (isFirstTurn) {
-            const hasClubs3 = newCards.some(c => c.rank === 3 && c.suit === 'clubs');
+            const hasClubs3 = newCards.some(c => parseInt(c.rank) === 3 && c.suit === 'clubs');
             if (!hasClubs3) return false;
         }
 
-        // 規則 B：發球權 (場上沒牌，或是大家都過牌回到自己)
         if (!lastPlay || (Array.isArray(lastPlay) && lastPlay.length === 0)) {
             return true; 
         }
@@ -110,16 +106,20 @@ getPlayInfo(cards) {
         const prev = this.getPlayInfo(lastPlay);
         if (!prev) return true;
 
-        // 規則 C：被動壓牌
-        // 1. 張數必須完全相同
+        // 關鍵修正：張數必須相同
         if (newCards.length !== lastPlay.length) return false;
 
-        // 2. 牌型必須相同 (例如：單張不能壓對子)
-        if (next.type !== prev.type) return false;
+        // 如果是 5 張牌，只要 next.power 大於 prev.power 即可（支援順子被葫蘆壓）
+        if (newCards.length === 5) {
+            return next.power > prev.power;
+        }
 
-        // 3. 力量比較：新出的牌必須「大於」場上的牌 (next.power > prev.power)
-        // 這是修正「小牌壓大牌」最關鍵的一行
-        return next.power > prev.power;
+        // 單張或對子，則必須類型完全一致
+        if (next.type === prev.type) {
+            return next.power > prev.power;
+        }
+
+        return false;
     }
 };
 
