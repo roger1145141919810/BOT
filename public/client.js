@@ -43,7 +43,6 @@ function updateSeats(players, currentPlayerId) {
     const myIndex = players.findIndex(p => p.id === socket.id);
     if (myIndex === -1) return;
 
-    // 重新排序玩家，讓自己永遠在底部
     const ordered = [];
     for (let i = 0; i < players.length; i++) {
         ordered.push(players[(myIndex + i) % players.length]);
@@ -58,13 +57,14 @@ function updateSeats(players, currentPlayerId) {
         const isTurn = p.id === currentPlayerId;
         const passHtml = (p.hasPassed && !isTurn) ? '<div class="pass-overlay">PASS</div>' : '';
 
+        // 注意：只更新座位的 HTML，不要去動到 table 中間的 div
         seat.innerHTML = `
             <div class="player-info-wrapper ${isTurn ? 'active-turn' : ''}">
                 <div class="seat-name">
                     ${p.name} ${p.isAI ? '<span class="ai-tag-mini">[AI]</span>' : ''}
                 </div>
                 ${passHtml}
-                <div class="card-count" id="count-${p.id}">${p.cardCount ?? 13}張</div>
+                <div class="card-count">${p.cardCount ?? 13}張</div>
             </div>
         `;
     });
@@ -181,7 +181,10 @@ socket.on('play_made', ({ playerId, cards, isPass }) => {
 
 socket.on('new_round', () => {
     allPlayers.forEach(p => p.hasPassed = false);
-    $('lastPlayContent').innerHTML = '<span class="new-round">全新開始（發球權）</span>';
+    
+    // 清空上一輪的殘留牌，並顯示提示
+    $('lastPlayContent').innerHTML = '<span class="new-round">全新回合 (自由出牌)</span>';
+    
     updateSeats(allPlayers, null); 
 });
 
