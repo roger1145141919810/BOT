@@ -188,16 +188,36 @@ io.on('connection', (socket) => {
         nextTurn(roomId);
     });
 
-    socket.on('disconnect', () => {
+        socket.on('disconnect', () => {
         for (const roomId in rooms) {
             const room = rooms[roomId];
             const index = room.players.findIndex(p => p.id === socket.id);
+        
             if (index !== -1) {
-                room.players.splice(index, 1);
-                if (room.players.length === 0 || !room.players.some(p => !p.isAI)) {
-                    delete rooms[roomId];
-                } else {
+                const player = room.players[index];
+    
+                // 情況 A：如果遊戲尚未開始，直接移除玩家
+                if (!room.gameStarted) {
+                    room.players.splice(index, 1);
+                    if (room.players.length === 0) {
+                        delete rooms[roomId];
+                    } else {
+                        io.to(roomId).emit('room_update', room.players);
+                    }
+                } 
+                // 情況 B：如果遊戲進行中，將玩家轉為 AI 接管
+                else {
+                    console.log(`玩家 ${player.name} 斷線，由 AI 接管`);
+                    player.isAI = true;
+                    player.name = `${player.name} (AI接管)`;
+                
+                    // 通知所有玩家有人變成了 AI
                     io.to(roomId).emit('room_update', room.players);
+
+                    // 重要：如果剛好輪到該斷線玩家，立即觸發 AI 出牌邏輯
+                    if (room.turnIndex === index) {
+                        handleAiAction(roomId, player);
+                    }
                 }
                 break;
             }
