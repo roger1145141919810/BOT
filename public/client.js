@@ -35,6 +35,7 @@ function renderPlayers(list) {
 
 // --- 找到 updateSeats 並完整替換 ---
 function updateSeats(players, currentPlayerId) {
+    // 1. 找到「我」的位置並排序 (維持你的原創邏輯)
     const myIndex = players.findIndex(p => p.id === socket.id);
     const ordered = [];
     for (let i = 0; i < players.length; i++) {
@@ -42,24 +43,31 @@ function updateSeats(players, currentPlayerId) {
     }
 
     const seatIds = ['me-seat', 'p1-seat', 'p2-seat', 'p3-seat'];
-    seatIds.forEach(id => { if($(id)) $(id).innerHTML = ''; });
+    
+    // 2. 清空舊的內容，避免重複堆疊
+    seatIds.forEach(id => {
+        const el = $(id);
+        if (el) el.innerHTML = ''; 
+    });
 
     ordered.forEach((p, i) => {
         const seat = $(seatIds[i]);
         if (!seat) return;
 
         const isTurn = p.id === currentPlayerId;
-        // 核心邏輯：判定是否顯示 PASS 標籤
+        
+        // 核心邏輯：判定是否顯示 PASS
+        // 必須玩家有過牌標記，且目前「不」輪到他
         const passHtml = (p.hasPassed && !isTurn) ? '<div class="pass-overlay">PASS</div>' : '';
 
-        // 使用 player-info-wrapper 結構配合 CSS 解決重疊
+        // 3. 渲染結構 (加入 player-info-wrapper 配合 CSS)
         seat.innerHTML = `
             <div class="player-info-wrapper ${isTurn ? 'active-turn' : ''}">
                 <div class="seat-name">
-                    ${p.name} ${p.isAI ? '[AI]' : ''}
+                    ${p.name} ${p.isAI ? '<span class="ai-tag-mini">[AI]</span>' : ''}
                 </div>
                 ${passHtml}
-                <div class="card-count" id="count-${p.id}">${p.cardCount || 13}張</div>
+                <div class="card-count" id="count-${p.id}">${p.cardCount ?? 13}張</div>
             </div>
         `;
     });
