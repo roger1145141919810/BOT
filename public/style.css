@@ -107,9 +107,10 @@ body {
 }
 
 /* --- 底部控制 UI --- */
+/* 修改 style.css 約第 115 行 */
 .player-ui {
     position: fixed;
-    bottom: 20px;
+    bottom: 30px; /* 如果覺得太低，可以從 20px 改成 30px 或更高 */
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
