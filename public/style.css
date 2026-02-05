@@ -106,7 +106,21 @@ body {
     border: 1px solid #eee;
     margin: 0 2px;
 }
+.rank, .rank-mini {
+    font-size: 24px;
+    font-family: 'Arial Black', sans-serif; /* 使用較粗的字體 */
+    line-height: 1;
+}
 
+.rank-mini { font-size: 18px; }
+
+/* 花色樣式 */
+.suit, .suit-mini {
+    font-size: 32px;
+    line-height: 1;
+}
+
+.suit-mini { font-size: 22px; }
 /* --- 底部控制 UI --- */
 /* 修改 style.css 約第 115 行 */
 .player-ui {
@@ -145,7 +159,29 @@ body {
     transition: all 0.2s ease-out;
     user-select: none;
 }
-
+.card:hover {
+    transform: translateY(-20px);
+    z-index: 500;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    border-color: #3498db;
+}
+.played-cards-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2); /* 半透明底座 */
+    border-radius: 15px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+    min-height: 100px;
+}
+/* 選取狀態：黃金發光邊框 */
+.card.selected {
+    transform: translateY(-45px); /* 彈得更高 */
+    box-shadow: 0 0 15px #f1c40f, 0 5px 15px rgba(0,0,0,0.3);
+    border: 2px solid #f1c40f;
+    z-index: 600;
+}
 /* 確保第一張牌不要有負邊距，否則會跑出螢幕 */
 .card:first-child {
     margin-left: 0;
