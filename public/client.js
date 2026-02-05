@@ -269,4 +269,30 @@ socket.on('new_round', () => {
     $('lastPlayContent').innerHTML = '<span class="new-round">全新開始（發球權）</span>';
 });
 
+socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
+    console.log("遊戲結束，贏家是:", winnerName);
+    
+    const overlay = $('gameOverOverlay');
+    const statsEl = $('playerStats');
+    const winnerTitle = $('winnerTitle');
+    const isMe = (winnerId === socket.id);
+
+    winnerTitle.textContent = isMe ? "✨ 恭喜！你贏了 ✨" : `👑 贏家是：${winnerName}`;
+    winnerTitle.style.color = isMe ? "#f1c40f" : "#ffffff";
+
+    statsEl.innerHTML = allPlayers.map(p => {
+        const count = allHandCounts[p.id] || 0;
+        const isWinner = (count === 0);
+        return `
+            <div class="stat-row ${isWinner ? 'winner-row' : ''}">
+                <span class="stat-name">${p.name} ${p.id === socket.id ? '(你)' : ''}</span>
+                <span class="count-tag">${isWinner ? '🏆 完賽' : count + ' 張'}</span>
+            </div>
+        `;
+    }).join('');
+
+    overlay.classList.remove('hidden');
+    selected.clear();
+});
+
 socket.on('error_msg', msg => alert(msg));
