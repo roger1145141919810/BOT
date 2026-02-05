@@ -37,14 +37,15 @@ function handleAiAction(roomId, aiPlayer) {
     const room = rooms[roomId];
     if (!room || !room.gameStarted) return;
 
-    // 這裡要統一抓取 room.hands[aiPlayer.id]
-    const aiHand = room.hands[aiPlayer.id];
-    if (!aiHand || aiHand.length === 0) return;
+    // AI 必須抓取當前 id 對應的手牌 (即便該 socket 已斷開)
+    const aiHand = room.hands[aiPlayer.id]; 
+    if (!aiHand) return;
 
+    // 取得場上其他人的手牌張數
     const opponentCounts = {};
     room.players.forEach(p => opponentCounts[p.id] = room.hands[p.id].length);
 
-    // 呼叫你的 aiDecision 邏輯
+    // AI 做決定
     const cardsToPlay = aiDecision(aiHand, room.lastPlay, opponentCounts);
 
     if (cardsToPlay && cardsToPlay.length > 0) {
@@ -53,19 +54,19 @@ function handleAiAction(roomId, aiPlayer) {
         room.lastPlay = cardsToPlay;
         room.passCount = 0;
         io.to(roomId).emit('play_made', { playerId: aiPlayer.id, cards: cardsToPlay });
-
+        
         // 勝利檢查
         if (room.hands[aiPlayer.id].length === 0) {
             io.to(roomId).emit('game_over', { 
                 winnerName: aiPlayer.name, 
                 winnerId: aiPlayer.id,
-                allHandCounts: opponentCounts // 這裡記得補上結算用的剩餘張數
+                allHandCounts: opponentCounts 
             });
             room.gameStarted = false;
             return;
         }
     } else {
-        // 過牌邏輯
+        // 過牌
         room.passCount++;
         io.to(roomId).emit('play_made', { playerId: aiPlayer.id, cards: [], isPass: true });
         
@@ -75,6 +76,8 @@ function handleAiAction(roomId, aiPlayer) {
             io.to(roomId).emit('new_round');
         }
     }
+    
+    // 進入下一家
     nextTurn(roomId);
 }
 io.on('connection', (socket) => {
@@ -204,40 +207,39 @@ io.on('connection', (socket) => {
     });
 
         socket.on('disconnect', () => {
-        for (const roomId in rooms) {
-            const room = rooms[roomId];
-            const index = room.players.findIndex(p => p.id === socket.id);
+    for (const roomId in rooms) {
+        const room = rooms[roomId];
+        const index = room.players.findIndex(p => p.id === socket.id);
         
-            if (index !== -1) {
-                const player = room.players[index];
-    
-                // 情況 A：如果遊戲尚未開始，直接移除玩家
-                if (!room.gameStarted) {
-                    room.players.splice(index, 1);
-                    if (room.players.length === 0) {
-                        delete rooms[roomId];
-                    } else {
-                        io.to(roomId).emit('room_update', room.players);
-                    }
-                } 
-                // 情況 B：如果遊戲進行中，將玩家轉為 AI 接管
-                else {
-                    console.log(`玩家 ${player.name} 斷線，由 AI 接管`);
-                    player.isAI = true;
-                    player.name = `${player.name} (AI接管)`;
-                
-                    // 通知所有玩家有人變成了 AI
-                    io.to(roomId).emit('room_update', room.players);
+        if (index !== -1) {
+            const player = room.players[index];
 
-                    // 重要：如果剛好輪到該斷線玩家，立即觸發 AI 出牌邏輯
-                    if (room.turnIndex === index) {
+            if (room.gameStarted) {
+                // 1. 標記玩家為 AI 並修改名稱
+                player.isAI = true;
+                player.name = `${player.name} (AI接管)`;
+                
+                console.log(`[房間 ${roomId}] 玩家 ${player.name} 斷線，已轉交 AI`);
+
+                // 2. 通知所有客戶端 UI 更新（這樣大家才會看到變成了 AI）
+                io.to(roomId).emit('room_update', room.players);
+
+                // 3. 【關鍵處理】如果現在剛好是斷線玩家的回合
+                if (room.turnIndex === index) {
+                    console.log(`[房間 ${roomId}] 回合中玩家斷線，強制啟動 AI 行動`);
+                    // 給一點延遲感，避免畫面切換過快
+                    setTimeout(() => {
                         handleAiAction(roomId, player);
-                    }
+                    }, 1000);
                 }
-                break;
+            } else {
+                // 如果遊戲還沒開始就斷線，直接移除玩家
+                room.players.splice(index, 1);
+                io.to(roomId).emit('room_update', room.players);
             }
+            break;
         }
-    });
+    }
 });
 
 const PORT = process.env.PORT || 3000;
