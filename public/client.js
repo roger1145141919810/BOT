@@ -4,7 +4,7 @@ const $ = id => document.getElementById(id);
 let currentRoom = null;
 let myHand = [];
 let selected = new Set();
-let allPlayers = []; // 儲存所有玩家資訊（包含 AI）
+let allPlayers = []; // 儲存所有玩家資訊（包含 AI 與斷線狀態）
 
 const SUIT_DATA = {
     'clubs': { symbol: '♣', color: 'black', weight: 0 },
@@ -13,11 +13,19 @@ const SUIT_DATA = {
     'spades': { symbol: '♠', color: 'black', weight: 3 }
 };
 
-// --- 大廳邏輯 ---
+// --- 排行與輔助功能 ---
+
+function rankText(r) {
+    const map = { 11: 'J', 12: 'Q', 13: 'K', 14: 'A', 15: '2' };
+    return map[r] || String(r);
+}
+
+// --- 介面渲染核心 ---
 
 function renderPlayers(list) {
     allPlayers = list;
     const el = $('playersList');
+    if (!el) return;
     el.innerHTML = '';
     list.forEach((p, i) => {
         const d = document.createElement('div');
@@ -31,12 +39,11 @@ function renderPlayers(list) {
     });
 }
 
-// --- 遊戲中座位分配邏輯 ---
-
-// --- 找到 updateSeats 並完整替換 ---
 function updateSeats(players, currentPlayerId) {
-    // 1. 找到「我」的位置並排序 (維持你的原創邏輯)
     const myIndex = players.findIndex(p => p.id === socket.id);
+    if (myIndex === -1) return;
+
+    // 重新排序玩家，讓自己永遠在底部
     const ordered = [];
     for (let i = 0; i < players.length; i++) {
         ordered.push(players[(myIndex + i) % players.length]);
@@ -44,23 +51,13 @@ function updateSeats(players, currentPlayerId) {
 
     const seatIds = ['me-seat', 'p1-seat', 'p2-seat', 'p3-seat'];
     
-    // 2. 清空舊的內容，避免重複堆疊
-    seatIds.forEach(id => {
-        const el = $(id);
-        if (el) el.innerHTML = ''; 
-    });
-
     ordered.forEach((p, i) => {
         const seat = $(seatIds[i]);
         if (!seat) return;
 
         const isTurn = p.id === currentPlayerId;
-        
-        // 核心邏輯：判定是否顯示 PASS
-        // 必須玩家有過牌標記，且目前「不」輪到他
         const passHtml = (p.hasPassed && !isTurn) ? '<div class="pass-overlay">PASS</div>' : '';
 
-        // 3. 渲染結構 (加入 player-info-wrapper 配合 CSS)
         seat.innerHTML = `
             <div class="player-info-wrapper ${isTurn ? 'active-turn' : ''}">
                 <div class="seat-name">
@@ -73,56 +70,9 @@ function updateSeats(players, currentPlayerId) {
     });
 }
 
-// --- 找到 socket.on('play_made') 並完整替換 ---
-socket.on('play_made', ({ playerId, cards, isPass }) => {
-    // 1. 更新全域玩家狀態
-    const player = allPlayers.find(p => p.id === playerId);
-    if (player) {
-        player.hasPassed = isPass;
-        if (!isPass && cards) {
-            player.cardCount = (player.cardCount || 13) - cards.length;
-        }
-    }
-
-    // 2. 我方手牌處理
-    if (playerId === socket.id) {
-        const playedIds = new Set(cards.map(c => c.id));
-        myHand = myHand.filter(c => !playedIds.has(c.id));
-        renderHand();
-    }
-    
-    // 3. 桌面中央渲染 (加上 background: white 解決紅框問題)
-    const contentEl = $('lastPlayContent');
-    if (isPass) {
-        contentEl.innerHTML = '<span class="pass-text-main">PASS</span>';
-    } else {
-        const cardsHtml = cards.map(c => {
-            const suitInfo = SUIT_DATA[c.suit];
-            return `
-                <div class="card-mini" style="color: ${suitInfo.color};">
-                    <div class="rank-mini">${rankText(c.rank)}</div>
-                    <div class="suit-mini">${suitInfo.symbol}</div>
-                </div>
-            `;
-        }).join('');
-        contentEl.innerHTML = `<div class="played-cards-wrapper">${cardsHtml}</div>`;
-    }
-
-    // 4. 立即更新座位 (讓 PASS 出現/消失)
-    updateSeats(allPlayers, playerId);
-});
-
-// --- 找到 socket.on('new_round') 並完整替換 ---
-socket.on('new_round', () => {
-    allPlayers.forEach(p => p.hasPassed = false); // 新回合重置
-    $('lastPlayContent').innerHTML = '<span class="new-round">全新開始</span>';
-    updateSeats(allPlayers, null);
-});
-
-// --- 牌面渲染 ---
-
 function renderHand() {
     const handEl = $('hand');
+    if (!handEl) return;
     handEl.innerHTML = '';
     myHand.forEach((c) => {
         const card = document.createElement('div');
@@ -145,141 +95,44 @@ function renderHand() {
     });
 }
 
-function rankText(r) {
-    const map = { 11: 'J', 12: 'Q', 13: 'K', 14: 'A', 15: '2' };
-    return map[r] || String(r);
-}
-
-// --- 事件處理 ---
-
-$('createBtn').addEventListener('click', () => {
-    const roomId = $('roomId').value.trim();
-    const name = $('name').value.trim() || 'Player';
-    if (!roomId) return alert('請填房間ID');
-    
-    // 這裡只負責發送，不負責切換畫面
-    socket.emit('create_room', { roomId, name });
-    currentRoom = roomId; 
-});
-
-$('joinBtn').addEventListener('click', () => {
-    const roomId = $('roomId').value.trim();
-    const name = $('name').value.trim() || 'Player';
-    if (!roomId) return alert('請填房間ID');
-    
-    // 這裡只負責發送
-    socket.emit('join_room', { roomId, name });
-    currentRoom = roomId; 
-});
-
-
-$('startBtn').addEventListener('click', () => {
-    if (!currentRoom) return;
-    socket.emit('start_game', { roomId: currentRoom });
-});
-
-$('playBtn').addEventListener('click', () => {
-    const cards = myHand.filter(c => selected.has(c.id));
-    if (cards.length === 0) return alert('請選牌');
-    socket.emit('play_cards', { roomId: currentRoom, cards });
-    selected.clear();
-});
-
-$('passBtn').addEventListener('click', () => {
-    socket.emit('pass', { roomId: currentRoom });
-    selected.clear();
-});
-
-$('restartBtn').addEventListener('click', () => {
-    // 隱藏結算畫面
-    $('gameOverOverlay').classList.add('hidden');
-    // 告訴後端重新開始遊戲
-    socket.emit('start_game', { roomId: currentRoom });
-});
-
-$('backToLobbyBtn').addEventListener('click', () => {
-    // 簡單的做法是重新整理頁面回到大廳
-    location.reload();
-});
-// --- Socket 監聽 ---
-
-socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
-    console.log("遊戲結束，贏家是:", winnerName);
-    
-    const overlay = $('gameOverOverlay');
-    const statsEl = $('playerStats');
-    const winnerTitle = $('winnerTitle');
-    const isMe = (winnerId === socket.id);
-
-    // 1. 設定標題與顏色
-    winnerTitle.textContent = isMe ? "✨ 恭喜！你贏了 ✨" : `👑 贏家是：${winnerName}`;
-    winnerTitle.style.color = isMe ? "#f1c40f" : "#ffffff";
-
-    // 2. 顯示所有玩家剩餘牌數排行榜
-    statsEl.innerHTML = allPlayers.map(p => {
-        const count = allHandCounts[p.id] || 0;
-        const isWinner = (count === 0);
-        return `
-            <div class="stat-row ${isWinner ? 'winner-row' : ''}">
-                <span class="stat-name">${p.name} ${p.id === socket.id ? '(你)' : ''}</span>
-                <span class="count-tag">${isWinner ? '🏆 完賽' : count + ' 張'}</span>
-            </div>
-        `;
-    }).join('');
-
-    // 3. 顯示遮罩
-    overlay.classList.remove('hidden');
-    
-    // 4. 清除本地選擇狀態
-    selected.clear();
-});
+// --- Socket 監聽邏輯 (修復同步問題) ---
 
 socket.on('room_update', players => {
-    // 1. 確保 UI 切換 (解決你之前按鈕沒反應的問題)
+    allPlayers = players;
     $('lobby').classList.add('hidden');
     $('roomArea').classList.remove('hidden');
-    
-    // 2. 更新房號顯示 (截圖 ECC96868 顯示房號 ID 是空的，就是漏了這行)
     if (currentRoom) $('curRoom').textContent = currentRoom;
-    
     renderPlayers(players);
 });
 
-// 3. 確保 deal 事件能正確接收
 socket.on('deal', hand => {
-    console.log("收到手牌數據:", hand); // 除錯用
     myHand = hand.sort((a, b) => {
         if (a.rank !== b.rank) return a.rank - b.rank;
         return SUIT_DATA[a.suit].weight - SUIT_DATA[b.suit].weight;
     });
-    renderHand(); // 呼叫你寫好的渲染函數
+    // 初始化所有人張數為 13
+    allPlayers.forEach(p => p.cardCount = 13);
+    renderHand();
 });
 
 socket.on('game_start', ({ currentPlayerId, players }) => {
-    console.log("遊戲正式開始！切換畫面...");
+    allPlayers = players;
+    $('roomArea').classList.add('hidden');
+    $('game').classList.remove('hidden');
     
-    // 1. 隱藏準備區與大廳，顯示遊戲桌布
-    if ($('lobby')) $('lobby').classList.add('hidden');
-    if ($('roomArea')) $('roomArea').classList.add('hidden');
-    if ($('game')) $('game').classList.remove('hidden');
+    // 初始化狀態
+    allPlayers.forEach(p => {
+        p.cardCount = 13;
+        p.hasPassed = false;
+    });
 
-    // 2. 初始化數據與座位渲染
-    allPlayers = players; 
-    updateSeats(players, currentPlayerId);
-    
-    // 3. 觸發手牌渲染
+    updateSeats(allPlayers, currentPlayerId);
     renderHand();
 
-    // --- 關鍵新增：判斷首回合按鈕狀態 ---
     const isMyTurn = (currentPlayerId === socket.id);
-    const statusEl = $('status');
-    if (statusEl) {
-        statusEl.textContent = isMyTurn ? '你是首家，請選牌出牌！' : '遊戲開始，等待對手...';
-    }
-    
-    // 確保按鈕在你的回合時被啟用
-    if ($('playBtn')) $('playBtn').disabled = !isMyTurn;
-    if ($('passBtn')) $('passBtn').disabled = !isMyTurn;
+    $('status').textContent = isMyTurn ? '你是首家，請出牌！' : '遊戲開始，等待對手...';
+    $('playBtn').disabled = !isMyTurn;
+    $('passBtn').disabled = !isMyTurn;
 });
 
 socket.on('turn_update', ({ currentPlayerId }) => {
@@ -291,34 +144,30 @@ socket.on('turn_update', ({ currentPlayerId }) => {
 });
 
 socket.on('play_made', ({ playerId, cards, isPass }) => {
-    // 1. 更新全域玩家列表中的狀態 (為了讓 updateSeats 知道誰 PASS)
     const player = allPlayers.find(p => p.id === playerId);
     if (player) {
-        player.hasPassed = isPass; // 記錄這個人是否過牌
-        // 同步更新張數，避免重疊顯示錯誤
+        player.hasPassed = isPass;
         if (!isPass && cards) {
             player.cardCount = (player.cardCount || 13) - cards.length;
         }
     }
 
-    // 2. 如果是我出牌，從手牌中移除並重新渲染手牌
-    if (playerId === socket.id) {
+    // 本地手牌同步
+    if (playerId === socket.id && !isPass) {
         const playedIds = new Set(cards.map(c => c.id));
         myHand = myHand.filter(c => !playedIds.has(c.id));
         renderHand();
     }
     
-    // 3. 渲染桌面中央的出牌內容 (解決重疊與只有邊框問題)
+    // 中央出牌區渲染
     const contentEl = $('lastPlayContent');
     if (isPass) {
-        // 桌面中央顯示淡出的 PASS 提示 (或保持清空，因為頭上已經有了)
         contentEl.innerHTML = '<span class="pass-text-main">PASS</span>';
     } else {
         const cardsHtml = cards.map(c => {
             const suitInfo = SUIT_DATA[c.suit];
-            // 加入 background: white 解決只有紅框的問題
             return `
-                <div class="card-mini" style="color: ${suitInfo.color}; background: white; border: 1px solid #ccc;">
+                <div class="card-mini" style="color: ${suitInfo.color}; background: white;">
                     <div class="rank-mini">${rankText(c.rank)}</div>
                     <div class="suit-mini">${suitInfo.symbol}</div>
                 </div>
@@ -327,26 +176,16 @@ socket.on('play_made', ({ playerId, cards, isPass }) => {
         contentEl.innerHTML = `<div class="played-cards-wrapper">${cardsHtml}</div>`;
     }
 
-    // 4. 【關鍵】立即重新渲染所有座位
-    // 這樣 PASS 字樣才會出現在頭上，且根據 turnIndex 決定是否隱藏
-    // 這裡的第二個參數帶入當前 playerId，或是等下一個 turn_update 觸發
     updateSeats(allPlayers, playerId); 
 });
 
-// --- 補充：新回合開始時一定要重置狀態 ---
 socket.on('new_round', () => {
     allPlayers.forEach(p => p.hasPassed = false);
-    $('lastPlayContent').innerHTML = '<span class="new-round-tip">全新開始</span>';
-    // 這裡不帶 currentPlayerId，交由後續的 turn_update 處理
-    updateSeats(allPlayers, null); 
-});
-socket.on('new_round', () => {
     $('lastPlayContent').innerHTML = '<span class="new-round">全新開始（發球權）</span>';
+    updateSeats(allPlayers, null); 
 });
 
 socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
-    console.log("遊戲結束，贏家是:", winnerName);
-    
     const overlay = $('gameOverOverlay');
     const statsEl = $('playerStats');
     const winnerTitle = $('winnerTitle');
@@ -356,8 +195,8 @@ socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
     winnerTitle.style.color = isMe ? "#f1c40f" : "#ffffff";
 
     statsEl.innerHTML = allPlayers.map(p => {
-        const count = allHandCounts[p.id] || 0;
-        const isWinner = (count === 0);
+        const count = allHandCounts ? allHandCounts[p.id] : (p.id === winnerId ? 0 : p.cardCount);
+        const isWinner = (p.id === winnerId);
         return `
             <div class="stat-row ${isWinner ? 'winner-row' : ''}">
                 <span class="stat-name">${p.name} ${p.id === socket.id ? '(你)' : ''}</span>
@@ -371,3 +210,44 @@ socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
 });
 
 socket.on('error_msg', msg => alert(msg));
+
+// --- 按鈕事件 ---
+
+$('createBtn').onclick = () => {
+    const roomId = $('roomId').value.trim();
+    const name = $('name').value.trim() || 'Player';
+    if (!roomId) return alert('請填房間ID');
+    currentRoom = roomId;
+    socket.emit('create_room', { roomId, name });
+};
+
+$('joinBtn').onclick = () => {
+    const roomId = $('roomId').value.trim();
+    const name = $('name').value.trim() || 'Player';
+    if (!roomId) return alert('請填房間ID');
+    currentRoom = roomId;
+    socket.emit('join_room', { roomId, name });
+};
+
+$('startBtn').onclick = () => {
+    if (currentRoom) socket.emit('start_game', { roomId: currentRoom });
+};
+
+$('playBtn').onclick = () => {
+    const cards = myHand.filter(c => selected.has(c.id));
+    if (cards.length === 0) return;
+    socket.emit('play_cards', { roomId: currentRoom, cards });
+    selected.clear();
+};
+
+$('passBtn').onclick = () => {
+    socket.emit('pass', { roomId: currentRoom });
+    selected.clear();
+};
+
+$('restartBtn').onclick = () => {
+    $('gameOverOverlay').classList.add('hidden');
+    socket.emit('start_game', { roomId: currentRoom });
+};
+
+$('backToLobbyBtn').onclick = () => location.reload();
