@@ -19,77 +19,87 @@ const Rules = {
         return weights[suit] !== undefined ? weights[suit] : 0;
     },
 
-    /**
-     * 分析一組牌的牌型與強度
-     * @param {Array} cards 
-     * @returns {Object|null} 牌型資訊，不合法則回傳 null
-     */
-    // --- server/game/rules.js ---
+    getPlayInfo(cards) {
+        if (!Array.isArray(cards) || cards.length === 0) return null;
+        const len = cards.length;
 
-getPlayInfo(cards) {
-    if (!Array.isArray(cards) || cards.length === 0) return null;
-    const len = cards.length;
-
-    // 1. 單張 (SINGLE)
-    if (len === 1) {
-        return { type: 'SINGLE', power: this.getCardPower(cards[0]) };
-    }
-
-    // 2. 對子 (PAIR)
-    if (len === 2) {
-        if (cards[0].rank === cards[1].rank) {
-            const p = Math.max(this.getCardPower(cards[0]), this.getCardPower(cards[1]));
-            return { type: 'PAIR', power: p };
+        // 1. 單張 (SINGLE)
+        if (len === 1) {
+            return { type: 'SINGLE', power: this.getCardPower(cards[0]) };
         }
-    }
 
-    // 3. 五張牌型 (順子、葫蘆、鐵支、同花順)
-    if (len === 5) {
-        // 先按數字排序，方便判斷
-        const sorted = [...cards].sort((a, b) => a.rank - b.rank);
-        const counts = {}; // 統計每個數字出現幾次
-        sorted.forEach(c => counts[c.rank] = (counts[c.rank] || 0) + 1);
-        const uniqueRanks = Object.keys(counts);
-
-        // A. 鐵支 (Four of a Kind) - 4+1
-        if (uniqueRanks.length === 2) {
-            for (let r in counts) {
-                if (counts[r] === 4) {
-                    return { type: 'FIVE_CARD', subType: 'FOUR_OF_A_KIND', power: 800 + parseInt(r) };
-                }
+        // 2. 對子 (PAIR)
+        if (len === 2) {
+            if (parseInt(cards[0].rank) === parseInt(cards[1].rank)) {
+                const p = Math.max(this.getCardPower(cards[0]), this.getCardPower(cards[1]));
+                return { type: 'PAIR', power: p };
             }
         }
 
-        // B. 葫蘆 (Full House) - 3+2
-        if (uniqueRanks.length === 2) {
-            for (let r in counts) {
-                if (counts[r] === 3) {
-                    // 以「三張」的那組數字決定強度
-                    return { type: 'FIVE_CARD', subType: 'FULL_HOUSE', power: 600 + parseInt(r) };
+        // 3. 五張牌型 (順子、葫蘆、鐵支、同花順)
+        if (len === 5) {
+            // --- 關鍵修正：確保 rank 是數字並正確排序 ---
+            const sorted = [...cards].sort((a, b) => parseInt(a.rank) - parseInt(b.rank));
+            const ranks = sorted.map(c => parseInt(c.rank));
+            
+            const counts = {}; 
+            ranks.forEach(r => counts[r] = (counts[r] || 0) + 1);
+            const uniqueRanks = Object.keys(counts).map(Number).sort((a, b) => a - b);
+
+            // A. 鐵支 (Four of a Kind) - 4+1
+            if (uniqueRanks.length === 2) {
+                for (let r in counts) {
+                    if (counts[r] === 4) {
+                        return { type: 'FIVE_CARD', subType: 'FOUR_OF_A_KIND', power: 800 + parseInt(r) };
+                    }
                 }
+            }
+
+            // B. 葫蘆 (Full House) - 3+2
+            if (uniqueRanks.length === 2) {
+                for (let r in counts) {
+                    if (counts[r] === 3) {
+                        // 以「三張」的那組數字決定強度
+                        return { type: 'FIVE_CARD', subType: 'FULL_HOUSE', power: 600 + parseInt(r) };
+                    }
+                }
+            }
+
+            // 判斷是否為同花
+            const isFlush = cards.every(c => c.suit === cards[0].suit);
+            
+            // --- 關鍵修正：順子判斷 (解決 A, 2 的連續性問題) ---
+            let isStraight = false;
+            if (uniqueRanks.length === 5) {
+                // 一般情況: 3,4,5,6,7 或 10,J,Q,K,A
+                if (ranks[4] - ranks[0] === 4) {
+                    isStraight = true;
+                } 
+                // 大老二特殊情況: A, 2, 3, 4, 5 ( ranks 會是 [3, 4, 5, 14, 15] )
+                else if (ranks.includes(14) && ranks.includes(15) && ranks.includes(3) && ranks.includes(4) && ranks.includes(5)) {
+                    isStraight = true;
+                }
+            }
+
+            // C. 同花順 (Straight Flush)
+            if (isFlush && isStraight) {
+                return { type: 'FIVE_CARD', subType: 'STRAIGHT_FLUSH', power: 1000 + (ranks.includes(15) && ranks.includes(3) ? 15 : ranks[4]) };
+            }
+            // D. 同花 (Flush)
+            if (isFlush) {
+                return { type: 'FIVE_CARD', subType: 'FLUSH', power: 400 + ranks[4] };
+            }
+            // E. 順子 (Straight)
+            if (isStraight) {
+                // 如果是 A,2,3,4,5，權重以 2 (15) 為準
+                const straightPower = (ranks.includes(15) && ranks.includes(3)) ? 15 : ranks[4];
+                return { type: 'FIVE_CARD', subType: 'STRAIGHT', power: 200 + straightPower };
             }
         }
 
-        // 判斷是否為同花、順子
-        const isFlush = cards.every(c => c.suit === cards[0].suit);
-        const isStraight = uniqueRanks.length === 5 && (sorted[4].rank - sorted[0].rank === 4);
+        return null;
+    },
 
-        // C. 同花順 (Straight Flush)
-        if (isFlush && isStraight) {
-            return { type: 'FIVE_CARD', subType: 'STRAIGHT_FLUSH', power: 1000 + sorted[4].rank };
-        }
-        // D. 同花 (Flush)
-        if (isFlush) {
-            return { type: 'FIVE_CARD', subType: 'FLUSH', power: 400 + sorted[4].rank };
-        }
-        // E. 順子 (Straight)
-        if (isStraight) {
-            return { type: 'FIVE_CARD', subType: 'STRAIGHT', power: 200 + sorted[4].rank };
-        }
-    }
-
-    return null;
-}
     canPlay(newCards, lastPlay, isFirstTurn = false) {
         const next = this.getPlayInfo(newCards);
         if (!next) return false; 
@@ -106,15 +116,12 @@ getPlayInfo(cards) {
         const prev = this.getPlayInfo(lastPlay);
         if (!prev) return true;
 
-        // 關鍵修正：張數必須相同
         if (newCards.length !== lastPlay.length) return false;
 
-        // 如果是 5 張牌，只要 next.power 大於 prev.power 即可（支援順子被葫蘆壓）
         if (newCards.length === 5) {
             return next.power > prev.power;
         }
 
-        // 單張或對子，則必須類型完全一致
         if (next.type === prev.type) {
             return next.power > prev.power;
         }
