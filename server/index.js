@@ -4,6 +4,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const { generateDeck, shuffle, deal } = require('./game/engine');
 const { aiDecision } = require('./game/ai'); 
+const Rules = require('./game/rules');
 
 const app = express();
 const server = http.createServer(app);
@@ -138,16 +139,26 @@ io.on('connection', (socket) => {
     });
 
     socket.on('play_cards', ({ roomId, cards }) => {
-        const room = rooms[roomId];
-        if (!room || room.players[room.turnIndex].id !== socket.id) return;
+    const room = rooms[roomId];
+    if (!room || room.players[room.turnIndex].id !== socket.id) return;
 
-        room.hands[socket.id] = room.hands[socket.id].filter(c => !cards.find(pc => pc.id === c.id));
-        room.lastPlay = cards;
-        room.passCount = 0;
+    // --- 新增驗證邏輯 ---
+    // 檢查這手牌是否符合大老二規則且比場上的牌大
+    if (!Rules.canPlay(cards, room.lastPlay)) {
+        // 如果不合法，通知該玩家出牌失敗，且不切換回合
+        socket.emit('error_msg', '牌組不合法，或必須大於場上的牌！');
+        return; 
+    }
+    // ------------------
 
-        io.to(roomId).emit('play_made', { playerId: socket.id, cards }); 
-        nextTurn(roomId);
-    });
+    // 驗證通過才繼續執行
+    room.hands[socket.id] = room.hands[socket.id].filter(c => !cards.find(pc => pc.id === c.id));
+    room.lastPlay = cards;
+    room.passCount = 0;
+
+    io.to(roomId).emit('play_made', { playerId: socket.id, cards }); 
+    nextTurn(roomId);
+});
 
     socket.on('pass', ({ roomId }) => {
         const room = rooms[roomId];
