@@ -24,10 +24,11 @@ function nextTurn(roomId) {
 
     io.to(roomId).emit('turn_update', { currentPlayerId: currentPlayer.id });
 
+    // 這裡會自動處理原本就是 AI，或是「剛變成 AI」的玩家
     if (currentPlayer.isAI) {
         setTimeout(() => {
             handleAiAction(roomId, currentPlayer);
-        }, 1200);
+        }, 1200); // 延遲一下讓畫面比較自然
     }
 }
 
