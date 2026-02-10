@@ -108,39 +108,88 @@ body {
 
 /* --- [重點修改] 牌張材質與字體 --- */
 .card, .card-mini {
-    /* 亞麻質感背景疊加 */
+    /* 1. 背景：深色皮革材質 + 放射狀微光 */
     background: 
-        repeating-linear-gradient(45deg, rgba(0,0,0,0.01) 0px, rgba(0,0,0,0.01) 1px, transparent 1px, transparent 2px),
-        linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%) !important;
-    border: none !important;
-    /* 多重陰影：內發光 + 底層陰影 */
+        url('https://www.transparenttextures.com/patterns/dark-leather.png'), /* 皮革紋理 */
+        radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%) !important;
+    
+    /* 2. 外框：金屬絲質感邊框 */
+    border: 1.5px solid #d4af37 !important;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    
+    /* 3. 陰影：外發光 + 深度陰影 */
     box-shadow: 
-        inset 0 0 0 1px rgba(255,255,255,0.8),
-        0 2px 5px rgba(0,0,0,0.3) !important;
-    color: #1a1a1a !important;
+        inset 0 0 15px rgba(212, 175, 55, 0.15), /* 內部金色微光 */
+        0 8px 15px rgba(0,0,0,0.6) !important;
+    
+    /* 文字統一改為金屬色 */
+    color: #d4af37 !important;
 }
 
-/* 古典數字字體 */
+/* 4. 裝飾性內框 (Art Deco 風格) */
+.card::after {
+    content: '';
+    position: absolute;
+    top: 5px; left: 5px; right: 5px; bottom: 5px;
+    border: 1px solid rgba(212, 175, 55, 0.3); /* 內圈細金線 */
+    border-radius: 6px;
+    pointer-events: none;
+}
+
+/* 5. 中心裝飾 (龍紋背景圖) */
+.card::before {
+    content: '🐉'; /* 如果有龍的 SVG 圖片可以用 url() 替換 */
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 40px;
+    opacity: 0.15; /* 隱隱約約的龍紋 */
+    filter: grayscale(1) sepia(1) saturate(5);
+}
+
+/* 金屬字體優化 */
 .rank, .rank-mini {
-    font-family: "Georgia", "Times New Roman", serif !important;
-    font-weight: 800 !important;
+    font-family: "Georgia", serif !important;
+    font-weight: 900 !important;
     letter-spacing: -1px;
+    /* 金屬燙金感 */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8), 0 0 5px rgba(212, 175, 55, 0.4);
 }
 
-/* 顏色優化 */
-.red { color: #b32424 !important; }
-.black { color: #1a1a1a !important; }
+/* 花色修正：在黑金風格下，紅牌建議也用金色或深紅金色 */
+.red { color: #e67e22 !important; } /* 改用亮古銅色代替純紅 */
+.black { color: #d4af37 !important; } /* 黑牌直接用標準金色 */
 
+.suit, .suit-mini {
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+}
+
+/* --- 手牌選取效果優化 --- */
+.card.selected {
+    transform: translateY(-50px) scale(1.05); /* 選中時稍微放大 */
+    border-color: #fff !important; /* 選中時邊框變亮金白 */
+    box-shadow: 
+        0 0 25px rgba(212, 175, 55, 0.6), 
+        0 15px 30px rgba(0,0,0,0.7) !important;
+    z-index: 600;
+}
+
+.card:hover {
+    transform: translateY(-30px) rotate(-1deg);
+    z-index: 500;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.8) !important;
+}
+
+/* 迷你牌適配 (出牌區) */
 .card-mini {
     width: 50px;
     height: 72px;
     border-radius: 6px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
 }
-
+.card-mini::before { font-size: 20px; } /* 小牌龍紋縮小 */
+.card-mini::after { top: 3px; left: 3px; right: 3px; bottom: 3px; }
 /* --- 底部控制 UI --- */
 .player-ui {
     position: fixed;
