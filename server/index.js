@@ -220,20 +220,29 @@ io.on('connection', (socket) => {
         nextTurn(roomId);
     });
 
-    socket.on('disconnect', () => {
+   socket.on('disconnect', () => {
         for (const roomId in rooms) {
             const room = rooms[roomId];
             const index = room.players.findIndex(p => p.id === socket.id);
             
             if (index !== -1) {
                 if (room.gameStarted) {
+                    // 1. 玩家斷線，轉為 AI
                     room.players[index].isAI = true;
                     if (!room.players[index].name.includes("(AI)")) {
                         room.players[index].name += " (AI)";
                     }
                     io.to(roomId).emit('room_update', room.players);
                     if (room.turnIndex === index) setTimeout(() => handleAiAction(roomId, room.players[index]), 1000);
+
+                    // 2. [新增判斷] 檢查是否還有真人在房間
+                    const humanPlayers = room.players.filter(p => !p.isAI);
+                    if (humanPlayers.length === 0) {
+                        console.log(`房間 ${roomId} 已無真人玩家，正在自動清空...`);
+                        delete rooms[roomId];
+                    }
                 } else {
+                    // 遊戲未開始的情況
                     room.players.splice(index, 1);
                     if (room.players.length === 0) {
                         delete rooms[roomId];
@@ -241,6 +250,10 @@ io.on('connection', (socket) => {
                         io.to(roomId).emit('room_update', room.players);
                     }
                 }
+                break;
+            }
+        }
+    });
                 break;
             }
         }
