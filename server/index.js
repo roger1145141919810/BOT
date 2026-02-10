@@ -104,10 +104,22 @@ io.on('connection', (socket) => {
     // 加入房間
     socket.on('join_room', ({ roomId, name }) => {
         const room = rooms[roomId];
+        
+        // 1. 基礎檢查：房間是否存在
         if (!room) {
             socket.emit('error_msg', '房間不存在，請先建立房間。');
             return;
         }
+
+        // 2. 核心修正：檢查房間內是否已有同名玩家
+        // 使用 some 檢查玩家陣列中是否有任何人的 name 等於新加入的 name
+        const isNameTaken = room.players.some(p => p.name === name);
+        if (isNameTaken) {
+            socket.emit('error_msg', `名字 "${name}" 已被房內其他玩家使用，請換個名字。`);
+            return;
+        }
+
+        // 3. 狀態檢查：遊戲是否已開始或人數已滿
         if (room.gameStarted) {
             socket.emit('error_msg', '遊戲已經開始，無法加入。');
             return;
@@ -117,13 +129,14 @@ io.on('connection', (socket) => {
             return;
         }
 
+        // 4. 通過所有檢查，正式加入
         socket.join(roomId);
         room.players.push({ id: socket.id, name, isAI: false });
+        
         io.to(roomId).emit('room_update', room.players);
         socket.emit('join_success', { roomId });
-        console.log(`[加入] 玩家 ${name} 加入了房間: ${roomId}`);
+        console.log(`[加入] 玩家 ${name} 成功進入房間: ${roomId}`);
     });
-
     // 開始遊戲
     socket.on('start_game', ({ roomId }) => {
         const room = rooms[roomId];
