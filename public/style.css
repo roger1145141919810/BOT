@@ -1,152 +1,365 @@
-/* --- 基礎修正 --- */
-* { box-sizing: border-box; font-family: "Segoe UI", "Microsoft JhengHei", system-ui, sans-serif; }
+* { box-sizing: border-box; font-family: "Microsoft JhengHei", system-ui, sans-serif; }
+
+
 
 body { 
+
     margin: 0; padding: 0; 
-    /* 背景改為更有深度的深綠色皮革感 */
-    background: radial-gradient(circle at center, #1a4a3e 0%, #071d17 100%); 
+
+    background: radial-gradient(circle at center, #163e32 0%, #051a14 100%); 
+
     color: #fff; height: 100vh; display: flex; justify-content: center; overflow: hidden;
+
 }
+
+
 
 .center { width: 100%; max-width: 1200px; position: relative; height: 100%; }
+
 .hidden { display: none !important; }
 
-/* --- 房間資訊（毛玻璃質感） --- */
+
+
+/* --- [重要] 房間資訊與準備區：改為絕對定位，不佔用空間 --- */
+
 #roomArea {
+
     position: absolute;
-    top: 50%; left: 50%; transform: translate(-50%, -50%); 
-    z-index: 3000; 
-    background: rgba(10, 20, 15, 0.85); 
-    backdrop-filter: blur(15px); /* 毛玻璃效果 */
-    padding: 35px;
-    border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-    min-width: 380px;
-    text-align: center;
+
+    top: 20px;
+
+    left: 20px;
+
+    z-index: 3000; /* 確保在最上層 */
+
+    background: rgba(0, 0, 0, 0.7);
+
+    padding: 15px;
+
+    border-radius: 10px;
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    min-width: 200px;
+
 }
 
-#roomArea h2 { margin-top: 0; color: #f1c40f; letter-spacing: 2px; }
 
-/* --- 卡片通用材質 (高級亞麻質感) --- */
-.card, .card-mini {
-    background-color: #fdfdfd !important;
-    /* 增加微細的紙張紋理感 */
-    background-image: 
-        repeating-linear-gradient(45deg, rgba(0,0,0,0.01) 0px, rgba(0,0,0,0.01) 1px, transparent 1px, transparent 2px),
-        linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%) !important;
-    color: #1a1a1a;
-    border: none;
-    /* 多重陰影：環境陰影 + 內浮雕細邊 */
-    box-shadow: 
-        inset 0 0 0 1px rgba(255, 255, 255, 0.9), 
-        0 2px 4px rgba(0,0,0,0.2), 
-        -1px 4px 8px rgba(0,0,0,0.3) !important;
-    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+
+.player-entry {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 5px 0;
+
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+
 }
 
-/* 高級字體樣式 */
-.rank, .rank-mini {
-    font-family: "Georgia", "Times New Roman", serif;
-    font-weight: 800;
-    font-size: 28px;
+
+
+.ready-status { font-size: 0.8rem; }
+
+.status-ready { color: #2ecc71; font-weight: bold; }
+
+.status-waiting { color: #95a5a6; }
+
+
+
+/* 準備按鈕發光效果 */
+
+#startBtn.is-ready {
+
+    background: #27ae60;
+
+    box-shadow: 0 0 10px #2ecc71;
+
 }
 
-/* 花色與紅黑配色優化 */
-.suit, .suit-mini { filter: drop-shadow(0.5px 0.5px 0px rgba(0,0,0,0.1)); }
-.red { color: #c02d2d !important; } /* 使用較深的寶石紅 */
-.black { color: #2c2c2c !important; }
 
-/* --- 牌桌與座位 --- */
+
+/* --- 牌桌佈局 --- */
+
 .table-container {
+
     position: relative;
-    width: 100%; height: 50vh; 
-    display: flex; justify-content: center; align-items: center;
-    margin-top: 8vh;
+
+    width: 100%;
+
+    height: 55vh; /* 調整高度 */
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    margin-top: 5vh;
+
 }
+
+
+
+.player-seat {
+
+    position: absolute;
+
+    display: flex;
+
+    flex-direction: column; 
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 130px;
+
+    z-index: 10;
+
+}
+
+
 
 .player-info-wrapper {
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(5px);
-    padding: 10px 20px;
-    border-radius: 100px; /* 膠囊型看起來較現代 */
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    background: rgba(0, 0, 0, 0.6);
+
+    padding: 8px 15px;
+
+    border-radius: 12px;
+
+    gap: 5px;
+
     border: 1px solid rgba(255, 255, 255, 0.1);
+
 }
+
+
 
 .active-turn {
-    border: 2px solid #f1c40f;
-    box-shadow: 0 0 20px rgba(241, 196, 15, 0.4);
-    transform: scale(1.1);
+
+    border: 2px solid #ffeb3b;
+
+    box-shadow: 0 0 15px #ffeb3b;
+
+    transform: scale(1.05);
+
 }
 
-/* --- 方位定位修正 --- */
-.pos-top { top: 2%; left: 50%; transform: translateX(-50%); }
-.pos-left { left: 8%; top: 45%; transform: translateY(-50%); }
-.pos-right { right: 8%; top: 45%; transform: translateY(-50%); }
-.pos-bottom { bottom: 28%; left: 50%; transform: translateX(-50%); }
+
+
+/* --- 方位定位 (優化垂直間距) --- */
+
+.pos-top { top: 5%; left: 50%; transform: translateX(-50%); }
+
+.pos-left { left: 5%; top: 45%; transform: translateY(-50%); }
+
+.pos-right { right: 5%; top: 45%; transform: translateY(-50%); }
+
+.pos-bottom { 
+
+    bottom: 5%; 
+
+    left: 50%; 
+
+    transform: translateX(-50%); 
+
+}
+
+
 
 /* --- 出牌區 (中間) --- */
+
+#lastPlayContent {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    min-height: 120px;
+
+}
+
+
+
 .played-cards-wrapper {
-    background: rgba(0, 0, 0, 0.25);
-    padding: 20px 30px;
-    border-radius: 20px;
-    box-shadow: inset 0 0 25px rgba(0,0,0,0.4);
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    background: rgba(0, 0, 0, 0.3);
+
+    padding: 15px;
+
+    border-radius: 15px;
+
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+
 }
 
-/* --- 底部玩家手牌區 --- */
+
+
+.card-mini {
+
+    width: 50px;
+
+    height: 72px;
+
+    background: #ffffff !important;
+
+    border-radius: 6px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-weight: bold;
+
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+
+    color: inherit;
+
+}
+
+
+
+/* --- 底部控制 UI --- */
+
 .player-ui {
+
     position: fixed;
-    bottom: 30px;
-    left: 50%; transform: translateX(-50%);
+
+    bottom: 20px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: 100%;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
     z-index: 2000;
+
 }
 
-#hand { height: 160px; padding: 20px; }
+
+
+#controls { display: flex; gap: 15px; margin-bottom: 10px; }
+
+
+
+#hand { 
+
+    display: flex; 
+
+    justify-content: center; 
+
+    padding: 20px 10px 40px 10px; /* 增加底部 padding 防止牌被切到 */
+
+    height: 150px;
+
+}
+
+
 
 .card {
-    min-width: 85px; height: 125px; /* 稍微放大卡片 */
-    padding: 12px 8px;
-    margin-left: -35px; /* 增加疊合感 */
-    border-radius: 12px;
+
+    min-width: 75px;
+
+    height: 110px;
+
+    background: #fff;
+
+    color: #000;
+
+    border-radius: 10px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 10px 5px;
+
+    cursor: pointer;
+
+    margin-left: -30px; /* 卡片重疊 */
+
+    border: 1px solid #ddd;
+
+    box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+
+    position: relative;
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    user-select: none;
+
 }
+
+
+
+.card:first-child { margin-left: 0; }
+
+
 
 .card:hover {
-    transform: translateY(-30px) rotate(-2deg); /* 加上微小旋轉增加生動感 */
+
+    transform: translateY(-25px);
+
     z-index: 500;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.5) !important;
+
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+
 }
+
+
 
 .card.selected {
-    transform: translateY(-55px) scale(1.05);
-    border: 2px solid #f1c40f !important;
-    box-shadow: 0 0 20px rgba(241, 196, 15, 0.6), -5px 15px 25px rgba(0,0,0,0.4) !important;
+
+    transform: translateY(-45px); /* 選中時彈得更高 */
+
+    border: 2px solid #f1c40f;
+
+    box-shadow: 0 0 15px #f1c40f;
+
+    z-index: 600;
+
 }
 
-/* --- 高級感按鈕 --- */
-#controls {
-    background: rgba(255, 255, 255, 0.08);
-    padding: 12px 25px;
-    border-radius: 50px;
-    backdrop-filter: blur(10px);
-    margin-bottom: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
 
-.primary-btn, .secondary-btn {
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.2s;
-    border-radius: 12px;
-}
 
-.primary-btn { 
-    background: linear-gradient(to bottom, #f39c12, #e67e22); 
-    box-shadow: 0 4px 0 #a35d14, 0 8px 15px rgba(0,0,0,0.3);
-}
+/* --- 按鈕風格 --- */
 
-.primary-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #a35d14; }
+.primary-btn { background: #e67e22; border: none; padding: 10px 25px; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-.secondary-btn { 
-    background: linear-gradient(to bottom, #3498db, #2980b9);
-    box-shadow: 0 4px 0 #1c5a85, 0 8px 15px rgba(0,0,0,0.3);
-}
+.secondary-btn { background: #3498db; border: none; padding: 10px 25px; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
+button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
