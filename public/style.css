@@ -10,12 +10,12 @@ body {
 .center { width: 100%; max-width: 1200px; position: relative; height: 100%; }
 .hidden { display: none !important; }
 
-/* --- 房間資訊與準備區 --- */
+/* --- [重要] 房間資訊與準備區：改為絕對定位，不佔用空間 --- */
 #roomArea {
     position: absolute;
     top: 20px;
     left: 20px;
-    z-index: 3000; 
+    z-index: 3000; /* 確保在最上層 */
     background: rgba(0, 0, 0, 0.7);
     padding: 15px;
     border-radius: 10px;
@@ -35,6 +35,7 @@ body {
 .status-ready { color: #2ecc71; font-weight: bold; }
 .status-waiting { color: #95a5a6; }
 
+/* 準備按鈕發光效果 */
 #startBtn.is-ready {
     background: #27ae60;
     box-shadow: 0 0 10px #2ecc71;
@@ -44,7 +45,7 @@ body {
 .table-container {
     position: relative;
     width: 100%;
-    height: 55vh; 
+    height: 55vh; /* 調整高度 */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -78,6 +79,7 @@ body {
     transform: scale(1.05);
 }
 
+/* --- 方位定位 (優化垂直間距) --- */
 .pos-top { top: 5%; left: 50%; transform: translateX(-50%); }
 .pos-left { left: 5%; top: 45%; transform: translateY(-50%); }
 .pos-right { right: 5%; top: 45%; transform: translateY(-50%); }
@@ -105,49 +107,18 @@ body {
     box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
 }
 
-/* --- [修正] 牌張材質與字體核心 --- */
-.card, .card-mini {
-    background: 
-        /* 第一層：極微細的格子模擬亞麻布紋 */
-        repeating-linear-gradient(45deg, rgba(0,0,0,0.01) 0px, rgba(0,0,0,0.01) 1px, transparent 1px, transparent 2px),
-        /* 第二層：模擬高級卡紙的微弱灰白漸層 */
-        linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%) !important;
-    
-    border: none !important; /* 移除原本硬梆梆的線條邊框 */
-    
-    /* 多重陰影：內發光模擬導角 + 外部環境遮蔽 */
-    box-shadow: 
-        inset 0 0 0 1px rgba(255, 255, 255, 0.9), 
-        0 1px 3px rgba(0,0,0,0.2), 
-        -1px 3px 8px rgba(0,0,0,0.3) !important;
-    
-    color: #1a1a1a !important; /* 更深的墨色 */
-}
-
-/* 數字字體改為更有質感的襯線體 */
-.rank, .rank-mini {
-    font-family: "Georgia", "Times New Roman", serif !important;
-    font-weight: 900 !important;
-    letter-spacing: -1px;
-}
-
-/* 顏色優化：更有深度的紅 */
-.red { color: #b01a1a !important; }
-.black { color: #1a1a1a !important; }
-
-/* 讓花色微微帶點立體感 */
-.suit, .suit-mini {
-    filter: drop-shadow(0.5px 0.5px 0px rgba(0,0,0,0.1));
-}
-
 .card-mini {
     width: 50px;
     height: 72px;
+    background: #ffffff !important;
     border-radius: 6px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    font-weight: bold;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    color: inherit;
 }
 
 /* --- 底部控制 UI --- */
@@ -168,13 +139,15 @@ body {
 #hand { 
     display: flex; 
     justify-content: center; 
-    padding: 20px 10px 40px 10px; 
+    padding: 20px 10px 40px 10px; /* 增加底部 padding 防止牌被切到 */
     height: 150px;
 }
 
 .card {
-    min-width: 80px; /* 稍微加寬更有份量感 */
-    height: 115px;
+    min-width: 75px;
+    height: 110px;
+    background: #fff;
+    color: #000;
     border-radius: 10px;
     display: flex;
     flex-direction: column;
@@ -182,43 +155,30 @@ body {
     justify-content: space-between;
     padding: 10px 5px;
     cursor: pointer;
-    margin-left: -35px; 
+    margin-left: -30px; /* 卡片重疊 */
+    border: 1px solid #ddd;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.2);
     position: relative;
-    transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     user-select: none;
 }
 
 .card:first-child { margin-left: 0; }
 
 .card:hover {
-    transform: translateY(-30px) rotate(-1deg); /* 增加微小旋轉更顯自然 */
+    transform: translateY(-25px);
     z-index: 500;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.4) !important;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
 }
 
 .card.selected {
-    transform: translateY(-50px) scale(1.02); 
-    /* 選中時使用金色發光 */
-    box-shadow: 
-        0 0 0 2px #f1c40f, 
-        0 10px 25px rgba(241, 196, 15, 0.5) !important;
+    transform: translateY(-45px); /* 選中時彈得更高 */
+    border: 2px solid #f1c40f;
+    box-shadow: 0 0 15px #f1c40f;
     z-index: 600;
 }
 
 /* --- 按鈕風格 --- */
-.primary-btn { 
-    background: linear-gradient(to bottom, #e67e22, #d35400); 
-    border: none; padding: 10px 25px; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; 
-    box-shadow: 0 3px 0 #a04000;
-}
-.secondary-btn { 
-    background: linear-gradient(to bottom, #3498db, #2980b9); 
-    border: none; padding: 10px 25px; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; 
-    box-shadow: 0 3px 0 #1c5a85;
-}
-.primary-btn:active, .secondary-btn:active {
-    transform: translateY(2px);
-    box-shadow: 0 1px 0 #a04000;
-}
-
+.primary-btn { background: #e67e22; border: none; padding: 10px 25px; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
+.secondary-btn { background: #3498db; border: none; padding: 10px 25px; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
 button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
