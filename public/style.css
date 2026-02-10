@@ -10,12 +10,12 @@ body {
 .center { width: 100%; max-width: 1200px; position: relative; height: 100%; }
 .hidden { display: none !important; }
 
-/* --- [重要] 房間資訊與準備區：改為絕對定位，不佔用空間 --- */
+/* --- [重要] 房間資訊與準備區：絕對定位 --- */
 #roomArea {
     position: absolute;
     top: 20px;
     left: 20px;
-    z-index: 3000; /* 確保在最上層 */
+    z-index: 3000; 
     background: rgba(0, 0, 0, 0.7);
     padding: 15px;
     border-radius: 10px;
@@ -35,7 +35,6 @@ body {
 .status-ready { color: #2ecc71; font-weight: bold; }
 .status-waiting { color: #95a5a6; }
 
-/* 準備按鈕發光效果 */
 #startBtn.is-ready {
     background: #27ae60;
     box-shadow: 0 0 10px #2ecc71;
@@ -45,7 +44,7 @@ body {
 .table-container {
     position: relative;
     width: 100%;
-    height: 55vh; /* 調整高度 */
+    height: 55vh; 
     display: flex;
     justify-content: center;
     align-items: center;
@@ -79,7 +78,7 @@ body {
     transform: scale(1.05);
 }
 
-/* --- 方位定位 (優化垂直間距) --- */
+/* --- 方位定位 --- */
 .pos-top { top: 5%; left: 50%; transform: translateX(-50%); }
 .pos-left { left: 5%; top: 45%; transform: translateY(-50%); }
 .pos-right { right: 5%; top: 45%; transform: translateY(-50%); }
@@ -107,18 +106,39 @@ body {
     box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
 }
 
+/* --- [重點修改] 牌張材質與字體 --- */
+.card, .card-mini {
+    /* 亞麻質感背景疊加 */
+    background: 
+        repeating-linear-gradient(45deg, rgba(0,0,0,0.01) 0px, rgba(0,0,0,0.01) 1px, transparent 1px, transparent 2px),
+        linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%) !important;
+    border: none !important;
+    /* 多重陰影：內發光 + 底層陰影 */
+    box-shadow: 
+        inset 0 0 0 1px rgba(255,255,255,0.8),
+        0 2px 5px rgba(0,0,0,0.3) !important;
+    color: #1a1a1a !important;
+}
+
+/* 古典數字字體 */
+.rank, .rank-mini {
+    font-family: "Georgia", "Times New Roman", serif !important;
+    font-weight: 800 !important;
+    letter-spacing: -1px;
+}
+
+/* 顏色優化 */
+.red { color: #b32424 !important; }
+.black { color: #1a1a1a !important; }
+
 .card-mini {
     width: 50px;
     height: 72px;
-    background: #ffffff !important;
     border-radius: 6px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    font-weight: bold;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    color: inherit;
 }
 
 /* --- 底部控制 UI --- */
@@ -139,15 +159,13 @@ body {
 #hand { 
     display: flex; 
     justify-content: center; 
-    padding: 20px 10px 40px 10px; /* 增加底部 padding 防止牌被切到 */
+    padding: 20px 10px 40px 10px; 
     height: 150px;
 }
 
 .card {
     min-width: 75px;
     height: 110px;
-    background: #fff;
-    color: #000;
     border-radius: 10px;
     display: flex;
     flex-direction: column;
@@ -155,9 +173,7 @@ body {
     justify-content: space-between;
     padding: 10px 5px;
     cursor: pointer;
-    margin-left: -30px; /* 卡片重疊 */
-    border: 1px solid #ddd;
-    box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+    margin-left: -30px; 
     position: relative;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     user-select: none;
@@ -168,13 +184,13 @@ body {
 .card:hover {
     transform: translateY(-25px);
     z-index: 500;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.5) !important;
 }
 
 .card.selected {
-    transform: translateY(-45px); /* 選中時彈得更高 */
-    border: 2px solid #f1c40f;
-    box-shadow: 0 0 15px #f1c40f;
+    transform: translateY(-45px); 
+    border: 2px solid #f1c40f !important;
+    box-shadow: 0 0 15px rgba(241, 196, 15, 0.7), 0 10px 20px rgba(0,0,0,0.4) !important;
     z-index: 600;
 }
 
