@@ -69,17 +69,52 @@ function handleAiAction(roomId, aiPlayer) {
     nextTurn(roomId);
 }
 
+// 獨立出來的開始遊戲邏輯
+function performStartGame(roomId) {
+    const room = rooms[roomId];
+    if (!room) return;
+
+    // 自動補滿 AI
+    while (room.players.length < 4) {
+        const aiId = `AI-${Math.random().toString(36).substr(2, 5)}`;
+        room.players.push({ 
+            id: aiId, 
+            name: `機器人 ${room.players.length}`, 
+            isAI: true,
+            isReady: true // AI 永遠視為準備好
+        });
+    }
+
+    const deck = shuffle(generateDeck()); 
+    const hands = deal(deck, 4); 
+    
+    room.gameStarted = true;
+    room.lastPlay = null;
+    room.passCount = 0;
+
+    room.players.forEach((player, i) => {
+        room.hands[player.id] = hands[i];
+        if (!player.isAI) io.to(player.id).emit('deal', hands[i]);
+        if (hands[i].some(c => c.id === 'clubs-3')) room.turnIndex = i;
+    });
+
+    io.to(roomId).emit('room_update', room.players);
+    io.to(roomId).emit('game_start', { 
+        currentPlayerId: room.players[room.turnIndex].id,
+        players: room.players 
+    });
+    
+    if (room.players[room.turnIndex].isAI) handleAiAction(roomId, room.players[room.turnIndex]);
+}
+
 // --- Socket 邏輯 ---
 io.on('connection', (socket) => {
     
-    // 建立房間 (修正覆蓋問題)
     socket.on('create_room', ({ roomId, name }) => {
-        // 1. 檢查房間是否已存在
         if (rooms[roomId]) {
-            socket.emit('error_msg', '該房間 ID 已被使用，請更換房號或點擊加入。');
+            socket.emit('error_msg', '該房間 ID 已被使用。');
             return;
         }
-        // 2. 檢查輸入
         if (!roomId || roomId.trim() === "") {
             socket.emit('error_msg', '房號不能為空。');
             return;
@@ -87,7 +122,7 @@ io.on('connection', (socket) => {
 
         socket.join(roomId);
         rooms[roomId] = { 
-            players: [{ id: socket.id, name, isAI: false }], 
+            players: [{ id: socket.id, name, isAI: false, isReady: false }], // 初始未準備
             gameStarted: false,
             turnIndex: 0,
             lastPlay: null,
@@ -96,92 +131,53 @@ io.on('connection', (socket) => {
         };
         
         io.to(roomId).emit('room_update', rooms[roomId].players);
-        // 通知前端建立成功，可以切換 UI
         socket.emit('create_success', { roomId });
-        console.log(`[建立] 玩家 ${name} 建立了房間: ${roomId}`);
     });
 
-    // 加入房間
     socket.on('join_room', ({ roomId, name }) => {
         const room = rooms[roomId];
-        
-        // 1. 基礎檢查：房間是否存在
         if (!room) {
-            socket.emit('error_msg', '房間不存在，請先建立房間。');
+            socket.emit('error_msg', '房間不存在。');
+            return;
+        }
+        if (room.players.some(p => p.name === name)) {
+            socket.emit('error_msg', `名字 "${name}" 已被使用。`);
+            return;
+        }
+        if (room.gameStarted || room.players.length >= 4) {
+            socket.emit('error_msg', '無法加入（遊戲已開始或人數已滿）。');
             return;
         }
 
-        // 2. 核心修正：檢查房間內是否已有同名玩家
-        // 使用 some 檢查玩家陣列中是否有任何人的 name 等於新加入的 name
-        const isNameTaken = room.players.some(p => p.name === name);
-        if (isNameTaken) {
-            socket.emit('error_msg', `名字 "${name}" 已被房內其他玩家使用，請換個名字。`);
-            return;
-        }
-
-        // 3. 狀態檢查：遊戲是否已開始或人數已滿
-        if (room.gameStarted) {
-            socket.emit('error_msg', '遊戲已經開始，無法加入。');
-            return;
-        }
-        if (room.players.length >= 4) {
-            socket.emit('error_msg', '房間已滿（最多 4 人）。');
-            return;
-        }
-
-        // 4. 通過所有檢查，正式加入
         socket.join(roomId);
-        room.players.push({ id: socket.id, name, isAI: false });
+        room.players.push({ id: socket.id, name, isAI: false, isReady: false }); // 初始未準備
         
         io.to(roomId).emit('room_update', room.players);
         socket.emit('join_success', { roomId });
-        console.log(`[加入] 玩家 ${name} 成功進入房間: ${roomId}`);
     });
-    // 開始遊戲
-    socket.on('start_game', ({ roomId }) => {
+
+    // --- 準備制核心邏輯 ---
+    socket.on('toggle_ready', ({ roomId }) => {
         const room = rooms[roomId];
-        if (!room) return;
+        if (!room || room.gameStarted) return;
 
-        // 只有房主（第一個玩家）可以開始遊戲
-        if (room.players[0].id !== socket.id) {
-            socket.emit('error_msg', '只有房主可以開始遊戲。');
-            return;
+        const player = room.players.find(p => p.id === socket.id);
+        if (player) {
+            player.isReady = !player.isReady; // 切換狀態
+            
+            io.to(roomId).emit('room_update', room.players);
+
+            // 檢查是否所有人類玩家都準備好了（且至少要有人）
+            const humans = room.players.filter(p => !p.isAI);
+            const allReady = humans.every(p => p.isReady);
+
+            // 如果全部準備好，且人數在 2~4 人之間，自動開始
+            if (allReady && humans.length >= 1) { 
+                performStartGame(roomId);
+            }
         }
-
-        // 自動補滿 AI
-        while (room.players.length < 4) {
-            const aiId = `AI-${Math.random().toString(36).substr(2, 5)}`;
-            room.players.push({ 
-                id: aiId, 
-                name: `機器人 ${room.players.length}`, 
-                isAI: true 
-            });
-        }
-
-        const deck = shuffle(generateDeck()); 
-        const hands = deal(deck, 4); 
-        
-        room.gameStarted = true;
-        room.lastPlay = null;
-        room.passCount = 0;
-
-        room.players.forEach((player, i) => {
-            room.hands[player.id] = hands[i];
-            if (!player.isAI) io.to(player.id).emit('deal', hands[i]);
-            // 尋找梅花 3 決定誰先出
-            if (hands[i].some(c => c.id === 'clubs-3')) room.turnIndex = i;
-        });
-
-        io.to(roomId).emit('room_update', room.players);
-        io.to(roomId).emit('game_start', { 
-            currentPlayerId: room.players[room.turnIndex].id,
-            players: room.players 
-        });
-        
-        if (room.players[room.turnIndex].isAI) handleAiAction(roomId, room.players[room.turnIndex]);
     });
 
-    // 出牌邏輯
     socket.on('play_cards', ({ roomId, cards }) => {
         const room = rooms[roomId];
         if (!room || !room.gameStarted) return;
@@ -208,7 +204,6 @@ io.on('connection', (socket) => {
         nextTurn(roomId);
     });
 
-    // 過牌邏輯
     socket.on('pass', ({ roomId }) => {
         const room = rooms[roomId];
         if (!room || !room.gameStarted) return;
@@ -225,7 +220,6 @@ io.on('connection', (socket) => {
         nextTurn(roomId);
     });
 
-    // 斷線處理
     socket.on('disconnect', () => {
         for (const roomId in rooms) {
             const room = rooms[roomId];
@@ -233,7 +227,6 @@ io.on('connection', (socket) => {
             
             if (index !== -1) {
                 if (room.gameStarted) {
-                    // 遊戲中斷線：轉為 AI
                     room.players[index].isAI = true;
                     if (!room.players[index].name.includes("(AI)")) {
                         room.players[index].name += " (AI)";
@@ -241,11 +234,9 @@ io.on('connection', (socket) => {
                     io.to(roomId).emit('room_update', room.players);
                     if (room.turnIndex === index) setTimeout(() => handleAiAction(roomId, room.players[index]), 1000);
                 } else {
-                    // 等待中斷線：直接移除
                     room.players.splice(index, 1);
                     if (room.players.length === 0) {
-                        delete rooms[roomId]; // 徹底清理房間物件
-                        console.log(`[清理] 房間 ${roomId} 已無玩家，系統回收房號。`);
+                        delete rooms[roomId];
                     } else {
                         io.to(roomId).emit('room_update', room.players);
                     }
