@@ -5,7 +5,7 @@ let currentRoom = null;
 let myHand = [];
 let selected = new Set();
 let allPlayers = []; 
-let myReadyStatus = false; // 新增：追蹤自己的準備狀態
+let myReadyStatus = false;
 
 const SUIT_DATA = {
     'clubs':    { symbol: '♣', color: '#2c3e50', weight: 0 },
@@ -14,10 +14,14 @@ const SUIT_DATA = {
     'spades':   { symbol: '♠', color: '#2c3e50', weight: 3 }
 };
 
-// --- 排行與輔助功能 ---
 function rankText(r) {
     const map = { 11: 'J', 12: 'Q', 13: 'K', 14: 'A', 15: '2' };
     return map[r] || String(r);
+}
+
+// 輔助函式：判斷當前是否在遊戲畫面
+function isGameActive() {
+    return !$('game').classList.contains('hidden');
 }
 
 // --- 介面渲染核心 ---
@@ -28,7 +32,6 @@ function renderPlayers(list) {
     if (!el) return;
     el.innerHTML = '';
     
-    // 更新自己的準備狀態（從伺服器清單中找自己）
     const me = list.find(p => p.id === socket.id);
     if (me) {
         myReadyStatus = me.isReady;
@@ -58,10 +61,12 @@ function renderPlayers(list) {
 
 function updateSeats(players, currentPlayerId) {
     const myIndex = players.findIndex(p => p.id === socket.id);
+    // 如果自己不在裡面（可能剛斷線或觀戰），就不執行渲染
     if (myIndex === -1) return;
 
     const ordered = [];
-    for (let i = 0; i < players.length; i++) {
+    // 永遠固定渲染 4 個位置，避免人數變動導致 CSS Flex/Grid 跑版
+    for (let i = 0; i < 4; i++) {
         ordered.push(players[(myIndex + i) % players.length]);
     }
 
@@ -70,6 +75,12 @@ function updateSeats(players, currentPlayerId) {
     ordered.forEach((p, i) => {
         const seat = $(seatIds[i]);
         if (!seat) return;
+
+        // 如果該位置沒人（雖然邏輯上會補 AI），則清空
+        if (!p) {
+            seat.innerHTML = '';
+            return;
+        }
 
         const isTurn = p.id === currentPlayerId;
         const passHtml = (p.hasPassed && !isTurn) ? '<div class="pass-overlay">PASS</div>' : '';
@@ -113,10 +124,8 @@ function renderHand() {
 
 // --- Socket 監聽邏輯 ---
 
-// 修改：當房號重複或名稱重複時會彈出提醒
 socket.on('error_msg', msg => alert(msg));
 
-// 修改：明確監聽成功進入房間的事件
 socket.on('create_success', ({ roomId }) => {
     currentRoom = roomId;
     $('lobby').classList.add('hidden');
@@ -133,6 +142,17 @@ socket.on('join_success', ({ roomId }) => {
 
 socket.on('room_update', players => {
     allPlayers = players;
+    
+    // 關鍵修改：如果已經在遊戲中，不要重新打開 roomArea 以免擠壓版面
+    if (!isGameActive()) {
+        $('lobby').classList.add('hidden');
+        $('roomArea').classList.remove('hidden');
+        if (currentRoom) $('curRoom').textContent = currentRoom;
+    } else {
+        // 如果正在遊戲中，僅靜默更新座位資訊（例如顯示某人變 AI）
+        updateSeats(allPlayers, null); 
+    }
+    
     renderPlayers(players);
 });
 
@@ -147,7 +167,7 @@ socket.on('deal', hand => {
 
 socket.on('game_start', ({ currentPlayerId, players }) => {
     allPlayers = players;
-    $('roomArea').classList.add('hidden');
+    $('roomArea').classList.add('hidden'); // 遊戲開始，隱藏準備區
     $('game').classList.remove('hidden');
     
     allPlayers.forEach(p => {
@@ -250,7 +270,6 @@ $('joinBtn').onclick = () => {
     socket.emit('join_room', { roomId, name });
 };
 
-// 修改：改為觸發準備狀態
 $('startBtn').onclick = () => {
     if (currentRoom) {
         socket.emit('toggle_ready', { roomId: currentRoom });
@@ -269,12 +288,11 @@ $('passBtn').onclick = () => {
     selected.clear();
 };
 
-// 修改：重新遊戲也改為需要重新準備
 $('restartBtn').onclick = () => {
     $('gameOverOverlay').classList.add('hidden');
     $('game').classList.add('hidden');
     $('roomArea').classList.remove('hidden');
-    // 回到房間後自動切換為未準備狀態（後端已處理，只需切換 UI）
+    // 後端在 gameStarted = false 時，room_update 會處理渲染
 };
 
 $('backToLobbyBtn').onclick = () => location.reload();
