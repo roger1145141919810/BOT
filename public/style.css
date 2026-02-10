@@ -159,8 +159,12 @@ body {
 }
 
 /* 花色修正：在黑金風格下，紅牌建議也用金色或深紅金色 */
-.red { color: #e67e22 !important; } /* 改用亮古銅色代替純紅 */
-.black { color: #d4af37 !important; } /* 黑牌直接用標準金色 */
+.red { 
+    color: #8b0000 !important; /* 暗紅色 (Deep Red) */
+    /* 增加一點點文字發光，防止暗紅在黑底上太沉 */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8), 0 0 3px rgba(139, 0, 0, 0.4);
+} 
+.black { color: #d4af37 !important; }
 
 .suit, .suit-mini {
     filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
