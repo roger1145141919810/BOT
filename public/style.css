@@ -102,7 +102,11 @@ body {
 }
 
 /* 花色與紅黑配色修正 */
-.black { color: #d4af37 !important; } /* 黑牌用金色 */
+.black { 
+    color: #d4af37 !important; /* 經典金屬金 */
+    /* 增加金屬燙印的立體感 */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8), 0 0 5px rgba(212, 175, 55, 0.4);
+}
 .red { color: #8b0000 !important; text-shadow: 0 0 3px rgba(139, 0, 0, 0.5); } /* 紅牌用暗紅 */
 
 .suit, .suit-mini { filter: drop-shadow(0 0 2px rgba(0,0,0,0.5)); font-size: 20px; }
