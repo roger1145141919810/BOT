@@ -80,9 +80,28 @@ body {
     box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.15), 0 8px 15px rgba(0,0,0,0.6) !important;
 }
 
-/* 手牌重疊設定 (配合寬度微調) */
-#hand .card { margin-left: -35px; }
-#hand .card:first-child { margin-left: 0; }
+#hand .card { 
+    /* 原本是 -35px (較擠)
+       改為 -20px (較開)
+       數值越接近 0，牌與牌之間的距離就越寬
+    */
+    margin-left: -20px; 
+    
+    /* 增加一點左右晃動的隨機感（選用，增加質感） */
+    transition: transform 0.2s ease, margin 0.2s ease;
+}
+
+/* 確保第一張牌不會有負間距 */
+#hand .card:first-child { 
+    margin-left: 0; 
+}
+
+/* 為了配合間距調開，我們微調滑鼠懸停時的效果，讓它更突出 */
+#hand .card:hover {
+    margin-right: 15px; /* 當滑鼠移上去時，把旁邊的牌稍微推開一點 */
+    transform: translateY(-30px) scale(1.05);
+    z-index: 100;
+}
 
 /* 裝飾性內細框 */
 .card::after, .card-mini::after {
