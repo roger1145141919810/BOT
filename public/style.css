@@ -10,7 +10,7 @@ body {
 .center { width: 100%; max-width: 1200px; position: relative; height: 100%; }
 .hidden { display: none !important; }
 
-/* --- 2. 房間資訊與準備區 (絕對定位) --- */
+/* --- 2. 房間資訊與準備區 --- */
 #roomArea {
     position: absolute; top: 20px; left: 20px; z-index: 3000; 
     background: rgba(0, 0, 0, 0.7); padding: 15px; border-radius: 10px;
@@ -25,7 +25,6 @@ body {
 .ready-status { font-size: 0.8rem; }
 .status-ready { color: #2ecc71; font-weight: bold; }
 .status-waiting { color: #95a5a6; }
-
 #startBtn.is-ready { background: #27ae60; box-shadow: 0 0 10px #2ecc71; }
 
 /* --- 3. 牌桌佈局與方位 --- */
@@ -47,26 +46,28 @@ body {
 
 .active-turn { border: 2px solid #ffeb3b; box-shadow: 0 0 15px #ffeb3b; transform: scale(1.05); }
 
-/* 方位定位 */
 .pos-top { top: 5%; left: 50%; transform: translateX(-50%); }
 .pos-left { left: 5%; top: 45%; transform: translateY(-50%); }
 .pos-right { right: 5%; top: 45%; transform: translateY(-50%); }
 .pos-bottom { bottom: 5%; left: 50%; transform: translateX(-50%); }
 
 /* --- 4. 出牌區 (中間) --- */
-#lastPlayContent { display: flex; justify-content: center; align-items: center; min-height: 120px; }
+#lastPlayContent { display: flex; justify-content: center; align-items: center; min-height: 140px; }
 .played-cards-wrapper { 
     display: flex; justify-content: center; gap: 8px; background: rgba(0, 0, 0, 0.3); 
     padding: 15px; border-radius: 15px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); 
 }
 
-/* --- 5. [核心樣式] 黑金龍紋牌張 --- */
+/* --- 5. [核心樣式] 黑金龍紋牌張 (比例修正版) --- */
 .card, .card-mini {
-    /* 基礎尺寸與重疊邏輯 */
-    min-width: 75px; height: 110px;
+    /* [修正] 調整比例為 1 : 1.5，解決牌太矮的問題 */
+    width: 80px; 
+    height: 120px; 
+    
     position: relative; overflow: hidden; cursor: pointer;
     user-select: none; transition: transform 0.2s ease, box-shadow 0.2s ease;
-    display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 10px 5px;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between; 
+    padding: 12px 6px; /* 增加上下間距讓比例更協調 */
 
     /* 黑皮革材質背景 */
     background: 
@@ -79,13 +80,13 @@ body {
     box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.15), 0 8px 15px rgba(0,0,0,0.6) !important;
 }
 
-/* 手牌重疊設定 */
-#hand .card { margin-left: -30px; }
+/* 手牌重疊設定 (配合寬度微調) */
+#hand .card { margin-left: -35px; }
 #hand .card:first-child { margin-left: 0; }
 
-/* 裝飾性內細框 (Art Deco) */
+/* 裝飾性內細框 */
 .card::after, .card-mini::after {
-    content: ''; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px;
+    content: ''; position: absolute; top: 6px; left: 6px; right: 6px; bottom: 6px;
     border: 1px solid rgba(212, 175, 55, 0.25); border-radius: 6px; pointer-events: none;
 }
 
@@ -101,47 +102,46 @@ body {
     letter-spacing: -1px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8), 0 0 5px rgba(212, 175, 55, 0.3);
 }
 
-/* 花色與紅黑配色修正 */
-/* --- 修正黑色字體不明顯的問題 --- */
-
+/* 顏色修正：金色字體 (解決黑色不明顯問題) */
 .black { 
-    /* 使用亮金色代替黑色 */
     color: #ffcc33 !important; 
-    
-    /* [核心] 增加發光與深影，讓字體從深色背景中「浮」出來 */
-    text-shadow: 
-        1px 1px 2px rgba(0, 0, 0, 0.9),  /* 深色底影增加清晰度 */
-        0 0 8px rgba(212, 175, 55, 0.6); /* 金色光暈增加質感 */
-    
-    font-weight: 900 !important; /* 確保筆畫夠粗，容易閱讀 */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9), 0 0 8px rgba(212, 175, 55, 0.6);
+    font-weight: 900 !important;
 }
 
-/* 同步調整花色符號的可視度 */
 .suit.black, .suit-mini.black {
     filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.4)) brightness(1.2);
 }
-.red { color: #8b0000 !important; text-shadow: 0 0 3px rgba(139, 0, 0, 0.5); } /* 紅牌用暗紅 */
+
+.red { 
+    color: #ff4d4d !important; /* 稍微調亮紅色以在黑背景增加對比度 */
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.8), 0 0 3px rgba(255, 77, 77, 0.4); 
+}
 
 .suit, .suit-mini { filter: drop-shadow(0 0 2px rgba(0,0,0,0.5)); font-size: 20px; }
 
 /* --- 6. 互動與動態效果 --- */
 .card:hover {
-    transform: translateY(-25px) rotate(-1deg);
+    transform: translateY(-30px) rotate(-1deg);
     z-index: 500;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.8) !important;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.8) !important;
 }
 
 .card.selected {
-    transform: translateY(-45px) scale(1.05);
-    border: 2px solid #fff !important; /* 選中時邊框變亮金白 */
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.7), 0 10px 20px rgba(0,0,0,0.5) !important;
+    transform: translateY(-55px) scale(1.05);
+    border: 2px solid #fff !important; 
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.7), 0 15px 30px rgba(0,0,0,0.6) !important;
     z-index: 600;
 }
 
-/* 迷你牌適配 */
-.card-mini { width: 50px; height: 72px; padding: 5px; margin-left: 0; cursor: default; }
+/* 迷你牌適配 (出牌區) */
+.card-mini { 
+    width: 55px; 
+    height: 82px; /* 保持比例 */
+    padding: 6px 3px; 
+    margin-left: 0; 
+}
 .card-mini::before { font-size: 22px; }
-.card-mini::after { top: 3px; left: 3px; right: 3px; bottom: 3px; }
 
 /* --- 7. 底部控制 UI --- */
 .player-ui {
@@ -150,7 +150,7 @@ body {
 }
 
 #controls { display: flex; gap: 15px; margin-bottom: 10px; }
-#hand { display: flex; justify-content: center; padding: 20px 10px 40px 10px; height: 150px; }
+#hand { display: flex; justify-content: center; padding: 20px 10px 40px 10px; height: 160px; }
 
 /* --- 8. 按鈕風格 --- */
 .primary-btn { background: #e67e22; border: none; padding: 10px 25px; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
