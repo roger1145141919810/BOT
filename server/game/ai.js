@@ -5,41 +5,59 @@ class BigTwoAI {
         this.history = [];
     }
 
-    // 決策核心
     decide(hand, lastPlay, opponentCounts) {
-        // 排序手牌（由小到大）
         hand.sort((a, b) => Rules.getCardPower(a) - Rules.getCardPower(b));
 
-        // --- 情況 A：主動出牌 (領先或場上沒牌) ---
+        // --- 情況 A：主動出牌 ---
         if (!lastPlay || lastPlay.length === 0) {
             const combinations = this.searchAllValidCombinations(hand, null);
-
-            // 1. 檢查是否有梅花 3 (開局規則)
             const clubs3 = hand.find(c => parseInt(c.rank) === 3 && c.suit === 'clubs');
             if (clubs3) {
-                // 優先找包含梅花 3 的最強/最長組合
                 const c3Combo = combinations
                     .filter(combo => combo.some(c => c.id === clubs3.id))
-                    .sort((a, b) => b.length - a.length)[0]; // 優先出五張
+                    .sort((a, b) => b.length - a.length)[0];
                 return c3Combo || [clubs3];
             }
-
-            // 2. 正常主動出牌：優先打出組合牌（長度優先：5張 > 2張 > 1張）
             if (combinations.length > 0) {
-                // 策略：找長度最長且權力相對較小的組合
                 combinations.sort((a, b) => b.length - a.length || Rules.getPlayInfo(a).power - Rules.getPlayInfo(b).power);
                 return combinations[0];
             }
             return [hand[0]];
         }
 
-        // --- 情況 B：被動壓牌 (嘗試大過上家) ---
+        // --- 情況 B：被動壓牌 (策略優化) ---
         const possibleMoves = this.getAllValidMoves(hand, lastPlay);
+        if (possibleMoves.length === 0) return null;
 
-        if (possibleMoves.length === 0) return null; // Pass
-
-        // 策略：如果有人快贏了 (張數 <= 3)，出最大的牌壓制；否則出最小的合法牌
         const isUrgent = Object.values(opponentCounts).some(count => count <= 3);
+        
+        // 如果是五張牌型，加入智慧過濾
+        if (lastPlay.length === 5) {
+            const lastPlayInfo = Rules.getPlayInfo(lastPlay);
+            
+            // 1. 優先找「同牌型」且能大過對方的 (例如順子對順子)
+            const sameTypeMoves = possibleMoves.filter(move => {
+                return Rules.getPlayInfo(move).type === lastPlayInfo.type;
+            });
+
+            if (sameTypeMoves.length > 0) {
+                return sameTypeMoves[0]; // 出最小的同牌型壓制
+            }
+
+            // 2. 如果沒有同牌型，只有「更高級」的牌型 (例如手上有葫蘆，上家打順子)
+            if (!isUrgent) {
+                // 如果不緊急 (對方牌還很多)，且自己手牌還很多，AI 傾向「Pass」來保留大牌
+                if (hand.length > 8) return null;
+                
+                // 如果非同牌型壓制會消耗掉太強的牌 (例如用鐵支壓順子)，也傾向 Pass
+                const bestMoveInfo = Rules.getPlayInfo(possibleMoves[0]);
+                if (bestMoveInfo.type === 'four_of_a_kind' || bestMoveInfo.type === 'straight_flush') {
+                    return null;
+                }
+            }
+        }
+
+        // 策略：緊急時出最大的，平常出最小的合法牌
         if (isUrgent) {
             return possibleMoves[possibleMoves.length - 1]; 
         }
@@ -47,19 +65,16 @@ class BigTwoAI {
         return possibleMoves[0];
     }
 
-    // 搜尋所有合法組合
     searchAllValidCombinations(hand, lastPlay) {
         let moves = [];
         const targetLen = lastPlay ? lastPlay.length : null;
 
-        // 1. 單張 (targetLen 為 null 或 1)
         if (!targetLen || targetLen === 1) {
             hand.forEach(c => {
                 if (Rules.canPlay([c], lastPlay)) moves.push([c]);
             });
         }
 
-        // 2. 對子 (targetLen 為 null 或 2)
         if (!targetLen || targetLen === 2) {
             for (let i = 0; i < hand.length - 1; i++) {
                 for (let j = i + 1; j < hand.length; j++) {
@@ -69,32 +84,43 @@ class BigTwoAI {
             }
         }
 
-        // 3. 五張牌 (targetLen 為 null 或 5)
         if (!targetLen || targetLen === 5) {
             const fiveCardMoves = this.findFiveCardMovesOptimized(hand, lastPlay);
             moves = moves.concat(fiveCardMoves);
         }
 
-        // 排序：權力由小到大
+        // 核心排序：權力由小到大
         return moves.sort((a, b) => Rules.getPlayInfo(a).power - Rules.getPlayInfo(b).power);
     }
 
-    // 優化後的五張牌搜尋：分類搜尋法
     findFiveCardMovesOptimized(hand, lastPlay) {
         const results = [];
-        const len = hand.length;
-        if (len < 5) return results;
-
-        // A. 找葫蘆 (Full House: 3+2)
         const groups = {};
         hand.forEach(c => {
             groups[c.rank] = groups[c.rank] || [];
             groups[c.rank].push(c);
         });
 
+        // 1. 找順子 (優先度高，因為消耗單張)
+        const uniqueRanks = Array.from(new Set(hand.map(c => Rules.getRankOrder(c)))).sort((a,b)=>a-b);
+        for (let i = 0; i <= uniqueRanks.length - 5; i++) {
+            let isSeq = true;
+            for (let j = 0; j < 4; j++) {
+                if (uniqueRanks[i+j+1] !== uniqueRanks[i+j] + 1) { isSeq = false; break; }
+            }
+            if (isSeq) {
+                // 組合順子 (簡單取法)
+                const combo = [];
+                for (let k = 0; k < 5; k++) {
+                    combo.push(hand.find(c => Rules.getRankOrder(c) === uniqueRanks[i+k]));
+                }
+                if (Rules.canPlay(combo, lastPlay)) results.push(combo);
+            }
+        }
+
+        // 2. 找葫蘆
         const triples = Object.values(groups).filter(g => g.length >= 3);
         const pairs = Object.values(groups).filter(g => g.length >= 2);
-
         triples.forEach(t => {
             pairs.forEach(p => {
                 if (t[0].rank !== p[0].rank) {
@@ -104,24 +130,7 @@ class BigTwoAI {
             });
         });
 
-        // B. 找順子 (Straight)
-        // 簡單邏輯：連續點數搜尋
-        for (let i = 0; i < len; i++) {
-            let straight = [hand[i]];
-            for (let j = i + 1; j < len; j++) {
-                if (parseInt(hand[j].rank) === parseInt(straight[straight.length - 1].rank) + 1) {
-                    straight.push(hand[j]);
-                } else if (parseInt(hand[j].rank) > parseInt(straight[straight.length - 1].rank) + 1) {
-                    break;
-                }
-                if (straight.length === 5) {
-                    if (Rules.canPlay(straight, lastPlay)) results.push([...straight]);
-                    break;
-                }
-            }
-        }
-
-        // C. 找鐵支 (Four of a Kind)
+        // 3. 找鐵支
         const quads = Object.values(groups).filter(g => g.length === 4);
         quads.forEach(q => {
             hand.forEach(single => {
@@ -140,9 +149,7 @@ class BigTwoAI {
     }
 }
 
-// 實例化並導出
 const aiInstance = new BigTwoAI();
-
 module.exports = {
     aiDecision: (hand, lastPlay, opponentCounts) => {
         try {
