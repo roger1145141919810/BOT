@@ -10,28 +10,72 @@ body {
 .center { width: 100%; max-width: 1200px; position: relative; height: 100%; }
 .hidden { display: none !important; }
 
+/* --- 房間/大廳與準備區修正 --- */
+/* 將準備區絕對定位，防止它擠壓到下方的遊戲桌 */
+#roomArea {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: 250px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+/* 遊戲開始後，徹底強制隱藏準備區 */
+#game:not(.hidden) ~ #roomArea {
+    display: none !important;
+}
+
+.player-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    margin-bottom: 5px;
+    border-radius: 6px;
+}
+
+/* 準備狀態標籤 */
+.ready-status {
+    font-size: 0.85rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+.status-ready { color: #2ecc71; font-weight: bold; }
+.status-waiting { color: #bdc3c7; }
+
+/* 準備按鈕特殊樣式 */
+#startBtn.is-ready {
+    background: #27ae60 !important;
+    box-shadow: 0 0 10px #2ecc71;
+}
+
 /* --- 牌桌佈局 --- */
 .table-container {
     position: relative;
     width: 100%;
-    height: 50vh; /* 從 65vh 改為 50vh */
+    height: 55vh; 
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-top: 20px;
 }
 
-/* 座位容器：解決重疊的關鍵 */
 .player-seat {
     position: absolute;
     display: flex;
-    flex-direction: column; /* 垂直排列 */
+    flex-direction: column; 
     align-items: center;
     justify-content: center;
     min-width: 130px;
     z-index: 10;
 }
 
-/* 玩家資訊外框 */
 .player-info-wrapper {
     display: flex;
     flex-direction: column;
@@ -41,6 +85,7 @@ body {
     border-radius: 12px;
     gap: 5px;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
 }
 
 .active-turn {
@@ -49,7 +94,6 @@ body {
     transform: scale(1.05);
 }
 
-/* PASS 標籤：放在名字下方的藥丸樣式 */
 .pass-overlay {
     color: #ffffff;
     background: #ff4757;
@@ -61,41 +105,30 @@ body {
     animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-@keyframes popIn {
-    0% { transform: scale(0.5); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-}
+/* 方位定位 */
+.pos-top { top: 5%; left: 50%; transform: translateX(-50%); }
+.pos-left { left: 5%; top: 45%; transform: translateY(-50%); }
+.pos-right { right: 5%; top: 45%; transform: translateY(-50%); }
+.pos-bottom { bottom: 5%; left: 50%; transform: translateX(-50%); }
 
-/* --- 方位定位 (統一精確值) --- */
-.pos-top { top: 10%; left: 50%; transform: translateX(-50%); }
-.pos-left { left: 5%; top: 40%; transform: translateY(-50%); }
-.pos-right { right: 5%; top: 40%; transform: translateY(-50%); }
-.pos-bottom { 
-    bottom: 10%; /* 從 2% 或原本的值調高到 10% */
-}
-
-/* --- 出牌區修正：解決「只有紅框」 --- */
-#lastPlay {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100px;
-}
-
+/* --- 出牌區樣式 --- */
 .played-cards-wrapper {
     display: flex;
     justify-content: center;
+    align-items: center;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+    min-height: 100px;
     gap: 5px;
-    background: rgba(255, 255, 255, 0.1); /* 稍微深色底讓白牌更明顯 */
-    padding: 10px;
-    border-radius: 10px;
-    min-height: 80px; /* 固定高度防止跳動 */
 }
 
 .card-mini {
     width: 50px;
     height: 72px;
     background: #ffffff !important;
+    color: #000;
     border-radius: 6px;
     display: flex;
     flex-direction: column;
@@ -103,29 +136,15 @@ body {
     align-items: center;
     font-weight: bold;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    border: 1px solid #eee;
-    margin: 0 2px;
-}
-.rank, .rank-mini {
-    font-size: 24px;
-    font-family: 'Arial Black', sans-serif; /* 使用較粗的字體 */
-    line-height: 1;
 }
 
-.rank-mini { font-size: 18px; }
-
-/* 花色樣式 */
-.suit, .suit-mini {
-    font-size: 32px;
-    line-height: 1;
-}
-
+.rank-mini { font-size: 18px; font-family: 'Arial Black', sans-serif; }
 .suit-mini { font-size: 22px; }
+
 /* --- 底部控制 UI --- */
-/* 修改 style.css 約第 115 行 */
 .player-ui {
     position: fixed;
-    bottom: 30px; /* 如果覺得太低，可以從 20px 改成 30px 或更高 */
+    bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
@@ -135,66 +154,43 @@ body {
     z-index: 2000;
 }
 
-#controls { display: flex; gap: 15px; margin-bottom: 20px; }
-
-#hand { display: flex; justify-content: center; padding: 10px; }
-
+#hand { display: flex; justify-content: center; padding: 10px; height: 130px; }
 
 .card {
     min-width: 75px;
     height: 110px;
     background: #fff;
     color: #000;
-    border-radius: 10px; /* 更圓潤的角 */
+    border-radius: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between; /* 讓數字與花色撐開 */
+    justify-content: space-between;
     padding: 10px 5px;
     cursor: pointer;
-    margin-left: -25px; /* 剛才討論的間距 */
+    margin-left: -30px; /* 增加重疊感 */
     border: 1px solid #ddd;
-    box-shadow: -2px 0 10px rgba(0,0,0,0.2); /* 側向投影增加層次感 */
+    box-shadow: -2px 0 10px rgba(0,0,0,0.2);
     position: relative;
     transition: all 0.2s ease-out;
-    user-select: none;
 }
+
+.card:first-child { margin-left: 0; }
+
 .card:hover {
     transform: translateY(-20px);
     z-index: 500;
     box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-    border-color: #3498db;
 }
-.played-cards-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 15px;
-    background: rgba(0, 0, 0, 0.2); /* 半透明底座 */
-    border-radius: 15px;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
-    min-height: 100px;
-}
-/* 選取狀態：黃金發光邊框 */
+
 .card.selected {
-    transform: translateY(-45px); /* 彈得更高 */
-    box-shadow: 0 0 15px #f1c40f, 0 5px 15px rgba(0,0,0,0.3);
-    border: 2px solid #f1c40f;
+    transform: translateY(-40px);
+    border: 3px solid #f1c40f;
+    box-shadow: 0 0 15px #f1c40f;
     z-index: 600;
-}
-/* 確保第一張牌不要有負邊距，否則會跑出螢幕 */
-.card:first-child {
-    margin-left: 0;
-}
-.card:first-child { margin-left: 0; }
-/* 修改 style.css 約第 140 行 */
-.card.selected {
-    transform: translateY(-30px); /* 向上彈起的距離 */
-    border: 2px solid #f1c40f;    /* 亮黃色邊框 */
-    z-index: 100;                 /* 確保選中的牌在最上層 */
 }
 
 /* 按鈕風格 */
-.primary-btn { background: #e67e22; border: none; padding: 10px 20px; color: white; border-radius: 5px; cursor: pointer; }
-.secondary-btn { background: #3498db; border: none; padding: 10px 20px; color: white; border-radius: 5px; cursor: pointer; }
+.primary-btn { background: #e67e22; border: none; padding: 10px 25px; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
+.secondary-btn { background: #3498db; border: none; padding: 10px 25px; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
 button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
