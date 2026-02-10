@@ -1,4 +1,4 @@
-/* --- 基礎修正 --- */
+/* --- 1. 基礎修正與環境 --- */
 * { box-sizing: border-box; font-family: "Microsoft JhengHei", system-ui, sans-serif; }
 
 body { 
@@ -10,244 +10,132 @@ body {
 .center { width: 100%; max-width: 1200px; position: relative; height: 100%; }
 .hidden { display: none !important; }
 
-/* --- [重要] 房間資訊與準備區：絕對定位 --- */
+/* --- 2. 房間資訊與準備區 (絕對定位) --- */
 #roomArea {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 3000; 
-    background: rgba(0, 0, 0, 0.7);
-    padding: 15px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    min-width: 200px;
+    position: absolute; top: 20px; left: 20px; z-index: 3000; 
+    background: rgba(0, 0, 0, 0.7); padding: 15px; border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1); min-width: 200px;
 }
 
 .player-entry {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 .ready-status { font-size: 0.8rem; }
 .status-ready { color: #2ecc71; font-weight: bold; }
 .status-waiting { color: #95a5a6; }
 
-#startBtn.is-ready {
-    background: #27ae60;
-    box-shadow: 0 0 10px #2ecc71;
-}
+#startBtn.is-ready { background: #27ae60; box-shadow: 0 0 10px #2ecc71; }
 
-/* --- 牌桌佈局 --- */
+/* --- 3. 牌桌佈局與方位 --- */
 .table-container {
-    position: relative;
-    width: 100%;
-    height: 55vh; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 5vh;
+    position: relative; width: 100%; height: 55vh; 
+    display: flex; justify-content: center; align-items: center; margin-top: 5vh;
 }
 
-.player-seat {
-    position: absolute;
-    display: flex;
-    flex-direction: column; 
-    align-items: center;
-    justify-content: center;
-    min-width: 130px;
-    z-index: 10;
+.player-seat { 
+    position: absolute; display: flex; flex-direction: column; 
+    align-items: center; justify-content: center; min-width: 130px; z-index: 10; 
 }
 
-.player-info-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 8px 15px;
-    border-radius: 12px;
-    gap: 5px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+.player-info-wrapper { 
+    display: flex; flex-direction: column; align-items: center; 
+    background: rgba(0, 0, 0, 0.6); padding: 8px 15px; border-radius: 12px; 
+    gap: 5px; border: 1px solid rgba(255, 255, 255, 0.1); 
 }
 
-.active-turn {
-    border: 2px solid #ffeb3b;
-    box-shadow: 0 0 15px #ffeb3b;
-    transform: scale(1.05);
-}
+.active-turn { border: 2px solid #ffeb3b; box-shadow: 0 0 15px #ffeb3b; transform: scale(1.05); }
 
-/* --- 方位定位 --- */
+/* 方位定位 */
 .pos-top { top: 5%; left: 50%; transform: translateX(-50%); }
 .pos-left { left: 5%; top: 45%; transform: translateY(-50%); }
 .pos-right { right: 5%; top: 45%; transform: translateY(-50%); }
-.pos-bottom { 
-    bottom: 5%; 
-    left: 50%; 
-    transform: translateX(-50%); 
+.pos-bottom { bottom: 5%; left: 50%; transform: translateX(-50%); }
+
+/* --- 4. 出牌區 (中間) --- */
+#lastPlayContent { display: flex; justify-content: center; align-items: center; min-height: 120px; }
+.played-cards-wrapper { 
+    display: flex; justify-content: center; gap: 8px; background: rgba(0, 0, 0, 0.3); 
+    padding: 15px; border-radius: 15px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); 
 }
 
-/* --- 出牌區 (中間) --- */
-#lastPlayContent {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 120px;
-}
-
-.played-cards-wrapper {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 15px;
-    border-radius: 15px;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
-}
-
-/* --- [重點修改] 牌張材質與字體 --- */
+/* --- 5. [核心樣式] 黑金龍紋牌張 --- */
 .card, .card-mini {
-    /* 1. 背景：深色皮革材質 + 放射狀微光 */
+    /* 基礎尺寸與重疊邏輯 */
+    min-width: 75px; height: 110px;
+    position: relative; overflow: hidden; cursor: pointer;
+    user-select: none; transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 10px 5px;
+
+    /* 黑皮革材質背景 */
     background: 
-        url('https://www.transparenttextures.com/patterns/dark-leather.png'), /* 皮革紋理 */
+        url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
         radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%) !important;
     
-    /* 2. 外框：金屬絲質感邊框 */
+    /* 金屬絲邊框與陰影 */
     border: 1.5px solid #d4af37 !important;
     border-radius: 10px;
-    position: relative;
-    overflow: hidden;
-    
-    /* 3. 陰影：外發光 + 深度陰影 */
-    box-shadow: 
-        inset 0 0 15px rgba(212, 175, 55, 0.15), /* 內部金色微光 */
-        0 8px 15px rgba(0,0,0,0.6) !important;
-    
-    /* 文字統一改為金屬色 */
-    color: #d4af37 !important;
+    box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.15), 0 8px 15px rgba(0,0,0,0.6) !important;
 }
 
-/* 4. 裝飾性內框 (Art Deco 風格) */
-.card::after {
-    content: '';
-    position: absolute;
-    top: 5px; left: 5px; right: 5px; bottom: 5px;
-    border: 1px solid rgba(212, 175, 55, 0.3); /* 內圈細金線 */
-    border-radius: 6px;
-    pointer-events: none;
+/* 手牌重疊設定 */
+#hand .card { margin-left: -30px; }
+#hand .card:first-child { margin-left: 0; }
+
+/* 裝飾性內細框 (Art Deco) */
+.card::after, .card-mini::after {
+    content: ''; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px;
+    border: 1px solid rgba(212, 175, 55, 0.25); border-radius: 6px; pointer-events: none;
 }
 
-/* 5. 中心裝飾 (龍紋背景圖) */
-.card::before {
-    content: '🐉'; /* 如果有龍的 SVG 圖片可以用 url() 替換 */
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 40px;
-    opacity: 0.15; /* 隱隱約約的龍紋 */
-    filter: grayscale(1) sepia(1) saturate(5);
+/* 中心龍紋裝飾 */
+.card::before, .card-mini::before {
+    content: '🐉'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 40px; opacity: 0.12; filter: grayscale(1) sepia(1) saturate(5);
 }
 
-/* 金屬字體優化 */
+/* 字體樣式 */
 .rank, .rank-mini {
-    font-family: "Georgia", serif !important;
-    font-weight: 900 !important;
-    letter-spacing: -1px;
-    /* 金屬燙金感 */
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.8), 0 0 5px rgba(212, 175, 55, 0.4);
+    font-family: "Georgia", serif !important; font-weight: 900 !important;
+    letter-spacing: -1px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8), 0 0 5px rgba(212, 175, 55, 0.3);
 }
 
-/* 花色修正：在黑金風格下，紅牌建議也用金色或深紅金色 */
-.red { 
-    color: #8b0000 !important; /* 暗紅色 (Deep Red) */
-    /* 增加一點點文字發光，防止暗紅在黑底上太沉 */
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.8), 0 0 3px rgba(139, 0, 0, 0.4);
-} 
-.black { color: #d4af37 !important; }
+/* 花色與紅黑配色修正 */
+.black { color: #d4af37 !important; } /* 黑牌用金色 */
+.red { color: #8b0000 !important; text-shadow: 0 0 3px rgba(139, 0, 0, 0.5); } /* 紅牌用暗紅 */
 
-.suit, .suit-mini {
-    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+.suit, .suit-mini { filter: drop-shadow(0 0 2px rgba(0,0,0,0.5)); font-size: 20px; }
+
+/* --- 6. 互動與動態效果 --- */
+.card:hover {
+    transform: translateY(-25px) rotate(-1deg);
+    z-index: 500;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.8) !important;
 }
 
-/* --- 手牌選取效果優化 --- */
 .card.selected {
-    transform: translateY(-50px) scale(1.05); /* 選中時稍微放大 */
-    border-color: #fff !important; /* 選中時邊框變亮金白 */
-    box-shadow: 
-        0 0 25px rgba(212, 175, 55, 0.6), 
-        0 15px 30px rgba(0,0,0,0.7) !important;
+    transform: translateY(-45px) scale(1.05);
+    border: 2px solid #fff !important; /* 選中時邊框變亮金白 */
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.7), 0 10px 20px rgba(0,0,0,0.5) !important;
     z-index: 600;
 }
 
-.card:hover {
-    transform: translateY(-30px) rotate(-1deg);
-    z-index: 500;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.8) !important;
-}
-
-/* 迷你牌適配 (出牌區) */
-.card-mini {
-    width: 50px;
-    height: 72px;
-    border-radius: 6px;
-}
-.card-mini::before { font-size: 20px; } /* 小牌龍紋縮小 */
+/* 迷你牌適配 */
+.card-mini { width: 50px; height: 72px; padding: 5px; margin-left: 0; cursor: default; }
+.card-mini::before { font-size: 22px; }
 .card-mini::after { top: 3px; left: 3px; right: 3px; bottom: 3px; }
-/* --- 底部控制 UI --- */
+
+/* --- 7. 底部控制 UI --- */
 .player-ui {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    z-index: 2000;
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    width: 100%; display: flex; flex-direction: column; align-items: center; z-index: 2000;
 }
 
 #controls { display: flex; gap: 15px; margin-bottom: 10px; }
+#hand { display: flex; justify-content: center; padding: 20px 10px 40px 10px; height: 150px; }
 
-#hand { 
-    display: flex; 
-    justify-content: center; 
-    padding: 20px 10px 40px 10px; 
-    height: 150px;
-}
-
-.card {
-    min-width: 75px;
-    height: 110px;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 5px;
-    cursor: pointer;
-    margin-left: -30px; 
-    position: relative;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    user-select: none;
-}
-
-.card:first-child { margin-left: 0; }
-
-.card:hover {
-    transform: translateY(-25px);
-    z-index: 500;
-    box-shadow: 0 12px 24px rgba(0,0,0,0.5) !important;
-}
-
-.card.selected {
-    transform: translateY(-45px); 
-    border: 2px solid #f1c40f !important;
-    box-shadow: 0 0 15px rgba(241, 196, 15, 0.7), 0 10px 20px rgba(0,0,0,0.4) !important;
-    z-index: 600;
-}
-
-/* --- 按鈕風格 --- */
+/* --- 8. 按鈕風格 --- */
 .primary-btn { background: #e67e22; border: none; padding: 10px 25px; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
 .secondary-btn { background: #3498db; border: none; padding: 10px 25px; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
 button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
