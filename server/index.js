@@ -14,6 +14,7 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 
 const rooms = {};
 
+// --- 輔助函式 ---
 function nextTurn(roomId) {
     const room = rooms[roomId];
     if (!room || !room.gameStarted) return;
@@ -68,9 +69,11 @@ function handleAiAction(roomId, aiPlayer) {
     nextTurn(roomId);
 }
 
+// --- Socket 邏輯 ---
 io.on('connection', (socket) => {
-   socket.on('create_room', ({ roomId, name }) => {
-        // --- 核心修正：檢查房號是否已存在 ---
+    
+    // 建立房間
+    socket.on('create_room', ({ roomId, name }) => {
         if (rooms[roomId]) {
             socket.emit('error_msg', '該房間 ID 已被使用，請更換或加入。');
             return;
@@ -90,8 +93,10 @@ io.on('connection', (socket) => {
             hands: {} 
         };
         io.to(roomId).emit('room_update', rooms[roomId].players);
-        console.log(`房間建立成功: ${roomId}`); // 加入 Log 方便調試
+        console.log(`房間建立成功: ${roomId}`);
     });
+
+    // 加入房間
     socket.on('join_room', ({ roomId, name }) => {
         const room = rooms[roomId];
         if (room && room.players.length < 4 && !room.gameStarted) {
@@ -103,6 +108,7 @@ io.on('connection', (socket) => {
         }
     });
 
+    // 開始遊戲
     socket.on('start_game', ({ roomId }) => {
         const room = rooms[roomId];
         if (!room) return;
@@ -138,6 +144,7 @@ io.on('connection', (socket) => {
         if (room.players[room.turnIndex].isAI) handleAiAction(roomId, room.players[room.turnIndex]);
     });
 
+    // 出牌邏輯
     socket.on('play_cards', ({ roomId, cards }) => {
         const room = rooms[roomId];
         if (!room || room.players[room.turnIndex].id !== socket.id) return;
@@ -151,7 +158,7 @@ io.on('connection', (socket) => {
 
         room.hands[socket.id] = room.hands[socket.id].filter(c => !cards.find(pc => pc.id === c.id));
         room.lastPlay = cards;
-        room.passCount = 0; // 成功出牌，重置過牌計數
+        room.passCount = 0;
 
         io.to(roomId).emit('play_made', { playerId: socket.id, cards, isPass: false });
 
@@ -163,6 +170,7 @@ io.on('connection', (socket) => {
         nextTurn(roomId);
     });
 
+    // 過牌邏輯
     socket.on('pass', ({ roomId }) => {
         const room = rooms[roomId];
         if (!room || room.players[room.turnIndex].id !== socket.id || !room.lastPlay) return;
@@ -178,6 +186,7 @@ io.on('connection', (socket) => {
         nextTurn(roomId);
     });
 
+    // 斷線處理
     socket.on('disconnect', () => {
         for (const roomId in rooms) {
             const room = rooms[roomId];
@@ -185,7 +194,6 @@ io.on('connection', (socket) => {
             if (index !== -1) {
                 if (room.gameStarted) {
                     room.players[index].isAI = true;
-                    // 避免重複加上 (AI) 字樣
                     if (!room.players[index].name.includes("(AI)")) {
                         room.players[index].name += " (AI)";
                     }
@@ -193,18 +201,15 @@ io.on('connection', (socket) => {
                     if (room.turnIndex === index) setTimeout(() => handleAiAction(roomId, room.players[index]), 1000);
                 } else {
                     room.players.splice(index, 1);
-                    // --- 核心修正：如果房間沒人了，刪除該房間 ---
                     if (room.players.length === 0) {
                         delete rooms[roomId];
-                        console.log(`房間 ${roomId} 已無人，系統回收。`);
+                        console.log(`房間 ${roomId} 已清理`);
                     } else {
                         io.to(roomId).emit('room_update', room.players);
                     }
                 }
                 break;
             }
-        }
-    });
         }
     });
 });
