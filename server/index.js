@@ -69,7 +69,17 @@ function handleAiAction(roomId, aiPlayer) {
 }
 
 io.on('connection', (socket) => {
-    socket.on('create_room', ({ roomId, name }) => {
+   socket.on('create_room', ({ roomId, name }) => {
+        // --- 核心修正：檢查房號是否已存在 ---
+        if (rooms[roomId]) {
+            socket.emit('error_msg', '該房間 ID 已被使用，請更換或加入。');
+            return;
+        }
+        if (!roomId || roomId.trim() === "") {
+            socket.emit('error_msg', '房間 ID 不能為空。');
+            return;
+        }
+
         socket.join(roomId);
         rooms[roomId] = { 
             players: [{ id: socket.id, name, isAI: false }], 
@@ -80,8 +90,8 @@ io.on('connection', (socket) => {
             hands: {} 
         };
         io.to(roomId).emit('room_update', rooms[roomId].players);
+        console.log(`房間建立成功: ${roomId}`); // 加入 Log 方便調試
     });
-
     socket.on('join_room', ({ roomId, name }) => {
         const room = rooms[roomId];
         if (room && room.players.length < 4 && !room.gameStarted) {
@@ -175,15 +185,26 @@ io.on('connection', (socket) => {
             if (index !== -1) {
                 if (room.gameStarted) {
                     room.players[index].isAI = true;
-                    room.players[index].name += " (AI)";
+                    // 避免重複加上 (AI) 字樣
+                    if (!room.players[index].name.includes("(AI)")) {
+                        room.players[index].name += " (AI)";
+                    }
                     io.to(roomId).emit('room_update', room.players);
                     if (room.turnIndex === index) setTimeout(() => handleAiAction(roomId, room.players[index]), 1000);
                 } else {
                     room.players.splice(index, 1);
-                    io.to(roomId).emit('room_update', room.players);
+                    // --- 核心修正：如果房間沒人了，刪除該房間 ---
+                    if (room.players.length === 0) {
+                        delete rooms[roomId];
+                        console.log(`房間 ${roomId} 已無人，系統回收。`);
+                    } else {
+                        io.to(roomId).emit('room_update', room.players);
+                    }
                 }
                 break;
             }
+        }
+    });
         }
     });
 });
