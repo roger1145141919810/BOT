@@ -10,42 +10,57 @@ body {
 .center { width: 100%; max-width: 1200px; position: relative; height: 100%; }
 .hidden { display: none !important; }
 
-/* --- [重要] 房間資訊與準備區：改為絕對定位，不佔用空間 --- */
+/* --- [修正] 房間資訊與準備區：改為畫面正中央 --- */
 #roomArea {
     position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 3000; /* 確保在最上層 */
-    background: rgba(0, 0, 0, 0.7);
-    padding: 15px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    min-width: 200px;
+    /* 完美的置中語法 */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+    
+    z-index: 3000; 
+    background: rgba(0, 0, 0, 0.9); /* 背景調深，確保置中時不被底下的桌子干擾 */
+    padding: 30px;
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 50px rgba(0,0,0,0.8);
+    min-width: 350px;
+    text-align: center;
 }
+
+#roomArea h2 { margin-top: 0; color: #f1c40f; }
 
 .player-entry {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 5px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    margin-bottom: 8px;
+    border-radius: 8px;
 }
 
-.ready-status { font-size: 0.8rem; }
+.ready-status { font-size: 0.9rem; }
 .status-ready { color: #2ecc71; font-weight: bold; }
-.status-waiting { color: #95a5a6; }
+.status-waiting { color: #bdc3c7; }
 
 /* 準備按鈕發光效果 */
+#startBtn {
+    width: 100%;
+    margin-top: 15px;
+    font-size: 1.1rem;
+    padding: 12px;
+}
 #startBtn.is-ready {
     background: #27ae60;
-    box-shadow: 0 0 10px #2ecc71;
+    box-shadow: 0 0 15px #2ecc71;
 }
 
 /* --- 牌桌佈局 --- */
 .table-container {
     position: relative;
     width: 100%;
-    height: 55vh; /* 調整高度 */
+    height: 55vh; 
     display: flex;
     justify-content: center;
     align-items: center;
@@ -79,12 +94,13 @@ body {
     transform: scale(1.05);
 }
 
-/* --- 方位定位 (優化垂直間距) --- */
+/* --- 方位定位 (調整垂直間距，避免重疊) --- */
 .pos-top { top: 5%; left: 50%; transform: translateX(-50%); }
-.pos-left { left: 5%; top: 45%; transform: translateY(-50%); }
-.pos-right { right: 5%; top: 45%; transform: translateY(-50%); }
+.pos-left { left: 5%; top: 40%; transform: translateY(-50%); }
+.pos-right { right: 5%; top: 40%; transform: translateY(-50%); }
+/* 底部座位稍微拉高，避免蓋到下方的操作按鈕 */
 .pos-bottom { 
-    bottom: 5%; 
+    bottom: 22%; 
     left: 50%; 
     transform: translateX(-50%); 
 }
@@ -118,7 +134,7 @@ body {
     align-items: center;
     font-weight: bold;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    color: inherit;
+    color: #000;
 }
 
 /* --- 底部控制 UI --- */
@@ -139,8 +155,8 @@ body {
 #hand { 
     display: flex; 
     justify-content: center; 
-    padding: 20px 10px 40px 10px; /* 增加底部 padding 防止牌被切到 */
-    height: 150px;
+    padding: 10px;
+    height: 140px;
 }
 
 .card {
@@ -155,7 +171,7 @@ body {
     justify-content: space-between;
     padding: 10px 5px;
     cursor: pointer;
-    margin-left: -30px; /* 卡片重疊 */
+    margin-left: -30px; 
     border: 1px solid #ddd;
     box-shadow: -2px 0 10px rgba(0,0,0,0.2);
     position: relative;
@@ -172,7 +188,7 @@ body {
 }
 
 .card.selected {
-    transform: translateY(-45px); /* 選中時彈得更高 */
+    transform: translateY(-45px); 
     border: 2px solid #f1c40f;
     box-shadow: 0 0 15px #f1c40f;
     z-index: 600;
