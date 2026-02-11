@@ -4,7 +4,7 @@ const $ = id => document.getElementById(id);
 let currentRoom = null;
 let myHand = [];
 let selected = new Set();
-let allPlayers = []; 
+let allPlayers = [];
 let myReadyStatus = false;
 
 const SUIT_DATA = {
@@ -31,7 +31,7 @@ function renderPlayers(list) {
     const el = $('playersList');
     if (!el) return;
     el.innerHTML = '';
-    
+
     const me = list.find(p => p.id === socket.id);
     if (me) {
         myReadyStatus = me.isReady;
@@ -61,22 +61,18 @@ function renderPlayers(list) {
 
 function updateSeats(players, currentPlayerId) {
     const myIndex = players.findIndex(p => p.id === socket.id);
-    // 如果自己不在裡面（可能剛斷線或觀戰），就不執行渲染
     if (myIndex === -1) return;
 
     const ordered = [];
-    // 永遠固定渲染 4 個位置，避免人數變動導致 CSS Flex/Grid 跑版
     for (let i = 0; i < 4; i++) {
         ordered.push(players[(myIndex + i) % players.length]);
     }
 
     const seatIds = ['me-seat', 'p1-seat', 'p2-seat', 'p3-seat'];
-    
+
     ordered.forEach((p, i) => {
         const seat = $(seatIds[i]);
         if (!seat) return;
-
-        // 如果該位置沒人（雖然邏輯上會補 AI），則清空
         if (!p) {
             seat.innerHTML = '';
             return;
@@ -104,7 +100,7 @@ function renderHand() {
     myHand.forEach((c) => {
         const card = document.createElement('div');
         
-        // [新增] 判斷花色決定 class，讓 CSS 特效抓得到目標
+        // 確保黑金效果生效
         const colorClass = (c.suit === 'spades' || c.suit === 'clubs') ? 'black' : 'red';
         card.className = `card ${colorClass}`; 
         
@@ -146,17 +142,13 @@ socket.on('join_success', ({ roomId }) => {
 
 socket.on('room_update', players => {
     allPlayers = players;
-    
-    // 關鍵修改：如果已經在遊戲中，不要重新打開 roomArea 以免擠壓版面
     if (!isGameActive()) {
         $('lobby').classList.add('hidden');
         $('roomArea').classList.remove('hidden');
         if (currentRoom) $('curRoom').textContent = currentRoom;
     } else {
-        // 如果正在遊戲中，僅靜默更新座位資訊（例如顯示某人變 AI）
         updateSeats(allPlayers, null); 
     }
-    
     renderPlayers(players);
 });
 
@@ -171,7 +163,7 @@ socket.on('deal', hand => {
 
 socket.on('game_start', ({ currentPlayerId, players }) => {
     allPlayers = players;
-    $('roomArea').classList.add('hidden'); // 遊戲開始，隱藏準備區
+    $('roomArea').classList.add('hidden');
     $('game').classList.remove('hidden');
     
     allPlayers.forEach(p => {
@@ -215,7 +207,6 @@ socket.on('play_made', ({ playerId, cards, isPass }) => {
     if (!isPass) {
         const cardsHtml = cards.map(c => {
             const suitInfo = SUIT_DATA[c.suit];
-            // [新增] 同樣套用 colorClass
             const colorClass = (c.suit === 'spades' || c.suit === 'clubs') ? 'black' : 'red';
             return `
                 <div class="card-mini ${colorClass}" style="color: ${suitInfo.color};">
@@ -226,7 +217,6 @@ socket.on('play_made', ({ playerId, cards, isPass }) => {
         }).join('');
         contentEl.innerHTML = `<div class="played-cards-wrapper">${cardsHtml}</div>`;
     }
-
     updateSeats(allPlayers, playerId); 
 });
 
@@ -298,7 +288,6 @@ $('restartBtn').onclick = () => {
     $('gameOverOverlay').classList.add('hidden');
     $('game').classList.add('hidden');
     $('roomArea').classList.remove('hidden');
-    // 後端在 gameStarted = false 時，room_update 會處理渲染
 };
 
 $('backToLobbyBtn').onclick = () => location.reload();
