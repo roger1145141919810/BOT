@@ -1,32 +1,24 @@
 /* --- 結算畫面專用樣式 --- */
 
-/* 覆蓋層：確保在最上層 */
 .overlay {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.9); /* 稍微深一點，強調結束感 */
-    display: flex;
+    width: 100vw;  /* 使用 vw 確保佔滿寬度 */
+    height: 100vh; /* 使用 vh 確保佔滿高度 */
+    background: rgba(0, 0, 0, 0.9);
+    display: flex !important; /* 確保 Flex 生效 */
     justify-content: center;
     align-items: center;
-    z-index: 9999;
+    z-index: 99999; /* 提高到極限 */
+    pointer-events: auto !important;
 }
 
-/* 結算主框體 */
 .result-box {
-    background: 
-        url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
-        radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%);
-    padding: 30px;
-    border-radius: 20px;
-    border: 2px solid #d4af37; /* 金色龍紋邊框 */
-    text-align: center;
-    min-width: 320px;
-    box-shadow: 0 0 30px rgba(212, 175, 55, 0.4), inset 0 0 15px rgba(212, 175, 55, 0.2);
-}
-
+    /* 確保按鈕所在的框框也能接收點擊 */
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 100000;
 /* 標題與分隔線 */
 #winnerTitle {
     color: #ffcc33;
