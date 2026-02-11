@@ -1,1 +1,106 @@
+/* --- 等待房間 (#roomArea) 樣式修正 --- */
 
+#roomArea {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh; /* 確保在畫面中央 */
+}
+
+#roomArea .lobby-card {
+    background: 
+        url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
+        radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%);
+    padding: 40px;
+    border-radius: 20px;
+    border: 2px solid #d4af37; /* 金色邊框 */
+    text-align: center;
+    min-width: 350px;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(212, 175, 55, 0.3);
+    color: white;
+}
+
+#roomArea h3 {
+    color: #ffcc33;
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+    text-shadow: 0 0 10px rgba(255, 204, 51, 0.4);
+}
+
+#curRoom {
+    color: #ffffff;
+    letter-spacing: 2px;
+}
+
+#roomArea hr {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #d4af37, transparent);
+    margin: 20px 0;
+}
+
+/* 玩家列表樣式 */
+#playersList {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.player-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.player-entry:last-child {
+    border-bottom: none;
+}
+
+/* 準備狀態的標籤 */
+.status-ready {
+    color: #2ecc71;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(46, 204, 113, 0.3);
+}
+
+.status-waiting {
+    color: #bdc3c7;
+    font-style: italic;
+}
+
+/* 提示文字 */
+.hint {
+    color: #888;
+    font-size: 0.85rem;
+    margin-top: 15px;
+}
+
+/* 按鈕美化 */
+#startBtn {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, #d4af37 0%, #aa8913 100%);
+    border: none;
+    border-radius: 10px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+#startBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+    filter: brightness(1.1);
+}
+
+#startBtn.is-ready {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+}
