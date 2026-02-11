@@ -15,25 +15,44 @@ const SUIT_DATA = {
     'spades':   { symbol: '♠', color: '#ffcc33', weight: 3 }
 };
 
-// 【新增】統一介面切換器，確保狀態乾淨
+/**
+ * 【核心修復】統一介面切換器
+ * 加入 display: none/flex 切換，防止隱形成分擋住滑鼠點擊
+ */
 function showScreen(screenId) {
-    const screens = ['lobby', 'roomArea', 'game', 'gameOverOverlay'];
+    const screens = ['lobby', 'roomArea', 'game'];
     screens.forEach(id => {
         const el = $(id);
         if (el) {
-            if (id === screenId) el.classList.remove('hidden');
-            else if (id !== 'gameOverOverlay' || screenId !== 'game') {
-                // 除非是在遊戲中，否則結算層也要一起隱藏
+            if (id === screenId) {
+                el.classList.remove('hidden');
+                el.style.display = 'flex'; // 強制顯示佈局
+                el.style.pointerEvents = 'auto'; // 確保可以點擊
+            } else {
                 el.classList.add('hidden');
+                el.style.display = 'none'; // 徹底移除佔位，防止擋住底層大廳
+                el.style.pointerEvents = 'none'; // 禁用任何可能的交互
             }
         }
     });
+
+    // 結算層獨立邏輯
+    const overlay = $('gameOverOverlay');
+    if (overlay) {
+        if (screenId === 'game') {
+            // 遊戲中預設隱藏結算層，除非觸發 game_over
+        } else {
+            overlay.classList.add('hidden');
+            overlay.style.display = 'none';
+        }
+    }
 }
 
-// 【新增】網頁載入時強制顯示大廳
+// 網頁載入時強制重置狀態並顯示大廳
 window.onload = () => {
+    currentRoom = null;
     showScreen('lobby');
-    console.log("遊戲初始化：大廳已就緒");
+    console.log("遊戲初始化：大廳已鎖定，物理隔離生效");
 };
 
 function rankText(r) {
@@ -42,7 +61,8 @@ function rankText(r) {
 }
 
 function isGameActive() {
-    return !$('game').classList.contains('hidden');
+    const game = $('game');
+    return game && !game.classList.contains('hidden') && game.style.display !== 'none';
 }
 
 // --- 介面渲染核心 ---
@@ -145,7 +165,6 @@ function renderHand() {
 
 socket.on('error_msg', msg => alert(msg));
 
-// 成功建立與加入時才切換畫面
 socket.on('create_success', ({ roomId }) => {
     currentRoom = roomId;
     $('curRoom').textContent = roomId;
@@ -158,13 +177,17 @@ socket.on('join_success', ({ roomId }) => {
     showScreen('roomArea');
 });
 
-// 【重點修正】room_update 不應該強制切換畫面，除非玩家已經在房間內
+// 【重點修正】room_update 防護守衛
 socket.on('room_update', players => {
     allPlayers = players;
-    if (currentRoom && !isGameActive()) {
+    
+    // 如果還沒有房間 ID，絕對不准切換走大廳
+    if (!currentRoom) {
+        showScreen('lobby');
+    } else if (!isGameActive()) {
         showScreen('roomArea');
         $('curRoom').textContent = currentRoom;
-    } else if (isGameActive()) {
+    } else {
         updateSeats(allPlayers, null); 
     }
     renderPlayers(players);
@@ -182,7 +205,11 @@ socket.on('deal', hand => {
 socket.on('game_start', ({ currentPlayerId, players }) => {
     allPlayers = players;
     showScreen('game');
-    $('gameOverOverlay').classList.add('hidden');
+    const overlay = $('gameOverOverlay');
+    if (overlay) {
+        overlay.classList.add('hidden');
+        overlay.style.display = 'none';
+    }
     
     allPlayers.forEach(p => {
         p.cardCount = 13;
@@ -251,6 +278,11 @@ socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
     const timerDisplay = $('shutdownTimer');
     const isMe = (winnerId === socket.id);
 
+    if (overlay) {
+        overlay.classList.remove('hidden');
+        overlay.style.display = 'flex';
+    }
+    
     winnerTitle.textContent = isMe ? "✨ 恭喜！你贏了 ✨" : `👑 贏家是：${winnerName}`;
     winnerTitle.style.color = isMe ? "#f1c40f" : "#ffffff";
 
@@ -265,7 +297,6 @@ socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
         `;
     }).join('');
 
-    overlay.classList.remove('hidden');
     selected.clear();
 
     let timeLeft = 30;
