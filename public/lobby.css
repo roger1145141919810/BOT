@@ -1,15 +1,17 @@
-/* --- 大廳與等待房間 修正版 --- */
+/* --- 大廳與等待房間 終極修正版 --- */
 
-/* 1. 強化隱藏標籤：確保權重最高，且加入 pointer-events 隔離 */
+/* 1. 強化隱藏標籤：確保權重高於下方的 ID 選擇器 */
+/* 這裡加上 body 是為了確保 Specificity 足以蓋過 body #lobby */
 body .hidden {
     display: none !important;
     pointer-events: none !important;
     opacity: 0 !important;
+    visibility: hidden !important;
     z-index: -1 !important;
 }
 
-/* 2. 強制容器覆蓋 */
-/* 移除這裡的 display !important，改由 JS 控制或由 .hidden 覆蓋 */
+/* 2. 容器設定：移除 display 的 !important */
+/* 讓 .hidden 類別出現時，能夠成功將其設為 none */
 body #lobby, 
 body #roomArea {
     position: fixed;
@@ -17,24 +19,24 @@ body #roomArea {
     left: 0;
     width: 100vw;
     height: 100vh;
-    display: flex; 
+    display: flex; /* 移除 !important，讓切換邏輯生效 */
     justify-content: center;
     align-items: center;
     z-index: 9999; 
     background: radial-gradient(circle at center, #163e32 0%, #051a14 100%);
-    pointer-events: auto;
+    pointer-events: auto; /* 確保正常狀態下可以點擊 */
 }
 
-/* 3. 核心卡片外框 (優化寬度適應) */
+/* 3. 核心卡片外框 */
 .lobby-card {
     background: 
         url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
         radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%);
-    padding: 30px;
+    padding: 35px;
     border-radius: 20px;
     border: 2px solid #d4af37;
     text-align: center;
-    width: 400px;
+    width: 420px;
     max-width: 90%;
     min-height: 400px;
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(212, 175, 55, 0.4);
@@ -42,35 +44,47 @@ body #roomArea {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    position: relative; /* 確保子元素層級正確 */
 }
 
 .lobby-card h3 {
     color: #ffcc33;
-    font-size: 1.6rem;
+    font-size: 1.8rem;
     margin-bottom: 5px;
     text-shadow: 0 0 10px rgba(255, 204, 51, 0.4);
 }
 
-/* 4. 輸入框美化：確保點擊優先級 */
+.lobby-card hr {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #d4af37, transparent);
+    margin: 20px 0;
+}
+
+/* 4. 輸入框修正：解決「點不到」與「無法輸入」的問題 */
 .input-group {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    margin: 20px 0;
+    margin-bottom: 25px;
+    position: relative;
+    z-index: 10001; /* 確保位於最頂層 */
 }
 
 .input-group input {
     width: 100%;
-    height: 50px; 
+    height: 50px;
     padding: 12px;
     border-radius: 8px;
     border: 1px solid #d4af37;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
+    background: rgba(0, 0, 0, 0.7) !important;
+    color: #fff !important;
     font-size: 1.1rem;
     text-align: center;
-    box-sizing: border-box; /* 防止 padding 撐開寬度 */
+    /* 關鍵：強制開啟點擊與游標 */
+    cursor: text !important;
     pointer-events: auto !important;
+    box-sizing: border-box;
 }
 
 /* 5. 統一按鈕樣式 */
@@ -102,7 +116,23 @@ body #roomArea {
     box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
 }
 
-/* 6. 準備狀態切換 */
+/* 6. 準備與列表樣式 */
+#playersList {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    text-align: left;
+}
+
+.player-entry {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 #startBtn.is-ready {
     background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
     color: white !important;
