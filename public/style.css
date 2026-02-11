@@ -26,8 +26,8 @@ body {
 .table-container {
     position: relative; 
     width: 100%; 
-    /* 1. 減少牌桌高度，這是縮減中間大間隙的關鍵 */
-    height: 40vh;  
+    /* 核心修改：將高度從 55vh 大幅縮減到 30vh，直接拉近 ID 與牌的距離 */
+    height: 30vh;  
     display: flex; 
     justify-content: center; 
     align-items: center; 
