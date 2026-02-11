@@ -45,7 +45,7 @@ body {
     width: 80px; 
     height: 120px; 
     position: relative; 
-    overflow: visible; /* 為了讓 pseudo-element 感應區運作 */
+    overflow: visible; 
     cursor: pointer;
     user-select: none; 
     transition: transform 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28), box-shadow 0.2s ease;
@@ -54,29 +54,24 @@ body {
     align-items: center; 
     justify-content: space-between; 
     padding: 12px 6px;
-
-    /* 完整的背景樣式：保留皮革紋路 */
     background: 
         url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
         radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%) !important;
-    
     border: 1.5px solid #d4af37 !important;
     border-radius: 10px;
     box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.15), 0 8px 15px rgba(0,0,0,0.6) !important;
 }
 
-/* 解決抽搐：利用偽元素在牌上方建立一個隱形的「捕捉區」 */
 .card::before {
     content: '';
     position: absolute;
-    top: -50px; /* 向上延伸，對齊彈起的高度 */
+    top: -50px; 
     left: 0;
     right: 0;
     bottom: 0;
     z-index: -1;
 }
 
-/* 中心龍紋裝飾：保留原本的 ::after 設定 */
 .card::after, .card-mini::after {
     content: '🐉';
     position: absolute;
@@ -89,19 +84,15 @@ body {
     pointer-events: none;
 }
 
-/* 手牌間距調開：改為 -20px */
 #hand .card { margin-left: -20px; }
 #hand .card:first-child { margin-left: 0; }
 
-/* 懸停效果 */
 #hand .card:hover {
     transform: translateY(-35px) scale(1.05);
     z-index: 500 !important;
     box-shadow: 0 20px 40px rgba(0,0,0,0.8) !important;
-    margin-right: 10px; /* 輕微推開相鄰牌 */
 }
 
-/* 選中效果 */
 .card.selected {
     transform: translateY(-55px) !important;
     border: 2px solid #ffffff !important;
@@ -114,10 +105,7 @@ body {
     font-family: "Georgia", serif !important; 
     font-weight: 900 !important;
     letter-spacing: -1px;
-    /* 移除原本蓋在上面的 text-shadow 以免干擾下面的類別 */
 }
-
-/* 黑色牌 (黑桃、梅花) 改為金色 */
 .black { 
     color: #ffcc33 !important; 
     text-shadow: 1px 1px 2px rgba(0,0,0,1), 0 0 8px rgba(212, 175, 55, 0.5) !important;
@@ -125,24 +113,42 @@ body {
 .suit.black, .suit-mini.black {
     filter: drop-shadow(0 0 1px rgba(0,0,0,0.8)) brightness(1.3);
 }
-
-/* 紅色牌 */
 .red { 
     color: #ff4d4d !important; 
     text-shadow: 1px 1px 2px rgba(0,0,0,1), 0 0 5px rgba(255, 77, 77, 0.3) !important;
 }
-
 .suit, .suit-mini { font-size: 20px; }
 
-/* --- 7. 底部控制與 UI --- */
+/* --- 7. 底部控制與 UI (重點修改區) --- */
 .player-ui {
-    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-    width: 100%; display: flex; flex-direction: column; align-items: center; z-index: 2000;
+    position: fixed; 
+    bottom: 20px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    width: 100%; 
+    display: flex; 
+    flex-direction: column; /* 確保內容垂直排列 */
+    align-items: center; 
+    z-index: 2000;
 }
-#controls { display: flex; gap: 15px; margin-bottom: 10px; }
+
+/* 手牌在上面，確保有足夠的 min-height 讓牌彈起不遮擋 */
 #hand { 
-    display: flex; justify-content: center; align-items: flex-end;
-    padding: 60px 10px 20px 10px; height: 180px; 
+    display: flex; 
+    justify-content: center; 
+    align-items: flex-end;
+    padding: 10px; 
+    height: 180px; /* 固定高度，預留彈起空間 */
+    width: 100%;
+    order: 1; /* 強制手牌順序為 1 (在上面) */
+}
+
+/* 控制鈕在下面 */
+#controls { 
+    display: flex; 
+    gap: 15px; 
+    margin-top: 15px; /* 與手牌拉開距離 */
+    order: 2; /* 強制按鈕順序為 2 (在下面) */
 }
 
 /* 迷你牌適配 (出牌區) */
