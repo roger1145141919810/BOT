@@ -7,11 +7,19 @@
     width: 100vw;
     height: 100vh;
     background: rgba(0, 0, 0, 0.9);
-    display: flex !important; 
+    
+    /* 關鍵修正：移除 !important */
+    display: flex; 
+    
     justify-content: center;
     align-items: center;
-    z-index: 99999 !important; 
-    pointer-events: auto !important; /* 確保能接收點擊 */
+    z-index: 9999;
+    pointer-events: auto;
+}
+
+/* 確保 hidden 優先級最高，能正常隱藏 */
+.hidden {
+    display: none !important;
 }
 
 .result-box {
@@ -25,9 +33,9 @@
     min-width: 320px;
     box-shadow: 0 0 30px rgba(212, 175, 55, 0.4), inset 0 0 15px rgba(212, 175, 55, 0.2);
     position: relative;
-    z-index: 100000;
+    z-index: 10000;
     pointer-events: auto !important;
-} /* <-- 補上這個括號 */
+}
 
 #winnerTitle {
     color: #ffcc33;
@@ -74,7 +82,7 @@
     font-size: 1.1rem;
     border-radius: 10px;
     transition: all 0.3s ease;
-    cursor: pointer !important; /* 確保滑鼠變手指 */
+    cursor: pointer !important;
     border: none;
     color: white;
     font-weight: bold;
