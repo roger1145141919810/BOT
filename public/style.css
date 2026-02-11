@@ -128,8 +128,8 @@ body {
 /* --- 7. 底部控制與 UI --- */
 .player-ui {
     position: fixed; 
-    /* 稍微提高位置，並利用負的 margin-top 向上吸附 */
-    bottom: 30px; 
+    /* 2. 讓整組 UI 離底部稍微遠一點，看起來更像在螢幕中心 */
+    bottom: 40px; 
     left: 50%; 
     transform: translateX(-50%);
     width: 100%; 
@@ -137,8 +137,6 @@ body {
     flex-direction: column; 
     align-items: center; 
     z-index: 2000;
-    /* 關鍵：透過負邊距讓整組手牌往牌桌靠近 */
-    margin-top: -50px; 
 }
 
 #hand { 
@@ -146,8 +144,8 @@ body {
     justify-content: center; 
     align-items: flex-end;
     padding: 0 10px; 
-    /* 縮減容器高度，讓牌桌與手牌更貼近 */
-    height: 140px; 
+    /* 3. 減少手牌區的固定高度，讓下方的按鈕自動「靠過來」 */
+    height: 130px; 
     width: 100%;
     order: 1;
 }
@@ -155,10 +153,17 @@ body {
 #controls { 
     display: flex; 
     gap: 15px; 
-    margin-top: 10px; 
+    /* 4. 將 margin-top 設為負值，強制按鈕往手牌的方向「吸」過去 */
+    margin-top: -10px; 
     order: 2;
+    padding-top: 10px;
 }
 
+/* 確保按鈕在選中牌彈起時不會被完全遮死 */
+.card.selected {
+    transform: translateY(-40px) !important; /* 稍微減小彈起高度 */
+    z-index: 600 !important;
+}
 /* 迷你牌適配 (出牌區) */
 .card-mini { width: 55px; height: 82px; padding: 6px 3px; margin-left: 0; cursor: default; }
 .card-mini::after { font-size: 22px; }
