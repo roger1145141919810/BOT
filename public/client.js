@@ -8,10 +8,10 @@ let allPlayers = [];
 let myReadyStatus = false;
 
 const SUIT_DATA = {
-    'clubs':    { symbol: '♣', color: '#2c3e50', weight: 0 },
+    'clubs':    { symbol: '♣', color: '#ffcc33', weight: 0 },
     'diamonds': { symbol: '♦', color: '#e74c3c', weight: 1 },
     'hearts':   { symbol: '♥', color: '#c0392b', weight: 2 },
-    'spades':   { symbol: '♠', color: '#2c3e50', weight: 3 }
+    'spades':   { symbol: '♠', color: '#ffcc33', weight: 3 }
 };
 
 function rankText(r) {
