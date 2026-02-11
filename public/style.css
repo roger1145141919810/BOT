@@ -147,3 +147,60 @@ body {
 
 #startBtn.is-ready { background: #27ae60; box-shadow: 0 0 15px #2ecc71; }
 button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+/* --- 8. 大廳與房間強制修正 (預防 result.css 衝突) --- */
+
+/* 使用 body 前綴提升優先級，確保覆蓋 result.css 的橫向撐開 */
+body #lobby, body #roomArea {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    z-index: 5000;
+    background: radial-gradient(circle at center, #163e32 0%, #051a14 100%);
+}
+
+/* 強制限制卡片寬度，防止變成長條 */
+body .lobby-card {
+    display: block !important;
+    width: 420px !important; /* 固定寬度，與結算畫面一致 */
+    max-width: 90% !important;
+    background: 
+        url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
+        radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%) !important;
+    border: 2px solid #d4af37 !important;
+    padding: 40px !important;
+    border-radius: 20px !important;
+    box-shadow: 0 0 50px rgba(0,0,0,0.9), 0 0 20px rgba(212,175,55,0.4) !important;
+    margin: auto !important;
+}
+
+/* 修正輸入框佈局 */
+.input-group {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 10px !important;
+    margin-bottom: 20px !important;
+}
+
+.input-group input {
+    flex: 1 !important;
+    min-width: 0 !important;
+    padding: 12px !important;
+    background: rgba(0,0,0,0.6) !important;
+    border: 1px solid #d4af37 !important;
+    color: white !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+}
+
+/* 確保按鈕在卡片內垂直排列且寬度正常 */
+.btn-group-vertical {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 15px !important;
+    width: 100% !important;
+}
