@@ -1,26 +1,19 @@
-/* --- 結算畫面專用樣式修正 --- */
+/* --- 結算畫面專用樣式 (已隔離，不污染大廳) --- */
 
 .overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
     background: rgba(0, 0, 0, 0.9);
-    
-    /* 關鍵修正：移除 !important */
     display: flex; 
-    
     justify-content: center;
     align-items: center;
-    z-index: 9999;
+    z-index: 9998; /* 比大廳稍微低一點點 */
     pointer-events: auto;
 }
 
-/* 確保 hidden 優先級最高，能正常隱藏 */
-.hidden {
-    display: none !important;
-}
+/* 確保隱藏標籤優先級最高 */
+.hidden { display: none !important; }
 
 .result-box {
     background: 
@@ -34,7 +27,6 @@
     box-shadow: 0 0 30px rgba(212, 175, 55, 0.4), inset 0 0 15px rgba(212, 175, 55, 0.2);
     position: relative;
     z-index: 10000;
-    pointer-events: auto !important;
 }
 
 #winnerTitle {
@@ -44,39 +36,14 @@
     text-shadow: 0 0 10px rgba(255, 204, 51, 0.5);
 }
 
-.result-box hr {
-    border: 0;
-    height: 1px;
-    background: linear-gradient(to right, transparent, #d4af37, transparent);
-    margin: 15px 0;
-}
-
-#playerStats {
-    margin: 20px 0;
-    font-size: 1.1rem;
-    line-height: 1.8;
-}
-
-.dissolve-hint {
-    color: #bdc3c7;
-    font-size: 0.9rem;
-    margin-bottom: 25px;
-}
-
-#shutdownTimer {
-    color: #ff4d4d;
-    font-weight: bold;
-    font-size: 1.2rem;
-    margin: 0 5px;
-}
-
-.btn-group-vertical {
+/* --- 隔離按鈕樣式：加上 #gameOverOverlay 限定範圍 --- */
+#gameOverOverlay .btn-group-vertical {
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
-.btn-group-vertical button {
+#gameOverOverlay .btn-group-vertical button {
     width: 100%;
     padding: 12px;
     font-size: 1.1rem;
@@ -88,5 +55,11 @@
     font-weight: bold;
 }
 
-.btn-group-vertical .primary-btn { background: #e67e22; box-shadow: 0 4px #d35400; }
-.btn-group-vertical .secondary-btn { background: #3498db; box-shadow: 0 4px #2980b9; }
+/* 只在結算畫面顯示橘色和藍色 */
+#gameOverOverlay .primary-btn { background: #e67e22; box-shadow: 0 4px #d35400; }
+#gameOverOverlay .secondary-btn { background: #3498db; box-shadow: 0 4px #2980b9; }
+
+#gameOverOverlay button:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}
