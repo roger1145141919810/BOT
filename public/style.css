@@ -26,12 +26,11 @@ body {
 .table-container {
     position: relative; 
     width: 100%; 
-    /* 將高度從 55vh 縮減到 45vh，減少中間空白 */
-    height: 45vh;  
+    /* 1. 減少牌桌高度，這是縮減中間大間隙的關鍵 */
+    height: 40vh;  
     display: flex; 
     justify-content: center; 
     align-items: center; 
-    /* 縮減上方間距 */
     margin-top: 2vh; 
 }
 .player-seat { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 130px; z-index: 10; }
