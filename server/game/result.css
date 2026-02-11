@@ -1,6 +1,5 @@
 /* --- 結算畫面專用樣式修正 --- */
 
-/* 覆蓋層：確保在最上層並接收點擊 */
 .overlay {
     position: fixed;
     top: 0;
@@ -12,10 +11,9 @@
     justify-content: center;
     align-items: center;
     z-index: 99999 !important; 
-    pointer-events: auto !important; 
+    pointer-events: auto !important; /* 確保能接收點擊 */
 }
 
-/* 結算主框體 */
 .result-box {
     background: 
         url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
@@ -29,9 +27,8 @@
     position: relative;
     z-index: 100000;
     pointer-events: auto !important;
-} /* <-- 剛才你漏掉這個括號 */
+} /* <-- 補上這個括號 */
 
-/* 標題與分隔線 */
 #winnerTitle {
     color: #ffcc33;
     font-size: 2rem;
@@ -46,14 +43,12 @@
     margin: 15px 0;
 }
 
-/* 玩家排名清單 */
 #playerStats {
     margin: 20px 0;
     font-size: 1.1rem;
     line-height: 1.8;
 }
 
-/* 倒計時文字 */
 .dissolve-hint {
     color: #bdc3c7;
     font-size: 0.9rem;
@@ -67,13 +62,10 @@
     margin: 0 5px;
 }
 
-/* 垂直按鈕群組 */
 .btn-group-vertical {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    position: relative;
-    z-index: 100001;
 }
 
 .btn-group-vertical button {
@@ -82,28 +74,11 @@
     font-size: 1.1rem;
     border-radius: 10px;
     transition: all 0.3s ease;
-    cursor: pointer !important; /* 確保滑鼠移上去會變手指 */
+    cursor: pointer !important; /* 確保滑鼠變手指 */
     border: none;
     color: white;
     font-weight: bold;
 }
 
-.btn-group-vertical .primary-btn {
-    background: #e67e22;
-    box-shadow: 0 4px #d35400;
-}
-
-.btn-group-vertical .primary-btn:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px #d35400;
-}
-
-.btn-group-vertical .secondary-btn {
-    background: #3498db;
-    box-shadow: 0 4px #2980b9;
-}
-
-.btn-group-vertical .secondary-btn:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px #2980b9;
-}
+.btn-group-vertical .primary-btn { background: #e67e22; box-shadow: 0 4px #d35400; }
+.btn-group-vertical .secondary-btn { background: #3498db; box-shadow: 0 4px #2980b9; }
