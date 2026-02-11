@@ -1,6 +1,6 @@
-/* --- 大廳與等待房間：絕對優先權樣式 --- */
+/* --- 龍紋黑金大廳：絕對優先權與輸入框修復 --- */
 
-/* 1. 強制容器置中與層級 */
+/* 1. 強制容器層級 */
 body #lobby, body #roomArea {
     position: fixed !important;
     top: 0 !important;
@@ -14,7 +14,7 @@ body #lobby, body #roomArea {
     background: radial-gradient(circle at center, #163e32 0%, #051a14 100%) !important;
 }
 
-/* 2. 強制黑金卡片樣式：覆蓋 result.css 的背景洗牌 */
+/* 2. 黑金卡片本體 */
 #lobby .lobby-card, #roomArea .lobby-card {
     background: 
         url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
@@ -23,66 +23,56 @@ body #lobby, body #roomArea {
     border-radius: 20px !important;
     border: 2px solid #d4af37 !important;
     width: 420px !important;
-    max-width: 90% !important;
-    min-height: 420px !important;
+    min-height: 450px !important; /* 增加高度確保不擠壓 */
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(212, 175, 55, 0.4) !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
+    color: white !important;
 }
 
-/* 3. 輸入框佈局修正 */
+/* 3. 【關鍵修復】輸入框區域：解決「看起來像黑線」的問題 */
 #lobby .input-group {
     display: flex !important;
     flex-direction: column !important;
-    gap: 12px !important;
-    margin-bottom: 25px !important;
+    gap: 15px !important;
+    margin: 20px 0 !important;
 }
 
 #lobby .input-group input {
-    height: 48px !important;
-    background: rgba(0, 0, 0, 0.6) !important;
+    height: 50px !important; /* 強制高度，防止變成一條線 */
+    background: rgba(255, 255, 255, 0.1) !important; /* 稍微亮一點點的深色 */
     border: 1px solid #d4af37 !important;
-    color: #fff !important;
+    color: #ffcc33 !important; /* 輸入文字為金色 */
     border-radius: 8px !important;
     text-align: center !important;
-    font-size: 1rem !important;
+    font-size: 1.1rem !important;
+    padding: 0 10px !important;
+    outline: none !important;
 }
 
-/* 4. 強制按鈕樣式：解決截圖 2 中橘色按鈕覆蓋問題 */
+#lobby .input-group input::placeholder {
+    color: rgba(212, 175, 55, 0.6) !important; /* 讓提示文字變明顯 */
+}
+
+/* 4. 金色按鈕修復：奪回 result.css 搶走的控制權 */
 #lobby .btn-group-vertical button, 
-#roomArea .btn-group button,
-#roomArea .btn-group-vertical button {
+#roomArea .btn-group button {
     width: 100% !important;
-    height: 52px !important;
-    margin-top: 10px !important;
+    height: 55px !important;
+    margin-top: 12px !important;
     font-size: 1.1rem !important;
     font-weight: bold !important;
     border-radius: 10px !important;
     border: none !important;
     cursor: pointer !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    /* 金色漸層強制覆蓋 result.css 的 #e67e22 */
+    /* 強制使用金色漸層 */
     background: linear-gradient(135deg, #d4af37 0%, #aa8913 100%) !important;
     color: #000 !important; 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* 按鈕懸停效果 */
-#lobby .btn-group-vertical button:hover, 
-#roomArea .btn-group button:hover {
+#lobby .btn-group-vertical button:hover {
     filter: brightness(1.2) !important;
     transform: translateY(-2px) !important;
-}
-
-/* 準備室文字顏色修正 */
-#roomArea h3 { color: #ffcc33 !important; }
-#roomArea .hint { color: #aaa !important; margin-top: 15px; }
-
-/* 準備狀態特別處理 (變紅) */
-#roomArea button#startBtn.is-ready {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
-    color: #fff !important;
 }
