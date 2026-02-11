@@ -24,8 +24,15 @@ body {
 
 /* --- 3. 牌桌佈局 --- */
 .table-container {
-    position: relative; width: 100%; height: 55vh; 
-    display: flex; justify-content: center; align-items: center; margin-top: 5vh;
+    position: relative; 
+    width: 100%; 
+    /* 將高度從 55vh 縮減到 45vh，減少中間空白 */
+    height: 45vh;  
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    /* 縮減上方間距 */
+    margin-top: 2vh; 
 }
 .player-seat { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 130px; z-index: 10; }
 .player-info-wrapper { display: flex; flex-direction: column; align-items: center; background: rgba(0, 0, 0, 0.6); padding: 8px 15px; border-radius: 12px; gap: 5px; border: 1px solid rgba(255, 255, 255, 0.1); }
@@ -122,8 +129,8 @@ body {
 /* --- 7. 底部控制與 UI --- */
 .player-ui {
     position: fixed; 
-    /* 從 20px 改為 50px，這會讓整組手牌明顯往上移動 */
-    bottom: 50px; 
+    /* 稍微提高位置，並利用負的 margin-top 向上吸附 */
+    bottom: 30px; 
     left: 50%; 
     transform: translateX(-50%);
     width: 100%; 
@@ -131,25 +138,25 @@ body {
     flex-direction: column; 
     align-items: center; 
     z-index: 2000;
+    /* 關鍵：透過負邊距讓整組手牌往牌桌靠近 */
+    margin-top: -50px; 
 }
 
-/* 手牌容器 */
 #hand { 
     display: flex; 
     justify-content: center; 
     align-items: flex-end;
-    padding: 10px; 
-    height: 160px; /* 稍微縮短高度，讓牌與按鈕更緊湊 */
+    padding: 0 10px; 
+    /* 縮減容器高度，讓牌桌與手牌更貼近 */
+    height: 140px; 
     width: 100%;
     order: 1;
 }
 
-/* 按鈕容器 */
 #controls { 
     display: flex; 
     gap: 15px; 
-    /* 縮小間距，讓按鈕緊貼手牌下方 */
-    margin-top: 5px; 
+    margin-top: 10px; 
     order: 2;
 }
 
