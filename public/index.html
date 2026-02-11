@@ -5,8 +5,10 @@
     <meta charset="utf-8" />
     <title>BOT - Big Old Two</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    
     <link rel="stylesheet" href="/style.css" />
     <link rel="stylesheet" href="/result.css" />
+    <link rel="stylesheet" href="/lobby.css" />
 </head>
 
 <body>
@@ -20,8 +22,8 @@
                 <h3>遊戲大廳</h3>
                 <hr>
                 <div class="input-group">
-                    <input id="roomId" placeholder="請輸入房間ID">
-                    <input id="name" placeholder="請輸入你的名字">
+                    <input id="roomId" type="text" placeholder="請輸入房間ID">
+                    <input id="name" type="text" placeholder="請輸入你的名字">
                 </div>
                 <div class="btn-group-vertical">
                     <button id="createBtn" class="primary-btn">建立新房間</button>
@@ -35,10 +37,10 @@
                 <h3>房間 ID: <span id="curRoom">-</span></h3>
                 <hr>
                 <div id="playersList"></div>
-                <div class="btn-group">
+                <div class="btn-group-vertical">
                     <button id="startBtn" class="primary-btn">準備遊戲</button>
                 </div>
-                <p class="hint">最少 2 人即可開局（會自動補足 AI）</p>
+                <p class="hint" style="margin-top: 15px; font-size: 0.9rem; color: #aaa;">最少 2 人即可開局（會自動補足 AI）</p>
             </div>
         </div>
 
@@ -47,7 +49,7 @@
                 <div class="poker-table">
                     <div id="status">等待開局...</div>
                     <div id="lastPlay">
-                        <div id="lastPlayContent">等待出牌...</div>
+                        <div id="lastPlayContent" class="played-cards-wrapper">等待出牌...</div>
                     </div>
                 </div>
 
@@ -55,8 +57,10 @@
                 <div class="player-seat pos-left" id="p1-seat"></div>
                 <div class="player-seat pos-right" id="p3-seat"></div>
                 <div class="player-seat pos-bottom" id="me-seat">
-                    <span class="my-badge">你</span>
-                    <div id="my-name">玩家</div>
+                    <div id="me-info" class="player-info-wrapper">
+                        <span class="my-badge">你</span>
+                        <div id="my-name">玩家</div>
+                    </div>
                 </div>
             </div>
 
