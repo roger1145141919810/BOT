@@ -6,13 +6,34 @@ let myHand = [];
 let selected = new Set();
 let allPlayers = [];
 let myReadyStatus = false;
-let countdownTimer = null; // 用於儲存倒計時 Interval
+let countdownTimer = null;
 
 const SUIT_DATA = {
     'clubs':    { symbol: '♣', color: '#ffcc33', weight: 0 },
     'diamonds': { symbol: '♦', color: '#e74c3c', weight: 1 },
     'hearts':   { symbol: '♥', color: '#c0392b', weight: 2 },
     'spades':   { symbol: '♠', color: '#ffcc33', weight: 3 }
+};
+
+// 【新增】統一介面切換器，確保狀態乾淨
+function showScreen(screenId) {
+    const screens = ['lobby', 'roomArea', 'game', 'gameOverOverlay'];
+    screens.forEach(id => {
+        const el = $(id);
+        if (el) {
+            if (id === screenId) el.classList.remove('hidden');
+            else if (id !== 'gameOverOverlay' || screenId !== 'game') {
+                // 除非是在遊戲中，否則結算層也要一起隱藏
+                el.classList.add('hidden');
+            }
+        }
+    });
+}
+
+// 【新增】網頁載入時強制顯示大廳
+window.onload = () => {
+    showScreen('lobby');
+    console.log("遊戲初始化：大廳已就緒");
 };
 
 function rankText(r) {
@@ -124,27 +145,26 @@ function renderHand() {
 
 socket.on('error_msg', msg => alert(msg));
 
+// 成功建立與加入時才切換畫面
 socket.on('create_success', ({ roomId }) => {
     currentRoom = roomId;
-    $('lobby').classList.add('hidden');
-    $('roomArea').classList.remove('hidden');
     $('curRoom').textContent = roomId;
+    showScreen('roomArea');
 });
 
 socket.on('join_success', ({ roomId }) => {
     currentRoom = roomId;
-    $('lobby').classList.add('hidden');
-    $('roomArea').classList.remove('hidden');
     $('curRoom').textContent = roomId;
+    showScreen('roomArea');
 });
 
+// 【重點修正】room_update 不應該強制切換畫面，除非玩家已經在房間內
 socket.on('room_update', players => {
     allPlayers = players;
-    if (!isGameActive()) {
-        $('lobby').classList.add('hidden');
-        $('roomArea').classList.remove('hidden');
-        if (currentRoom) $('curRoom').textContent = currentRoom;
-    } else {
+    if (currentRoom && !isGameActive()) {
+        showScreen('roomArea');
+        $('curRoom').textContent = currentRoom;
+    } else if (isGameActive()) {
         updateSeats(allPlayers, null); 
     }
     renderPlayers(players);
@@ -161,9 +181,8 @@ socket.on('deal', hand => {
 
 socket.on('game_start', ({ currentPlayerId, players }) => {
     allPlayers = players;
-    $('roomArea').classList.add('hidden');
-    $('game').classList.remove('hidden');
-    $('gameOverOverlay').classList.add('hidden'); // 確保開始時關閉結算窗
+    showScreen('game');
+    $('gameOverOverlay').classList.add('hidden');
     
     allPlayers.forEach(p => {
         p.cardCount = 13;
@@ -225,7 +244,6 @@ socket.on('new_round', () => {
     updateSeats(allPlayers, null); 
 });
 
-// --- 結算與倒計時邏輯 ---
 socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
     const overlay = $('gameOverOverlay');
     const statsEl = $('playerStats');
@@ -250,7 +268,6 @@ socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
     overlay.classList.remove('hidden');
     selected.clear();
 
-    // 啟動 30 秒倒計時
     let timeLeft = 30;
     timerDisplay.textContent = timeLeft;
     
@@ -260,14 +277,13 @@ socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
         timerDisplay.textContent = timeLeft;
         if (timeLeft <= 0) {
             clearInterval(countdownTimer);
-            location.reload(); // 時間到自動回大廳
+            location.reload(); 
         }
     }, 1000);
 });
 
 // --- 按鈕事件 ---
 
-// 建立房間
 $('createBtn').onclick = () => {
     const roomId = $('roomId').value.trim();
     const name = $('name').value.trim() || 'Player';
@@ -275,7 +291,6 @@ $('createBtn').onclick = () => {
     socket.emit('create_room', { roomId, name });
 };
 
-// 加入房間
 $('joinBtn').onclick = () => {
     const roomId = $('roomId').value.trim();
     const name = $('name').value.trim() || 'Player';
@@ -283,14 +298,12 @@ $('joinBtn').onclick = () => {
     socket.emit('join_room', { roomId, name });
 };
 
-// 開始遊戲 / 準備
 $('startBtn').onclick = () => {
     if (currentRoom) {
         socket.emit('toggle_ready', { roomId: currentRoom });
     }
 };
 
-// 出牌
 $('playBtn').onclick = () => {
     const cards = myHand.filter(c => selected.has(c.id));
     if (cards.length === 0) return;
@@ -298,32 +311,19 @@ $('playBtn').onclick = () => {
     selected.clear();
 };
 
-// 過牌
 $('passBtn').onclick = () => {
     socket.emit('pass', { roomId: currentRoom });
     selected.clear();
 };
 
-// 【重要修正】再玩一局：重置 UI 並通知伺服器
 $('restartBtn').onclick = () => {
-    console.log("嘗試重新開始...");
     if (countdownTimer) clearInterval(countdownTimer);
-    
-    // 1. 隱藏結算層，切換畫面回到房間等待區
-    $('gameOverOverlay').classList.add('hidden');
-    $('game').classList.add('hidden');
-    $('roomArea').classList.remove('hidden');
-
-    // 2. 通知伺服器玩家準備下一局
+    showScreen('roomArea');
     if (currentRoom) {
         socket.emit('toggle_ready', { roomId: currentRoom });
     }
 };
 
-// 回到大廳
 $('backToLobbyBtn').onclick = () => {
-    console.log("返回大廳...");
-    if (countdownTimer) clearInterval(countdownTimer);
-    // 最徹底的做法是重整網頁，清空所有變數
     location.reload(); 
 };
