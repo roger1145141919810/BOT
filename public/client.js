@@ -103,8 +103,12 @@ function renderHand() {
     handEl.innerHTML = '';
     myHand.forEach((c) => {
         const card = document.createElement('div');
-        card.className = 'card';
-        const info = SUIT_DATA[c.suit] || { symbol: c.suit, color: 'black' };
+        
+        // [新增] 判斷花色決定 class，讓 CSS 特效抓得到目標
+        const colorClass = (c.suit === 'spades' || c.suit === 'clubs') ? 'black' : 'red';
+        card.className = `card ${colorClass}`; 
+        
+        const info = SUIT_DATA[c.suit] || { symbol: c.suit, color: 'white' };
         card.style.color = info.color;
         card.innerHTML = `
             <div class="rank">${rankText(c.rank)}</div>
@@ -211,8 +215,10 @@ socket.on('play_made', ({ playerId, cards, isPass }) => {
     if (!isPass) {
         const cardsHtml = cards.map(c => {
             const suitInfo = SUIT_DATA[c.suit];
+            // [新增] 同樣套用 colorClass
+            const colorClass = (c.suit === 'spades' || c.suit === 'clubs') ? 'black' : 'red';
             return `
-                <div class="card-mini" style="color: ${suitInfo.color};">
+                <div class="card-mini ${colorClass}" style="color: ${suitInfo.color};">
                     <div class="rank-mini">${rankText(c.rank)}</div>
                     <div class="suit-mini">${suitInfo.symbol}</div>
                 </div>
