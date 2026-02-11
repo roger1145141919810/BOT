@@ -44,16 +44,35 @@ const Rules = {
             // A. 同花判定
             const isFlush = cards.every(c => c.suit === cards[0].suit);
 
-            // B. 順子判定 (處理一般順子與 A2345)
+            // B. 順子判定 (依台灣大老二規則：23456最大, 10JQKA次之, A2345最小)
             let isStraight = false;
             let straightTopPower = 0;
+
             if (uniqueRanks.length === 5) {
-                if (ranks[4] - ranks[0] === 4) {
+                // 檢查特殊順子組成 (Rank: 3, 4, 5, 6, 15 為 2-3-4-5-6)
+                const has3 = ranks.includes(3);
+                const has4 = ranks.includes(4);
+                const has5 = ranks.includes(5);
+                const has6 = ranks.includes(6);
+                const has14 = ranks.includes(14);
+                const has15 = ranks.includes(15);
+
+                const is23456 = has3 && has4 && has5 && has6 && has15;
+                const isA2345 = has3 && has4 && has5 && has14 && has15;
+                const isNormalStraight = (ranks[4] - ranks[0] === 4) && !ranks.includes(15);
+
+                if (is23456) {
                     isStraight = true;
-                    straightTopPower = ranks[4]; // 正常順子取最大那張
-                } else if (ranks.includes(14) && ranks.includes(15) && ranks.includes(3) && ranks.includes(4) && ranks.includes(5)) {
+                    // 給予 20，確保大於 A順(14) 與一般順
+                    straightTopPower = 20; 
+                } else if (isNormalStraight) {
                     isStraight = true;
-                    straightTopPower = 15; // A2345 順子在許多規則中以 2 為大
+                    // A順(10-A) 會是 14，其餘依最大張 rank 分布 (7~13)
+                    straightTopPower = ranks[4]; 
+                } else if (isA2345) {
+                    isStraight = true;
+                    // 怪物順(最小)，給予 1
+                    straightTopPower = 1; 
                 }
             }
 
@@ -105,8 +124,7 @@ const Rules = {
         // 張數必須相同 (大老二基本規則)
         if (newCards.length !== lastPlay.length) return false;
 
-        // 如果都是五張牌型，因為我們在 getPlayInfo 設定了 Power 階層，
-        // 葫蘆(600+) 會自動大於 順子(200+)，直接比 power 即可。
+        // 如果都是五張牌型，比 power
         return next.power > prev.power;
     }
 };
