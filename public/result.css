@@ -1,1 +1,84 @@
+/* --- 結算畫面專用樣式修正 --- */
 
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex !important; 
+    justify-content: center;
+    align-items: center;
+    z-index: 99999 !important; 
+    pointer-events: auto !important; /* 確保能接收點擊 */
+}
+
+.result-box {
+    background: 
+        url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
+        radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%);
+    padding: 30px;
+    border-radius: 20px;
+    border: 2px solid #d4af37;
+    text-align: center;
+    min-width: 320px;
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.4), inset 0 0 15px rgba(212, 175, 55, 0.2);
+    position: relative;
+    z-index: 100000;
+    pointer-events: auto !important;
+} /* <-- 補上這個括號 */
+
+#winnerTitle {
+    color: #ffcc33;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px rgba(255, 204, 51, 0.5);
+}
+
+.result-box hr {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #d4af37, transparent);
+    margin: 15px 0;
+}
+
+#playerStats {
+    margin: 20px 0;
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+.dissolve-hint {
+    color: #bdc3c7;
+    font-size: 0.9rem;
+    margin-bottom: 25px;
+}
+
+#shutdownTimer {
+    color: #ff4d4d;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin: 0 5px;
+}
+
+.btn-group-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn-group-vertical button {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    cursor: pointer !important; /* 確保滑鼠變手指 */
+    border: none;
+    color: white;
+    font-weight: bold;
+}
+
+.btn-group-vertical .primary-btn { background: #e67e22; box-shadow: 0 4px #d35400; }
+.btn-group-vertical .secondary-btn { background: #3498db; box-shadow: 0 4px #2980b9; }
