@@ -119,36 +119,38 @@ body {
 }
 .suit, .suit-mini { font-size: 20px; }
 
-/* --- 7. 底部控制與 UI (重點修改區) --- */
+/* --- 7. 底部控制與 UI --- */
 .player-ui {
     position: fixed; 
-    bottom: 20px; 
+    /* 從 20px 改為 50px，這會讓整組手牌明顯往上移動 */
+    bottom: 50px; 
     left: 50%; 
     transform: translateX(-50%);
     width: 100%; 
     display: flex; 
-    flex-direction: column; /* 確保內容垂直排列 */
+    flex-direction: column; 
     align-items: center; 
     z-index: 2000;
 }
 
-/* 手牌在上面，確保有足夠的 min-height 讓牌彈起不遮擋 */
+/* 手牌容器 */
 #hand { 
     display: flex; 
     justify-content: center; 
     align-items: flex-end;
     padding: 10px; 
-    height: 180px; /* 固定高度，預留彈起空間 */
+    height: 160px; /* 稍微縮短高度，讓牌與按鈕更緊湊 */
     width: 100%;
-    order: 1; /* 強制手牌順序為 1 (在上面) */
+    order: 1;
 }
 
-/* 控制鈕在下面 */
+/* 按鈕容器 */
 #controls { 
     display: flex; 
     gap: 15px; 
-    margin-top: 15px; /* 與手牌拉開距離 */
-    order: 2; /* 強制按鈕順序為 2 (在下面) */
+    /* 縮小間距，讓按鈕緊貼手牌下方 */
+    margin-top: 5px; 
+    order: 2;
 }
 
 /* 迷你牌適配 (出牌區) */
@@ -156,6 +158,16 @@ body {
 .card-mini::after { font-size: 22px; }
 
 /* 按鈕風格 */
-.primary-btn { background: #e67e22; border: none; padding: 10px 25px; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
-.secondary-btn { background: #3498db; border: none; padding: 10px 25px; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; }
+.primary-btn { 
+    background: #e67e22; border: none; padding: 10px 25px; color: white; border-radius: 8px; 
+    cursor: pointer; font-weight: bold; transition: background 0.2s;
+}
+.primary-btn:hover { background: #d35400; }
+
+.secondary-btn { 
+    background: #3498db; border: none; padding: 10px 25px; color: white; border-radius: 8px; 
+    cursor: pointer; font-weight: bold; transition: background 0.2s;
+}
+.secondary-btn:hover { background: #2980b9; }
+
 button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
