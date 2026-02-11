@@ -16,11 +16,17 @@
         </header>
 
         <div id="lobby">
-            <input id="roomId" placeholder="房間ID">
-            <input id="name" placeholder="你的名字">
-            <div class="btn-group">
-                <button id="createBtn">建立房間</button>
-                <button id="joinBtn">加入房間</button>
+            <div class="lobby-card">
+                <h3>遊戲大廳</h3>
+                <hr>
+                <div class="input-group">
+                    <input id="roomId" placeholder="請輸入房間ID">
+                    <input id="name" placeholder="請輸入你的名字">
+                </div>
+                <div class="btn-group-vertical">
+                    <button id="createBtn" class="primary-btn">建立新房間</button>
+                    <button id="joinBtn" class="secondary-btn">加入現有房間</button>
+                </div>
             </div>
         </div>
 
@@ -30,7 +36,7 @@
                 <hr>
                 <div id="playersList"></div>
                 <div class="btn-group">
-                    <button id="startBtn" class="primary-btn">開始遊戲</button>
+                    <button id="startBtn" class="primary-btn">準備遊戲</button>
                 </div>
                 <p class="hint">最少 2 人即可開局（會自動補足 AI）</p>
             </div>
@@ -68,11 +74,9 @@
                 <h2 id="winnerTitle">遊戲結束</h2>
                 <hr>
                 <div id="playerStats"></div>
-
                 <p class="dissolve-hint">
                     房間將在 <span id="shutdownTimer">30</span> 秒後自動解散
                 </p>
-
                 <div class="btn-group-vertical">
                     <button id="restartBtn" class="primary-btn">再玩一局</button>
                     <button id="backToLobbyBtn" class="secondary-btn">回到大廳</button>
