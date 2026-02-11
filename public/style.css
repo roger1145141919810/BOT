@@ -39,7 +39,13 @@ body {
 .pos-top { top: 5%; left: 50%; transform: translateX(-50%); }
 .pos-left { left: 5%; top: 45%; transform: translateY(-50%); }
 .pos-right { right: 5%; top: 45%; transform: translateY(-50%); }
-.pos-bottom { bottom: 5%; left: 50%; transform: translateX(-50%); }
+.pos-bottom { 
+    /* 2. 關鍵：讓你的 ID 框直接貼在手牌上方，不使用 absolute 撐開距離 */
+    bottom: -10px; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    z-index: 2000;
+}
 
 /* --- 4. 出牌區 --- */
 #lastPlayContent { display: flex; justify-content: center; align-items: center; min-height: 140px; }
