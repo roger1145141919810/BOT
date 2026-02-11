@@ -1,6 +1,6 @@
-/* --- 大廳與等待房間 整合樣式修正 --- */
+/* --- 大廳與等待房間 整合樣式 --- */
 
-/* 1. 讓背景容器水平垂直置中，並確保隱藏時不佔空間 */
+/* 1. 讓容器水平垂直置中 */
 #lobby, #roomArea {
     display: flex;
     justify-content: center;
@@ -8,29 +8,22 @@
     min-height: 80vh;
 }
 
-/* 當有 .hidden 時強制隱藏 */
-#lobby.hidden, #roomArea.hidden {
-    display: none !important;
-}
-
 /* 2. 核心卡片外框 (大廳與等待室共用) */
+/* 這裡移除了前綴，確保帶有 .lobby-card 的 div 都能吃到樣式 */
 .lobby-card {
     background: 
         url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
         radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%);
     padding: 40px;
     border-radius: 20px;
-    border: 2px solid #d4af37; /* 金色發光邊框 */
+    border: 2px solid #d4af37; /* 金色邊框 */
     text-align: center;
     min-width: 380px;
-    max-width: 500px;
+    max-width: 450px;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.3);
     color: white;
-    position: relative;
-    z-index: 10;
 }
 
-/* 3. 標題與裝飾線 */
 .lobby-card h3 {
     color: #ffcc33;
     font-size: 1.8rem;
@@ -45,45 +38,31 @@
     margin: 20px 0;
 }
 
-/* 4. 大廳專用：輸入框美化 */
-#lobby input {
-    width: 100%;
+/* 3. 輸入框與按鈕組美化 (大廳專用) */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.input-group input {
     padding: 12px;
-    margin: 10px 0;
     border-radius: 8px;
     border: 1px solid #d4af37;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     color: white;
     font-size: 1rem;
     text-align: center;
-    transition: all 0.3s;
 }
 
-#lobby input:focus {
+.input-group input:focus {
     outline: none;
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
     background: rgba(0, 0, 0, 0.8);
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
 
-/* 5. 玩家列表 (等待室專用) */
-#playersList {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 25px;
-    border: 1px solid rgba(212, 175, 55, 0.2);
-    text-align: left;
-}
-
-.player-entry {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-/* 6. 按鈕系統 (統一風格) */
+/* 4. 統一按鈕樣式 (建立、加入、開始、準備) */
 .primary-btn, #startBtn, #createBtn, #joinBtn {
     width: 100%;
     padding: 15px;
@@ -102,9 +81,27 @@
 .primary-btn:hover, #startBtn:hover {
     transform: translateY(-2px);
     filter: brightness(1.2);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
 }
 
-/* 準備狀態特別顏色 */
+/* 5. 玩家列表 (等待室專用) */
+#playersList {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.player-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* 準備狀態特別處理 */
 #startBtn.is-ready {
     background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
     color: white;
