@@ -267,6 +267,7 @@ socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
 
 // --- 按鈕事件 ---
 
+// 建立房間
 $('createBtn').onclick = () => {
     const roomId = $('roomId').value.trim();
     const name = $('name').value.trim() || 'Player';
@@ -274,6 +275,7 @@ $('createBtn').onclick = () => {
     socket.emit('create_room', { roomId, name });
 };
 
+// 加入房間
 $('joinBtn').onclick = () => {
     const roomId = $('roomId').value.trim();
     const name = $('name').value.trim() || 'Player';
@@ -281,12 +283,14 @@ $('joinBtn').onclick = () => {
     socket.emit('join_room', { roomId, name });
 };
 
+// 開始遊戲 / 準備
 $('startBtn').onclick = () => {
     if (currentRoom) {
         socket.emit('toggle_ready', { roomId: currentRoom });
     }
 };
 
+// 出牌
 $('playBtn').onclick = () => {
     const cards = myHand.filter(c => selected.has(c.id));
     if (cards.length === 0) return;
@@ -294,23 +298,35 @@ $('playBtn').onclick = () => {
     selected.clear();
 };
 
+// 過牌
 $('passBtn').onclick = () => {
     socket.emit('pass', { roomId: currentRoom });
     selected.clear();
 };
 
-// 再玩一局：重置 UI 並通知伺服器
+// 【重要修正】再玩一局：重置 UI 並通知伺服器
 $('restartBtn').onclick = () => {
+    console.log("嘗試重新開始...");
     if (countdownTimer) clearInterval(countdownTimer);
+    
+    // 隱藏結算層，回到房間等待區
     $('gameOverOverlay').classList.add('hidden');
     $('game').classList.add('hidden');
     $('roomArea').classList.remove('hidden');
-    // 通知伺服器玩家點擊了再玩一局 (伺服器應處理 toggle_ready 邏輯)
-    if (currentRoom) socket.emit('toggle_ready', { roomId: currentRoom });
+
+    // 通知伺服器重新切換準備狀態
+    if (currentRoom) {
+        socket.emit('toggle_ready', { roomId: currentRoom });
+    }
 };
 
-// 回大廳：直接刷新頁面
+// 【重要修正】返回大廳
 $('backToLobbyBtn').onclick = () => {
+    console.log("返回大廳...");
     if (countdownTimer) clearInterval(countdownTimer);
-    location.reload();
+    if (currentRoom) {
+        socket.emit('leave_room', { roomId: currentRoom });
+    }
+    // 直接重整網頁是最乾淨的返回大廳方式
+    location.reload(); 
 };
