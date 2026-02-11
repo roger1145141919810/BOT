@@ -1,11 +1,13 @@
 <!doctype html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="utf-8" />
     <title>BOT - Big Old Two</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <link rel="stylesheet" href="/style.css" />
 </head>
+
 <body>
     <div class="center">
         <header>
@@ -52,30 +54,34 @@
             </div>
 
             <div class="player-ui">
-                <div id="hand"></div> <div id="controls"> <button id="playBtn" class="primary-btn" disabled>出牌</button>
+                <div id="hand"></div>
+                <div id="controls">
+                    <button id="playBtn" class="primary-btn" disabled>出牌</button>
                     <button id="passBtn" class="secondary-btn" disabled>過牌 (Pass)</button>
                 </div>
             </div>
         </div>
 
         <div id="gameOverOverlay" class="overlay hidden">
-    <div class="result-box">
-        <h2 id="winnerTitle">遊戲結束</h2>
-        <hr>
-        <div id="playerStats"></div>
-        
-        <p class="dissolve-hint">
-            房間將在 <span id="shutdownTimer">30</span> 秒後自動解散
-        </p>
+            <div class="result-box">
+                <h2 id="winnerTitle">遊戲結束</h2>
+                <hr>
+                <div id="playerStats"></div>
 
-        <div class="btn-group-vertical">
-            <button id="restartBtn" class="primary-btn">再玩一局</button>
-            <button id="backToLobbyBtn" class="secondary-btn">回到大廳</button>
+                <p class="dissolve-hint">
+                    房間將在 <span id="shutdownTimer">30</span> 秒後自動解散
+                </p>
+
+                <div class="btn-group-vertical">
+                    <button id="restartBtn" class="primary-btn">再玩一局</button>
+                    <button id="backToLobbyBtn" class="secondary-btn">回到大廳</button>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-    <script src="/socket.io/socket.io.js"></script> 
+    <script src="/socket.io/socket.io.js"></script>
     <script src="/client.js"></script>
 </body>
+
 </html>
