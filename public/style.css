@@ -10,71 +10,7 @@ body {
 .center { width: 100%; max-width: 1200px; position: relative; height: 100%; }
 .hidden { display: none !important; }
 
-/* --- 2. 房間資訊與準備區 (修正：統一黑金卡片格式) --- */
-#lobby, #roomArea {
-    position: fixed; /* 改為固定定位 */
-    top: 0; left: 0; 
-    width: 100vw; height: 100vh;
-    display: flex; justify-content: center; align-items: center;
-    z-index: 4000; /* 確保在最上層 */
-    background: rgba(0, 0, 0, 0.4); /* 背景暗化 */
-}
-
-/* 核心：黑金卡片外框 */
-.lobby-card {
-    background: 
-        url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
-        radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%);
-    padding: 35px 45px;
-    border-radius: 20px;
-    border: 2px solid #d4af37; /* 金色邊框 */
-    text-align: center;
-    min-width: 380px;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.3);
-    color: white;
-}
-
-.lobby-card h3 {
-    color: #ffcc33;
-    font-size: 1.8rem;
-    margin-bottom: 5px;
-    text-shadow: 0 0 10px rgba(255, 204, 51, 0.4);
-}
-
-.lobby-card hr {
-    border: 0; height: 1px;
-    background: linear-gradient(to right, transparent, #d4af37, transparent);
-    margin: 15px 0 25px 0;
-}
-
-/* 輸入框美化 */
-.input-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; }
-.input-group input {
-    background: rgba(0, 0, 0, 0.6);
-    border: 1px solid #d4af37;
-    border-radius: 8px;
-    padding: 12px;
-    color: white;
-    font-size: 1rem;
-    text-align: center;
-}
-
-/* 玩家列表美化 */
-#playersList {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid rgba(212, 175, 55, 0.1);
-    text-align: left;
-}
-
-.player-entry { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.player-entry:last-child { border-bottom: none; }
-.status-ready { color: #2ecc71; font-weight: bold; }
-.status-waiting { color: #95a5a6; }
-
-/* --- 3. 牌桌佈局 (保持原樣，避免衝突) --- */
+/* --- 2. 牌桌佈局 --- */
 .table-container {
     position: relative; 
     width: 100%; height: 55vh;  
@@ -90,11 +26,11 @@ body {
 .pos-right { right: 5%; top: 45%; transform: translateY(-50%); }
 .pos-bottom { bottom: -10px; left: 50%; transform: translateX(-50%); z-index: 2000; }
 
-/* --- 4. 出牌區 --- */
+/* --- 3. 出牌展示區 --- */
 #lastPlayContent { display: flex; justify-content: center; align-items: center; min-height: 140px; }
 .played-cards-wrapper { display: flex; justify-content: center; gap: 8px; background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 15px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
 
-/* --- 5. [核心樣式] 黑金龍紋牌張 --- */
+/* --- 4. [核心樣式] 黑金龍紋牌張 --- */
 .card, .card-mini {
     width: 80px; height: 120px; position: relative; overflow: visible; cursor: pointer;
     user-select: none; transition: transform 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28), box-shadow 0.2s ease;
@@ -113,15 +49,15 @@ body {
 #hand .card { margin-left: -20px; }
 #hand .card:first-child { margin-left: 0; }
 #hand .card:hover { transform: translateY(-35px) scale(1.05); z-index: 500 !important; box-shadow: 0 20px 40px rgba(0,0,0,0.8) !important; }
-.card.selected { transform: translateY(-55px) !important; border: 2px solid #ffffff !important; box-shadow: 0 0 25px rgba(212, 175, 55, 0.7), 0 15px 30px rgba(0,0,0,0.6) !important; z-index: 600 !important; }
+.card.selected { transform: translateY(-55px) !important; border: 2px solid #ffffff !important; box-shadow: 0 0 25px rgba(212, 175, 55, 0.7) !important; z-index: 600 !important; }
 
-/* --- 6. 字體與顏色修正 --- */
-.rank, .rank-mini { font-family: "Georgia", serif !important; font-weight: 900 !important; letter-spacing: -1px; }
-.black { color: #ffcc33 !important; text-shadow: 1px 1px 2px rgba(0,0,0,1), 0 0 8px rgba(212, 175, 55, 0.5) !important; }
-.red { color: #ff4d4d !important; text-shadow: 1px 1px 2px rgba(0,0,0,1), 0 0 5px rgba(255, 77, 77, 0.3) !important; }
-.suit, .suit-mini { font-size: 20px; }
+/* 牌面顏色與字體 */
+.rank { font-family: "Georgia", serif !important; font-weight: 900 !important; letter-spacing: -1px; }
+.black { color: #ffcc33 !important; text-shadow: 1px 1px 2px #000, 0 0 8px rgba(212, 175, 55, 0.5) !important; }
+.red { color: #ff4d4d !important; text-shadow: 1px 1px 2px #000, 0 0 5px rgba(255, 77, 77, 0.3) !important; }
+.suit { font-size: 20px; }
 
-/* --- 7. 底部控制與 UI --- */
+/* --- 5. 底部控制 UI --- */
 .player-ui {
     position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%);
     width: 100%; display: flex; flex-direction: column; align-items: center; z-index: 2000;
@@ -129,129 +65,13 @@ body {
 #hand { display: flex; justify-content: center; align-items: flex-end; padding: 10px; height: 160px; width: 100%; order: 1; }
 #controls { display: flex; gap: 15px; margin-top: 5px; order: 2; }
 
-/* 迷你牌適配 */
-.card-mini { width: 55px; height: 82px; padding: 6px 3px; margin-left: 0; cursor: default; }
-
-/* 按鈕風格 (整合大廳與遊戲) */
-.primary-btn, #startBtn, #createBtn { 
-    background: #e67e22; border: none; padding: 10px 25px; color: white; border-radius: 8px; 
-    cursor: pointer; font-weight: bold; transition: all 0.2s;
+/* 遊戲中操作按鈕風格 */
+#playBtn, #passBtn { 
+    padding: 10px 25px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s;
 }
-.primary-btn:hover, #startBtn:hover, #createBtn:hover { background: #d35400; transform: translateY(-2px); }
-
-.secondary-btn, #joinBtn { 
-    background: #3498db; border: none; padding: 10px 25px; color: white; border-radius: 8px; 
-    cursor: pointer; font-weight: bold; transition: all 0.2s;
-}
-.secondary-btn:hover, #joinBtn:hover { background: #2980b9; transform: translateY(-2px); }
-
-#startBtn.is-ready { background: #27ae60; box-shadow: 0 0 15px #2ecc71; }
+#playBtn { background: #e67e22; color: white; }
+#passBtn { background: #3498db; color: white; }
 button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
-/* --- 8. 大廳與房間強制修正 (預防 result.css 衝突) --- */
 
-/* 使用 body 前綴提升優先級，確保覆蓋 result.css 的橫向撐開 */
-body #lobby, body #roomArea {
-    position: fixed !important;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    display: flex !important;
-    justify-content: center;
-    align-items: center;
-    z-index: 5000;
-    background: radial-gradient(circle at center, #163e32 0%, #051a14 100%);
-}
-
-/* 強制限制卡片寬度，防止變成長條 */
-body .lobby-card {
-    display: block !important;
-    width: 420px !important; /* 固定寬度，與結算畫面一致 */
-    max-width: 90% !important;
-    background: 
-        url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
-        radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%) !important;
-    border: 2px solid #d4af37 !important;
-    padding: 40px !important;
-    border-radius: 20px !important;
-    box-shadow: 0 0 50px rgba(0,0,0,0.9), 0 0 20px rgba(212,175,55,0.4) !important;
-    margin: auto !important;
-}
-
-/* 修正輸入框佈局 */
-.input-group {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 10px !important;
-    margin-bottom: 20px !important;
-}
-
-.input-group input {
-    flex: 1 !important;
-    min-width: 0 !important;
-    padding: 12px !important;
-    background: rgba(0,0,0,0.6) !important;
-    border: 1px solid #d4af37 !important;
-    color: white !important;
-    border-radius: 8px !important;
-    text-align: center !important;
-}
-
-/* 確保按鈕在卡片內垂直排列且寬度正常 */
-/* --- 最終修正：修復點擊、輸入框寬度與按鈕顯示 --- */
-
-/* 1. 強制讓容器在最前面，且可以點擊 */
-body #lobby, body #roomArea {
-    position: fixed !important;
-    z-index: 6000 !important; /* 拉到最高層 */
-    pointer-events: auto !important;
-    display: flex !important;
-    background: radial-gradient(circle at center, #163e32 0%, #051a14 100%) !important;
-}
-
-/* 2. 修正卡片內部元件的擠壓問題 */
-body .lobby-card {
-    width: 450px !important;
-    min-height: 400px !important; /* 給予足夠高度容納所有按鈕 */
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    padding: 40px !important;
-}
-
-/* 3. 解決輸入框「點不到」與「太窄」的問題 */
-body .input-group {
-    display: flex !important;
-    flex-direction: column !important; /* 改為垂直排列，空間最穩 */
-    gap: 15px !important;
-    width: 100% !important;
-    margin-bottom: 20px !important;
-}
-
-body .input-group input {
-    width: 100% !important;
-    height: 45px !important; /* 增加高度才好點擊 */
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid #d4af37 !important;
-    color: #fff !important;
-    font-size: 16px !important;
-    cursor: text !important;
-    pointer-events: auto !important;
-    text-align: center !important;
-}
-
-/* 4. 確保兩個按鈕完整出現，不被擠掉 */
-body .btn-group-vertical {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
-    width: 100% !important;
-}
-
-body .btn-group-vertical button {
-    display: block !important;
-    width: 100% !important;
-    height: 50px !important; /* 強制按鈕高度 */
-    visibility: visible !important;
-    opacity: 1 !important;
-}
+/* 迷你牌適配 (用於其他玩家或結算) */
+.card-mini { width: 55px; height: 82px; padding: 6px 3px; cursor: default; }
