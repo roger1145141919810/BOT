@@ -112,21 +112,42 @@ const Rules = {
         const next = this.getPlayInfo(newCards);
         if (!next) return false;
 
-        // 首輪必須包含梅花 3
+        // 1. 首輪必須包含梅花 3
         if (isFirstTurn && !newCards.some(c => parseInt(c.rank) === 3 && c.suit === 'clubs')) return false;
 
-        // 桌面沒牌，隨便出
+        // 2. 桌面沒牌，隨便出
         if (!lastPlay || lastPlay.length === 0) return true;
 
         const prev = this.getPlayInfo(lastPlay);
         if (!prev) return true;
 
-        // 張數必須相同 (大老二基本規則)
+        // 3. 張數必須相同
         if (newCards.length !== lastPlay.length) return false;
 
-        // 如果都是五張牌型，比 power
+        // 4. 五張牌型特殊邏輯
+        if (newCards.length === 5) {
+            // 台灣規則：通常必須牌型完全相同才能壓
+            if (next.subType === prev.subType) {
+                return next.power > prev.power;
+            }
+
+            // 特例：鐵支和同花順可以壓過任何五張牌型 (有些地區規則)
+            // 如果你的規則是「完全不能互壓」，請把下面這段刪除
+            const monsterRanks = ['FOUR_OF_A_KIND', 'STRAIGHT_FLUSH'];
+            if (monsterRanks.includes(next.subType)) {
+                // 如果上家也是怪物牌型，就比 power；否則直接壓過
+                if (monsterRanks.includes(prev.subType)) {
+                    return next.power > prev.power;
+                }
+                return true; 
+            }
+
+            // 牌型不同（如葫蘆 vs 順子），不能出牌
+            return false;
+        }
+
+        // 5. 單張或對子，直接比權重
         return next.power > prev.power;
     }
-};
 
 module.exports = Rules;
