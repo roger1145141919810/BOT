@@ -6,6 +6,7 @@ let myHand = [];
 let selected = new Set();
 let allPlayers = [];
 let myReadyStatus = false;
+let countdownTimer = null; // 用於儲存倒計時 Interval
 
 const SUIT_DATA = {
     'clubs':    { symbol: '♣', color: '#ffcc33', weight: 0 },
@@ -19,7 +20,6 @@ function rankText(r) {
     return map[r] || String(r);
 }
 
-// 輔助函式：判斷當前是否在遊戲畫面
 function isGameActive() {
     return !$('game').classList.contains('hidden');
 }
@@ -99,8 +99,6 @@ function renderHand() {
     handEl.innerHTML = '';
     myHand.forEach((c) => {
         const card = document.createElement('div');
-        
-        // 確保黑金效果生效
         const colorClass = (c.suit === 'spades' || c.suit === 'clubs') ? 'black' : 'red';
         card.className = `card ${colorClass}`; 
         
@@ -165,6 +163,7 @@ socket.on('game_start', ({ currentPlayerId, players }) => {
     allPlayers = players;
     $('roomArea').classList.add('hidden');
     $('game').classList.remove('hidden');
+    $('gameOverOverlay').classList.add('hidden'); // 確保開始時關閉結算窗
     
     allPlayers.forEach(p => {
         p.cardCount = 13;
@@ -226,10 +225,12 @@ socket.on('new_round', () => {
     updateSeats(allPlayers, null); 
 });
 
+// --- 結算與倒計時邏輯 ---
 socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
     const overlay = $('gameOverOverlay');
     const statsEl = $('playerStats');
     const winnerTitle = $('winnerTitle');
+    const timerDisplay = $('shutdownTimer');
     const isMe = (winnerId === socket.id);
 
     winnerTitle.textContent = isMe ? "✨ 恭喜！你贏了 ✨" : `👑 贏家是：${winnerName}`;
@@ -248,6 +249,20 @@ socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
 
     overlay.classList.remove('hidden');
     selected.clear();
+
+    // 啟動 30 秒倒計時
+    let timeLeft = 30;
+    timerDisplay.textContent = timeLeft;
+    
+    if (countdownTimer) clearInterval(countdownTimer);
+    countdownTimer = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(countdownTimer);
+            location.reload(); // 時間到自動回大廳
+        }
+    }, 1000);
 });
 
 // --- 按鈕事件 ---
@@ -284,10 +299,18 @@ $('passBtn').onclick = () => {
     selected.clear();
 };
 
+// 再玩一局：重置 UI 並通知伺服器
 $('restartBtn').onclick = () => {
+    if (countdownTimer) clearInterval(countdownTimer);
     $('gameOverOverlay').classList.add('hidden');
     $('game').classList.add('hidden');
     $('roomArea').classList.remove('hidden');
+    // 通知伺服器玩家點擊了再玩一局 (伺服器應處理 toggle_ready 邏輯)
+    if (currentRoom) socket.emit('toggle_ready', { roomId: currentRoom });
 };
 
-$('backToLobbyBtn').onclick = () => location.reload();
+// 回大廳：直接刷新頁面
+$('backToLobbyBtn').onclick = () => {
+    if (countdownTimer) clearInterval(countdownTimer);
+    location.reload();
+};
