@@ -1,129 +1,88 @@
-/* --- 大廳與等待房間 核心整合樣式 --- */
+/* --- 大廳與等待房間：絕對優先權樣式 --- */
 
-/* 1. 高權重容器：確保大廳覆蓋所有內容且可點擊 */
+/* 1. 強制容器置中與層級 */
 body #lobby, body #roomArea {
     position: fixed !important;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    display: flex !important; /* 只要沒有 .hidden 類別就顯示 */
-    justify-content: center;
-    align-items: center;
-    z-index: 9999 !important; /* 絕對最上層 */
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 9999 !important;
     background: radial-gradient(circle at center, #163e32 0%, #051a14 100%) !important;
-    pointer-events: auto !important;
 }
 
-/* 2. 核心卡片外框：固定寬度防止拉長 */
-.lobby-card {
+/* 2. 強制黑金卡片樣式：覆蓋 result.css 的背景洗牌 */
+#lobby .lobby-card, #roomArea .lobby-card {
     background: 
         url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
         radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%) !important;
     padding: 40px !important;
     border-radius: 20px !important;
     border: 2px solid #d4af37 !important;
-    text-align: center;
-    width: 420px !important; /* 強制固定寬度 */
+    width: 420px !important;
     max-width: 90% !important;
-    min-height: 420px; /* 給予足夠高度容納所有按鈕 */
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(212, 175, 55, 0.3) !important;
-    color: white;
+    min-height: 420px !important;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(212, 175, 55, 0.4) !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: center;
+    justify-content: center !important;
 }
 
-.lobby-card h3 {
-    color: #ffcc33;
-    font-size: 1.8rem;
-    margin-bottom: 5px;
-    text-shadow: 0 0 10px rgba(255, 204, 51, 0.4);
-}
-
-.lobby-card hr {
-    border: 0;
-    height: 1px;
-    background: linear-gradient(to right, transparent, #d4af37, transparent);
-    margin: 20px 0;
-}
-
-/* 3. 輸入框美化：垂直排列確保點擊範圍 */
-.input-group {
+/* 3. 輸入框佈局修正 */
+#lobby .input-group {
     display: flex !important;
     flex-direction: column !important;
-    gap: 15px !important;
+    gap: 12px !important;
     margin-bottom: 25px !important;
 }
 
-.input-group input {
-    width: 100% !important;
-    height: 48px !important; /* 增加高度，解決「點不到」的問題 */
-    padding: 12px !important;
-    border-radius: 8px !important;
-    border: 1px solid #d4af37 !important;
+#lobby .input-group input {
+    height: 48px !important;
     background: rgba(0, 0, 0, 0.6) !important;
-    color: white !important;
-    font-size: 1rem !important;
+    border: 1px solid #d4af37 !important;
+    color: #fff !important;
+    border-radius: 8px !important;
     text-align: center !important;
-    cursor: text !important;
-    pointer-events: auto !important;
+    font-size: 1rem !important;
 }
 
-.input-group input:focus {
-    outline: none;
-    box-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
-    background: rgba(0, 0, 0, 0.8) !important;
-}
-
-/* 4. 統一按鈕樣式：採用金色漸層設計 */
-/* 包含建立、加入、開始、準備按鈕 */
-.primary-btn, #startBtn, #createBtn, #joinBtn {
+/* 4. 強制按鈕樣式：解決截圖 2 中橘色按鈕覆蓋問題 */
+#lobby .btn-group-vertical button, 
+#roomArea .btn-group button,
+#roomArea .btn-group-vertical button {
     width: 100% !important;
-    height: 52px !important; /* 固定高度防止被壓縮 */
-    padding: 0 15px !important;
-    font-size: 1.1rem !important;
-    background: linear-gradient(135deg, #d4af37 0%, #aa8913 100%) !important;
-    border: none !important;
-    border-radius: 10px !important;
-    color: #000 !important;
-    font-weight: bold !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
+    height: 52px !important;
     margin-top: 10px !important;
+    font-size: 1.1rem !important;
+    font-weight: bold !important;
+    border-radius: 10px !important;
+    border: none !important;
+    cursor: pointer !important;
     display: flex !important;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    justify-content: center !important;
+    align-items: center !important;
+    /* 金色漸層強制覆蓋 result.css 的 #e67e22 */
+    background: linear-gradient(135deg, #d4af37 0%, #aa8913 100%) !important;
+    color: #000 !important; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
 }
 
-.primary-btn:hover, #startBtn:hover, #createBtn:hover, #joinBtn:hover {
-    transform: translateY(-2px) !important;
+/* 按鈕懸停效果 */
+#lobby .btn-group-vertical button:hover, 
+#roomArea .btn-group button:hover {
     filter: brightness(1.2) !important;
-    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4) !important;
+    transform: translateY(-2px) !important;
 }
 
-/* 5. 玩家列表 (等待室專用) */
-#playersList {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 25px;
-    border: 1px solid rgba(212, 175, 55, 0.2);
-    text-align: left;
-}
+/* 準備室文字顏色修正 */
+#roomArea h3 { color: #ffcc33 !important; }
+#roomArea .hint { color: #aaa !important; margin-top: 15px; }
 
-.player-entry {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.status-ready { color: #2ecc71; font-weight: bold; }
-.status-waiting { color: #95a5a6; }
-
-/* 準備狀態特別處理：變紅 */
-#startBtn.is-ready {
+/* 準備狀態特別處理 (變紅) */
+#roomArea button#startBtn.is-ready {
     background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
-    color: white !important;
+    color: #fff !important;
 }
