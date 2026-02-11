@@ -11,127 +11,159 @@ body {
 
 .center { width: 100%; max-width: 1200px; position: relative; height: 100%; }
 
-/* 強力隱藏指令：確保 JavaScript 切換介面時絕對生效 */
-.hidden { display: none !important; }
+/* 強力隱藏指令：使用 body 前綴確保權重高於下方的 ID 選擇器 */
+body .hidden { display: none !important; pointer-events: none !important; }
 
 /* ============================================================
    2. 大廳與房間區 (強制頂層遮罩)
-   解決：背景變白、輸入框點不到、畫面被 result.css 撐開
    ============================================================ */
+/* 移除這裡的 !important 以便 .hidden 能夠生效 */
 body #lobby, body #roomArea {
-    position: fixed !important;
+    position: fixed;
     top: 0; left: 0;
-    width: 100vw !important; height: 100vh !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    z-index: 6000 !important; /* 拉到最高層級 */
-    background: radial-gradient(circle at center, #163e32 0%, #051a14 100%) !important;
-    pointer-events: auto !important;
+    width: 100vw; height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 6000;
+    background: radial-gradient(circle at center, #163e32 0%, #051a14 100%);
+    pointer-events: auto;
 }
 
 /* 核心黑金卡片 */
-body .lobby-card {
+.lobby-card {
     background: 
         url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
         radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%) !important;
-    padding: 40px !important;
-    border-radius: 20px !important;
-    border: 2px solid #d4af37 !important;
+    padding: 40px;
+    border-radius: 20px;
+    border: 2px solid #d4af37;
     text-align: center;
-    width: 450px !important;
-    min-height: 420px !important; /* 確保有足夠高度容納按鈕 */
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(212, 175, 55, 0.4) !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
+    width: 450px;
+    min-height: 420px;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(212, 175, 55, 0.4);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .lobby-card h3 { color: #ffcc33; font-size: 1.8rem; margin-bottom: 5px; text-shadow: 0 0 10px rgba(255, 204, 51, 0.4); }
 .lobby-card hr { border: 0; height: 1px; background: linear-gradient(to right, transparent, #d4af37, transparent); margin: 20px 0; }
 
-/* 輸入框美化：修復點擊區域 */
-body .input-group {
-    display: flex !important;
-    flex-direction: column !important; 
-    gap: 15px !important;
-    width: 100% !important;
-    margin-bottom: 25px !important;
+/* 輸入框修復：確保 cursor 與 z-index 正常工作 */
+.input-group {
+    display: flex;
+    flex-direction: column; 
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 25px;
 }
 
-body .input-group input {
+.input-group input {
     width: 100% !important;
-    height: 50px !important; /* 增加高度防止點擊不到 */
+    height: 50px !important;
     background: rgba(0, 0, 0, 0.6) !important;
     border: 1px solid #d4af37 !important;
     color: #fff !important;
     border-radius: 8px !important;
     text-align: center !important;
     font-size: 1.1rem !important;
-    pointer-events: auto !important;
     cursor: text !important;
+    pointer-events: auto !important;
 }
 
 /* ============================================================
-   3. 遊戲牌桌與龍紋撲克牌
+   3. 遊戲牌桌與龍紋撲克牌 (修正一長條問題)
    ============================================================ */
-.table-container {
-    position: relative; width: 100%; height: 55vh; 
-    display: flex; justify-content: center; align-items: center; margin-top: 2vh; 
+#game {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
-/* 座位配置 */
-.player-seat { position: absolute; display: flex; flex-direction: column; align-items: center; min-width: 130px; z-index: 10; }
-.pos-top { top: 5%; left: 50%; transform: translateX(-50%); }
-.pos-left { left: 5%; top: 45%; transform: translateY(-50%); }
-.pos-right { right: 5%; top: 45%; transform: translateY(-50%); }
-.pos-bottom { bottom: -10px; left: 50%; transform: translateX(-50%); z-index: 2000; }
+.table-container {
+    position: relative; 
+    flex: 1;
+    width: 100%; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+}
+
+/* 牌桌中心背景 */
+.poker-table {
+    width: 400px;
+    height: 250px;
+    border: 2px solid rgba(212, 175, 55, 0.2);
+    border-radius: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* 座位配置：絕對定位確保十字佈局 */
+.player-seat { 
+    position: absolute; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    min-width: 130px; 
+}
+
+.pos-top    { top: 5%;  left: 50%; transform: translateX(-50%); }
+.pos-left   { left: 5%; top: 40%; transform: translateY(-50%); }
+.pos-right  { right: 5%; top: 40%; transform: translateY(-50%); }
+.pos-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; }
 
 /* 龍紋黑金牌張 */
-.card, .card-mini {
+.card {
     width: 80px; height: 120px; position: relative;
-    background: url('https://www.transparenttextures.com/patterns/dark-leather.png'), radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%) !important;
-    border: 1.5px solid #d4af37 !important;
+    background: radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%) !important;
+    border: 1.5px solid #d4af37;
     border-radius: 10px;
     display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 12px 6px;
-    box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.15), 0 8px 15px rgba(0,0,0,0.6) !important;
-    transition: transform 0.25s ease;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.6);
+    transition: transform 0.2s;
+    cursor: pointer;
 }
 
-.card::after {
-    content: '🐉'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    font-size: 40px; opacity: 0.12; pointer-events: none;
-}
-
-/* 牌面顏色 */
-.rank { font-family: "Georgia", serif !important; font-weight: 900 !important; }
-.black { color: #ffcc33 !important; text-shadow: 1px 1px 2px #000; }
-.red { color: #ff4d4d !important; text-shadow: 1px 1px 2px #000; }
+.card.selected { transform: translateY(-20px); border-color: #fff; box-shadow: 0 0 15px #d4af37; }
 
 /* ============================================================
-   4. 按鈕風格與底部控制 (整合大廳與遊戲)
+   4. 按鈕風格與底部控制
    ============================================================ */
-.primary-btn, #startBtn, #createBtn, #playBtn { 
-    background: linear-gradient(135deg, #e67e22 0%, #d35400 100%) !important;
-    border: none; padding: 12px 25px; color: white; border-radius: 8px; 
-    cursor: pointer; font-weight: bold; transition: all 0.2s;
+.btn-group-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     width: 100%;
+}
+
+.primary-btn, #startBtn, #createBtn, #playBtn { 
+    background: linear-gradient(135deg, #d4af37 0%, #aa8913 100%) !important;
+    border: none; height: 50px; color: #000; border-radius: 8px; 
+    cursor: pointer; font-weight: bold; font-size: 1.1rem;
 }
 
 .secondary-btn, #joinBtn, #passBtn { 
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%) !important;
-    border: none; padding: 12px 25px; color: white; border-radius: 8px; 
-    cursor: pointer; font-weight: bold; transition: all 0.2s;
+    background: rgba(255,255,255,0.1) !important;
+    border: 1px solid #d4af37; height: 50px; color: #d4af37; border-radius: 8px; 
+    cursor: pointer; font-weight: bold;
+}
+
+.player-ui {
     width: 100%;
+    padding: 20px;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-/* 垂直按鈕群組修復 (大廳專用) */
-body .btn-group-vertical {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
-    width: 100% !important;
-}
+#hand { display: flex; gap: 5px; margin-bottom: 15px; }
 
-#startBtn.is-ready { background: #27ae60 !important; box-shadow: 0 0 15px #2ecc71; }
-button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+#startBtn.is-ready { background: #27ae60 !important; color: white; }
