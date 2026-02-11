@@ -190,33 +190,41 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        for (const roomId in rooms) {
-            const room = rooms[roomId];
-            const index = room.players.findIndex(p => p.id === socket.id);
-            if (index !== -1) {
-                if (room.gameStarted) {
-                    room.players[index].isAI = true;
-                    if (!room.players[index].name.includes("(AI)")) room.players[index].name += " (AI)";
-                    io.to(roomId).emit('room_update', room.players);
-                    
-                    const humanPlayers = room.players.filter(p => !p.isAI);
-                    if (humanPlayers.length === 0) {
-                        delete rooms[roomId];
-                    } else if (room.turnIndex === index) {
-                        setTimeout(() => handleAiAction(roomId, room.players[index]), 1000);
-                    }
-                } else {
-                    room.players.splice(index, 1);
-                    if (room.players.length === 0) {
-                        delete rooms[roomId];
-                    } else {
-                        io.to(roomId).emit('room_update', room.players);
-                    }
-                }
-                break;
-            }
-        }
-    });
+        for (const roomId in rooms) {
+            const room = rooms[roomId];
+            const index = room.players.findIndex(p => p.id === socket.id);
+            
+            if (index !== -1) {
+                // 從玩家名單中移除
+                room.players.splice(index, 1);
+                
+                // 核心關鍵：檢查房間是否還有真人玩家
+                const hasHumans = room.players.some(p => !p.isAI);
+                
+                // 如果沒有真人了，或者房間空了，立刻刪除房間
+                if (room.players.length === 0 || !hasHumans) {
+                    console.log(`房間 ${roomId} 已無真人，正在刪除並釋放 ID`);
+                    delete rooms[roomId];
+                } else {
+                    // 如果還有真人，通知其他人更新列表
+                    io.to(roomId).emit('room_update', room.players);
+                }
+                break;
+            }
+        }
+    });
+
+    // 建議：處理手動請求「回到大廳」的邏輯
+    socket.on('leave_room', ({ roomId }) => {
+        socket.leave(roomId);
+        if (rooms[roomId]) {
+            rooms[roomId].players = rooms[roomId].players.filter(p => p.id !== socket.id);
+            const hasHumans = rooms[roomId].players.some(p => !p.isAI);
+            if (!hasHumans) delete rooms[roomId];
+            else io.to(roomId).emit('room_update', rooms[roomId].players);
+        }
+    });
+});
 }); // <--- io.on('connection') 的結尾
 
 server.listen(3000, '0.0.0.0', () => console.log(`Server running on port 3000`));
