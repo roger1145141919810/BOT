@@ -198,9 +198,60 @@ body .lobby-card {
 }
 
 /* 確保按鈕在卡片內垂直排列且寬度正常 */
-.btn-group-vertical {
+/* --- 最終修正：修復點擊、輸入框寬度與按鈕顯示 --- */
+
+/* 1. 強制讓容器在最前面，且可以點擊 */
+body #lobby, body #roomArea {
+    position: fixed !important;
+    z-index: 6000 !important; /* 拉到最高層 */
+    pointer-events: auto !important;
+    display: flex !important;
+    background: radial-gradient(circle at center, #163e32 0%, #051a14 100%) !important;
+}
+
+/* 2. 修正卡片內部元件的擠壓問題 */
+body .lobby-card {
+    width: 450px !important;
+    min-height: 400px !important; /* 給予足夠高度容納所有按鈕 */
     display: flex !important;
     flex-direction: column !important;
+    justify-content: center !important;
+    padding: 40px !important;
+}
+
+/* 3. 解決輸入框「點不到」與「太窄」的問題 */
+body .input-group {
+    display: flex !important;
+    flex-direction: column !important; /* 改為垂直排列，空間最穩 */
     gap: 15px !important;
     width: 100% !important;
+    margin-bottom: 20px !important;
+}
+
+body .input-group input {
+    width: 100% !important;
+    height: 45px !important; /* 增加高度才好點擊 */
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid #d4af37 !important;
+    color: #fff !important;
+    font-size: 16px !important;
+    cursor: text !important;
+    pointer-events: auto !important;
+    text-align: center !important;
+}
+
+/* 4. 確保兩個按鈕完整出現，不被擠掉 */
+body .btn-group-vertical {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+}
+
+body .btn-group-vertical button {
+    display: block !important;
+    width: 100% !important;
+    height: 50px !important; /* 強制按鈕高度 */
+    visibility: visible !important;
+    opacity: 1 !important;
 }
