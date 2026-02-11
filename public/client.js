@@ -320,7 +320,7 @@ $('restartBtn').onclick = () => {
     }
 };
 
-// 【重要修正】返回大廳
+// 返回大廳
 $('backToLobbyBtn').onclick = () => {
     console.log("返回大廳...");
     if (countdownTimer) clearInterval(countdownTimer);
