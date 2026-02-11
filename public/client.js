@@ -309,24 +309,21 @@ $('restartBtn').onclick = () => {
     console.log("嘗試重新開始...");
     if (countdownTimer) clearInterval(countdownTimer);
     
-    // 隱藏結算層，回到房間等待區
+    // 1. 隱藏結算層，切換畫面回到房間等待區
     $('gameOverOverlay').classList.add('hidden');
     $('game').classList.add('hidden');
     $('roomArea').classList.remove('hidden');
 
-    // 通知伺服器重新切換準備狀態
+    // 2. 通知伺服器玩家準備下一局
     if (currentRoom) {
         socket.emit('toggle_ready', { roomId: currentRoom });
     }
 };
 
-// 返回大廳
+// 回到大廳
 $('backToLobbyBtn').onclick = () => {
     console.log("返回大廳...");
     if (countdownTimer) clearInterval(countdownTimer);
-    if (currentRoom) {
-        socket.emit('leave_room', { roomId: currentRoom });
-    }
-    // 直接重整網頁是最乾淨的返回大廳方式
+    // 最徹底的做法是重整網頁，清空所有變數
     location.reload(); 
 };
