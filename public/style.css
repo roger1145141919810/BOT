@@ -32,28 +32,25 @@ body #lobby, body #roomArea {
 }
 
 /* ============================================================
-   3. 遊戲牌桌 (修正一長條、選取動作與重疊樣式)
-   ============================================================ */
-/* ============================================================
-   3. 遊戲牌桌：橢圓核心與專業佈局
+   3. 遊戲牌桌：橫向寬廣佈局修正
    ============================================================ */
 #game {
     position: relative;
     width: 100%; height: 100%;
     display: flex; flex-direction: column;
+    /* 強化牌桌中心感 */
     background: radial-gradient(circle at center, #1a4a3e 0%, #051a14 100%);
 }
 
-/* 建立一個視覺上的橢圓牌桌 */
 .table-container {
     position: relative; 
     flex: 1;
     width: 100%; 
     display: flex; justify-content: center; align-items: center;
-    pointer-events: none; /* 確保點擊穿透 */
+    pointer-events: none; 
 }
 
-/* 牌桌中心出牌區域：強制橫向並排 */
+/* --- 核心修正：寬橢圓桌面 (橫向並排) --- */
 #lastPlayContent {
     pointer-events: auto;
     display: flex !important;
@@ -61,44 +58,47 @@ body #lobby, body #roomArea {
     justify-content: center;
     align-items: center;
     gap: 12px;
-    width: 50%;
-    height: 250px;
-    border: 2px solid rgba(212, 175, 55, 0.2);
-    border-radius: 150px; /* 形成中心橢圓感 */
-    background: rgba(0, 0, 0, 0.15);
-    box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+    
+    /* 寬高比修正：增加寬度，降低高度 */
+    width: 80%;           /* 增加橫向佔比 */
+    max-width: 900px;     /* 設定上限防止過扁 */
+    height: 200px;        /* 固定高度，確保不變長條 */
+    
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    border-radius: 100px; /* 形成扁平寬橢圓 */
+    background: rgba(0, 0, 0, 0.2);
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
 }
 
-/* --- 龍紋黑金牌張：重疊與質感增強 --- */
+/* --- 卡牌質感與重疊樣式 --- */
 .card {
-    width: 80px; 
-    height: 115px; 
+    width: 78px; 
+    height: 112px; 
     position: relative;
     background: linear-gradient(145deg, #2a2a2a, #0a0a0a) !important;
-    border: 1px solid #d4af37; 
+    border: 1.5px solid #d4af37; 
     border-radius: 6px;
     display: flex; flex-direction: column; align-items: center; justify-content: space-between;
     padding: 8px 4px; 
-    box-shadow: -2px 0 10px rgba(0,0,0,0.7); /* 強化堆疊陰影 */
+    box-shadow: -3px 0 10px rgba(0,0,0,0.7);
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
     pointer-events: auto;
     
-    /* 關鍵：實現並排且緊密重疊 */
+    /* 緊密重疊 */
     margin-left: -35px; 
 }
-
 #hand .card:first-child { margin-left: 0; }
 
-/* 桌面出的牌：稍微縮小並橫排 */
+/* 桌面出的牌縮放 */
 .card-mini { 
-    width: 65px; height: 95px; padding: 5px; 
+    width: 65px; height: 95px; 
+    margin-left: -20px; 
     pointer-events: none; 
-    margin-left: -15px; 
 }
 .card-mini:first-child { margin-left: 0; }
 
-/* 選取彈起動畫 */
+/* 選取彈起：確保層級最高 */
 .card.selected {
     transform: translateY(-35px) !important; 
     border-color: #ffffff !important;
@@ -106,137 +106,132 @@ body #lobby, body #roomArea {
     z-index: 500 !important;
 }
 
-/* 龍紋裝飾 */
+/* 裝飾細節 */
 .dragon-emblem {
     position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%);
     font-size: 2.2rem; opacity: 0.15; color: #d4af37; pointer-events: none; z-index: 1;
 }
-
 .card-content { position: relative; z-index: 2; width: 100%; text-align: center; }
 .card.red .rank, .card.red .suit { color: #ff4d4d; }
 .card.black .rank, .card.black .suit { color: #d4af37; }
 
-/* --- 玩家座位精確定位 --- */
+/* --- 座位佈局修正：向螢幕邊緣延伸 --- */
 .player-seat {
     position: absolute;
     display: flex; flex-direction: column; align-items: center;
     z-index: 10;
     pointer-events: auto;
-    min-width: 120px;
 }
 
-/* 北、西、東、南四方分佈 */
-.pos-top    { top: 5%;  left: 50%; transform: translateX(-50%); }
-.pos-left   { left: 8%; top: 45%; transform: translateY(-50%); }
-.pos-right  { right: 8%; top: 45%; transform: translateY(-50%); }
-.pos-bottom { bottom: 180px; left: 50%; transform: translateX(-50%); } /* 位於手牌上方 */
-
-.player-info-wrapper {
-    background: rgba(0, 0, 0, 0.8);
-    padding: 10px 20px; border-radius: 12px; border: 1.5px solid #d4af37;
-    text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-}
-
-.player-info-wrapper.active-turn {
-    box-shadow: 0 0 15px #ffcc33;
-    border-color: #ffcc33;
-    background: rgba(212, 175, 55, 0.2);
-}
-
-.pos-top    { top: 5%;  left: 50%; transform: translateX(-50%); }
-.pos-left   { left: 5%; top: 40%; transform: translateY(-50%); }
-.pos-right  { right: 5%; top: 40%; transform: translateY(-50%); }
-.pos-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); }
+/* 北方 */
+.pos-top    { top: 6%;  left: 50%; transform: translateX(-50%); }
+/* 左右兩側：推向螢幕最邊緣，製造寬螢幕感 */
+.pos-left   { left: 3%; top: 45%; transform: translateY(-50%); }
+.pos-right  { right: 3%; top: 45%; transform: translateY(-50%); }
+/* 南方 (自己)：剛好浮在手牌上方 */
+.pos-bottom { bottom:
 /* ============================================================
-   4. 底部控制區 (去掉黑框背景)
+   4. 底部控制區 (完全透明、寬螢幕優化)
    ============================================================ */
 .player-ui {
+    position: fixed;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    padding: 0 20px 20px 20px;
-    /* 關鍵：去掉背景漸層，改為完全透明 */
-    background: transparent !important; 
-    display: flex; 
-    flex-direction: column; 
+    /* 徹底移除黑框，確保背景通透 */
+    background: transparent !important;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    padding-bottom: 30px;
     z-index: 5000;
-    pointer-events: none; /* 讓點擊能穿透空白區域 */
+    /* 防止透明層阻擋牌桌點擊 */
+    pointer-events: none; 
 }
 
-/* 確保手牌與按鈕可以被點擊 */
-#hand, .controls {
-    pointer-events: auto;
+/* 狀態文字：漂浮在手牌上方 */
+#status {
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #ffcc33;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+    background: rgba(0, 0, 0, 0.4);
+    padding: 5px 20px;
+    border-radius: 20px;
+    pointer-events: none;
+    border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
-#hand { 
-    display: flex; 
-    gap: 0; /* 配合 card 的負 margin 使用 */
-    margin-bottom: 25px; 
-    min-height: 140px; 
+/* 手牌區：配合寬螢幕增加寬度 */
+#hand {
+    display: flex;
     justify-content: center;
     align-items: flex-end;
+    min-height: 150px;
+    width: 90%;
+    max-width: 1000px;
+    margin-bottom: 20px;
+    pointer-events: auto; /* 恢復點擊 */
 }
 
-/* 按鈕群組美化：讓按鈕更精緻 */
-.controls {
-    display: flex; 
-    gap: 30px; 
-    justify-content: center; 
+/* 按鈕容器：確保並排 */
+#controls, .controls {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center;
+    gap: 25px;
     width: 100%;
-    max-width: 600px;
+    pointer-events: auto; /* 恢復點擊 */
 }
 
+/* 按鈕基礎樣式：更扁平精緻以配合寬螢幕 */
 #playBtn, #passBtn {
-    width: 140px; 
-    height: 48px; 
-    border-radius: 25px; /* 圓角膠囊造型更現代 */
-    font-size: 1.1rem; 
-    font-weight: bold; 
+    width: 150px;
+    height: 46px;
+    border-radius: 6px; /* 改為小圓角，更有專業牌桌質感 */
+    font-size: 1.1rem;
+    font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* 出牌按鈕：金屬金 */
-#playBtn { 
-    background: linear-gradient(135deg, #d4af37 0%, #aa8913 100%) !important; 
-    color: #332200; 
-    border: 1px solid #ffe699; 
+/* 出牌按鈕：黑金皮革風格 */
+#playBtn {
+    background: linear-gradient(135deg, #d4af37 0%, #aa8913 100%) !important;
+    color: #1a1a1a;
+    border: 1px solid #ffe699;
 }
 
 #playBtn:hover:not(:disabled) {
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
     filter: brightness(1.1);
+    box-shadow: 0 6px 15px rgba(212, 175, 55, 0.4);
 }
 
-/* 過牌按鈕：半透明磨砂感 */
-#passBtn { 
-    background: rgba(255, 255, 255, 0.1) !important; 
-    color: #d4af37; 
-    border: 1px solid #d4af37; 
-    backdrop-filter: blur(5px); /* 加入磨砂玻璃效果 */
+/* 過牌按鈕：半透明玻璃風格 */
+#passBtn {
+    background: rgba(20, 20, 20, 0.7) !important;
+    color: #d4af37;
+    border: 1px solid #d4af37;
+    backdrop-filter: blur(4px);
 }
 
 #passBtn:hover:not(:disabled) {
-    background: rgba(212, 175, 55, 0.2) !important;
+    background: rgba(40, 40, 40, 0.9) !important;
     transform: translateY(-3px);
+    color: #fff;
 }
 
+/* 停用狀態 (非我回合) */
 #playBtn:disabled, #passBtn:disabled {
-    opacity: 0.3;
+    opacity: 0.2;
     cursor: not-allowed;
     filter: grayscale(1);
-    transform: none;
-}
-
-#status {
-    margin-bottom: 15px;
-    font-size: 1.1rem;
-    color: #ffcc33;
-    text-shadow: 0 0 8px rgba(0,0,0,0.8);
-    background: rgba(0,0,0,0.4);
-    padding: 4px 15px;
-    border-radius: 20px;
-    pointer-events: none;
+    transform: none !important;
 }
