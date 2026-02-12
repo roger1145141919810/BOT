@@ -11,13 +11,12 @@ body {
 
 .center { width: 100%; max-width: 1200px; position: relative; height: 100%; }
 
-/* 強力隱藏指令：使用 body 前綴確保權重高於下方的 ID 選擇器 */
+/* 強力隱藏指令：確保權重高於下方所有 ID 選擇器 */
 body .hidden { display: none !important; pointer-events: none !important; }
 
 /* ============================================================
    2. 大廳與房間區 (強制頂層遮罩)
    ============================================================ */
-/* 移除這裡的 !important 以便 .hidden 能夠生效 */
 body #lobby, body #roomArea {
     position: fixed;
     top: 0; left: 0;
@@ -30,7 +29,6 @@ body #lobby, body #roomArea {
     pointer-events: auto;
 }
 
-/* 核心黑金卡片 */
 .lobby-card {
     background: 
         url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
@@ -47,33 +45,8 @@ body #lobby, body #roomArea {
     justify-content: center;
 }
 
-.lobby-card h3 { color: #ffcc33; font-size: 1.8rem; margin-bottom: 5px; text-shadow: 0 0 10px rgba(255, 204, 51, 0.4); }
-.lobby-card hr { border: 0; height: 1px; background: linear-gradient(to right, transparent, #d4af37, transparent); margin: 20px 0; }
-
-/* 輸入框修復：確保 cursor 與 z-index 正常工作 */
-.input-group {
-    display: flex;
-    flex-direction: column; 
-    gap: 15px;
-    width: 100%;
-    margin-bottom: 25px;
-}
-
-.input-group input {
-    width: 100% !important;
-    height: 50px !important;
-    background: rgba(0, 0, 0, 0.6) !important;
-    border: 1px solid #d4af37 !important;
-    color: #fff !important;
-    border-radius: 8px !important;
-    text-align: center !important;
-    font-size: 1.1rem !important;
-    cursor: text !important;
-    pointer-events: auto !important;
-}
-
 /* ============================================================
-   3. 遊戲牌桌與龍紋撲克牌 (修正一長條問題)
+   3. 遊戲牌桌與龍紋撲克牌
    ============================================================ */
 #game {
     position: relative;
@@ -92,78 +65,113 @@ body #lobby, body #roomArea {
     align-items: center;
 }
 
-/* 牌桌中心背景 */
-.poker-table {
-    width: 400px;
-    height: 250px;
-    border: 2px solid rgba(212, 175, 55, 0.2);
-    border-radius: 150px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.1);
-}
-
-/* 座位配置：絕對定位確保十字佈局 */
-.player-seat { 
-    position: absolute; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    min-width: 130px; 
-}
-
-.pos-top    { top: 5%;  left: 50%; transform: translateX(-50%); }
-.pos-left   { left: 5%; top: 40%; transform: translateY(-50%); }
-.pos-right  { right: 5%; top: 40%; transform: translateY(-50%); }
-.pos-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; }
-
 /* 龍紋黑金牌張 */
 .card {
-    width: 80px; height: 120px; position: relative;
+    width: 75px; height: 110px; position: relative;
     background: radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%) !important;
     border: 1.5px solid #d4af37;
-    border-radius: 10px;
-    display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 12px 6px;
-    box-shadow: 0 8px 15px rgba(0,0,0,0.6);
-    transition: transform 0.2s;
+    border-radius: 8px;
+    display: flex; flex-direction: column; 
+    align-items: center; justify-content: space-between; 
+    padding: 10px 5px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
+    overflow: hidden; /* 重要：防止龍紋超出邊界 */
 }
+
+/* 龍紋背景注入 */
+.dragon-emblem {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.5rem;
+    opacity: 0.12; /* 淡淡的金色感 */
+    pointer-events: none;
+    z-index: 1;
+}
+
+.card-content { position: relative; z-index: 2; width: 100%; text-align: center; }
+.card .rank { font-size: 1.4rem; font-weight: bold; }
+.card .suit { font-size: 1.2rem; }
 
 .card.selected { transform: translateY(-20px); border-color: #fff; box-shadow: 0 0 15px #d4af37; }
 
 /* ============================================================
-   4. 按鈕風格與底部控制
+   4. 底部控制區 (修復過牌按鈕)
    ============================================================ */
-.btn-group-vertical {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    width: 100%;
-}
-
-.primary-btn, #startBtn, #createBtn, #playBtn { 
-    background: linear-gradient(135deg, #d4af37 0%, #aa8913 100%) !important;
-    border: none; height: 50px; color: #000; border-radius: 8px; 
-    cursor: pointer; font-weight: bold; font-size: 1.1rem;
-}
-
-.secondary-btn, #joinBtn, #passBtn { 
-    background: rgba(255,255,255,0.1) !important;
-    border: 1px solid #d4af37; height: 50px; color: #d4af37; border-radius: 8px; 
-    cursor: pointer; font-weight: bold;
-}
-
 .player-ui {
     width: 100%;
-    padding: 20px;
-    background: rgba(0,0,0,0.4);
+    padding: 20px 10px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
+    z-index: 5000;
 }
 
-#hand { display: flex; gap: 5px; margin-bottom: 15px; }
+#hand { 
+    display: flex; 
+    gap: 8px; 
+    margin-bottom: 20px; 
+    min-height: 120px;
+    justify-content: center;
+    flex-wrap: nowrap; /* 確保手牌不換行 */
+}
 
-#startBtn.is-ready { background: #27ae60 !important; color: white; }
+/* 按鈕群組：確保出牌與過牌水平排列 */
+.controls {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    width: 100%;
+    max-width: 500px;
+}
+
+#playBtn, #passBtn {
+    flex: 1; /* 讓兩個按鈕等寬 */
+    height: 50px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#playBtn {
+    background: linear-gradient(135deg, #d4af37 0%, #aa8913 100%) !important;
+    border: none;
+    color: #000;
+}
+
+#passBtn {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 2px solid #d4af37;
+    color: #d4af37;
+}
+
+#playBtn:disabled, #passBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}
+
+#status {
+    margin-bottom: 10px;
+    font-size: 1rem;
+    color: #ffcc33;
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+/* 結算層 */
+#gameOverOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 9000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
