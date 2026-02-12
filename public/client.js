@@ -1,7 +1,8 @@
 const socket = io();
 const $ = id => document.getElementById(id);
 
-let currentRoom = null;
+// --- 全域狀態管理 ---
+let currentRoomId = null;
 let myHand = [];
 let selected = new Set();
 let allPlayers = [];
@@ -15,9 +16,12 @@ const SUIT_DATA = {
     'spades':   { symbol: '♠', color: '#ffcc33', weight: 3 }
 };
 
+/* ============================================================
+   1. 介面切換與防連點邏輯
+   ============================================================ */
+
 /**
- * 【核心修復】統一介面切換器
- * 加入 display: none/flex 切換，防止隱形成分擋住滑鼠點擊
+ * 核心切換器：物理隔離各個介面
  */
 function showScreen(screenId) {
     const screens = ['lobby', 'roomArea', 'game'];
@@ -26,46 +30,55 @@ function showScreen(screenId) {
         if (el) {
             if (id === screenId) {
                 el.classList.remove('hidden');
-                el.style.display = 'flex'; // 強制顯示佈局
-                el.style.pointerEvents = 'auto'; // 確保可以點擊
+                el.style.display = 'flex'; 
+                el.style.pointerEvents = 'auto'; 
             } else {
                 el.classList.add('hidden');
-                el.style.display = 'none'; // 徹底移除佔位，防止擋住底層大廳
-                el.style.pointerEvents = 'none'; // 禁用任何可能的交互
+                el.style.display = 'none'; 
+                el.style.pointerEvents = 'none'; 
             }
         }
     });
 
-    // 結算層獨立邏輯
+    // 隱藏結算層
     const overlay = $('gameOverOverlay');
-    if (overlay) {
-        if (screenId === 'game') {
-            // 遊戲中預設隱藏結算層，除非觸發 game_over
-        } else {
-            overlay.classList.add('hidden');
-            overlay.style.display = 'none';
-        }
+    if (overlay && screenId !== 'game') {
+        overlay.classList.add('hidden');
+        overlay.style.display = 'none';
     }
 }
 
-// 網頁載入時強制重置狀態並顯示大廳
+/**
+ * 防止連點：在請求期間禁用按鈕
+ */
+function setConnectLoading(isLoading) {
+    const btns = [$('createBtn'), $('joinBtn')];
+    btns.forEach(btn => {
+        if (btn) {
+            btn.disabled = isLoading;
+            btn.style.opacity = isLoading ? "0.6" : "1";
+            if (!isLoading) {
+                btn.textContent = (btn.id === 'createBtn') ? "建立新房間" : "加入房間";
+            } else {
+                btn.textContent = "連線中...";
+            }
+        }
+    });
+}
+
 window.onload = () => {
-    currentRoom = null;
+    currentRoomId = null;
     showScreen('lobby');
-    console.log("遊戲初始化：大廳已鎖定，物理隔離生效");
 };
+
+/* ============================================================
+   2. 渲染邏輯 (手牌、玩家列表、座位)
+   ============================================================ */
 
 function rankText(r) {
     const map = { 11: 'J', 12: 'Q', 13: 'K', 14: 'A', 15: '2' };
     return map[r] || String(r);
 }
-
-function isGameActive() {
-    const game = $('game');
-    return game && !game.classList.contains('hidden') && game.style.display !== 'none';
-}
-
-// --- 介面渲染核心 ---
 
 function renderPlayers(list) {
     allPlayers = list;
@@ -110,14 +123,10 @@ function updateSeats(players, currentPlayerId) {
     }
 
     const seatIds = ['me-seat', 'p1-seat', 'p2-seat', 'p3-seat'];
-
     ordered.forEach((p, i) => {
         const seat = $(seatIds[i]);
         if (!seat) return;
-        if (!p) {
-            seat.innerHTML = '';
-            return;
-        }
+        if (!p) { seat.innerHTML = ''; return; }
 
         const isTurn = p.id === currentPlayerId;
         const passHtml = (p.hasPassed && !isTurn) ? '<div class="pass-overlay">PASS</div>' : '';
@@ -152,43 +161,44 @@ function renderHand() {
         card.dataset.id = c.id;
         if (selected.has(c.id)) card.classList.add('selected');
         
-        card.addEventListener('click', () => {
+        card.onclick = () => {
             if (selected.has(c.id)) selected.delete(c.id);
             else selected.add(c.id);
             renderHand();
-        });
+        };
         handEl.appendChild(card);
     });
 }
 
-// --- Socket 監聽邏輯 ---
+/* ============================================================
+   3. Socket 監聽邏輯
+   ============================================================ */
 
-socket.on('error_msg', msg => alert(msg));
+socket.on('error_msg', msg => {
+    alert(msg);
+    setConnectLoading(false); // 錯誤時恢復按鈕
+});
 
 socket.on('create_success', ({ roomId }) => {
-    currentRoom = roomId;
+    currentRoomId = roomId;
     $('curRoom').textContent = roomId;
+    setConnectLoading(false);
     showScreen('roomArea');
 });
 
 socket.on('join_success', ({ roomId }) => {
-    currentRoom = roomId;
+    currentRoomId = roomId;
     $('curRoom').textContent = roomId;
+    setConnectLoading(false);
     showScreen('roomArea');
 });
 
-// 【重點修正】room_update 防護守衛
 socket.on('room_update', players => {
     allPlayers = players;
-    
-    // 如果還沒有房間 ID，絕對不准切換走大廳
-    if (!currentRoom) {
+    if (!currentRoomId) {
         showScreen('lobby');
-    } else if (!isGameActive()) {
+    } else if (!$('game').offsetParent) { // 檢查 game 是否為隱藏狀態
         showScreen('roomArea');
-        $('curRoom').textContent = currentRoom;
-    } else {
-        updateSeats(allPlayers, null); 
     }
     renderPlayers(players);
 });
@@ -198,24 +208,12 @@ socket.on('deal', hand => {
         if (a.rank !== b.rank) return a.rank - b.rank;
         return SUIT_DATA[a.suit].weight - SUIT_DATA[b.suit].weight;
     });
-    allPlayers.forEach(p => p.cardCount = 13);
     renderHand();
 });
 
 socket.on('game_start', ({ currentPlayerId, players }) => {
     allPlayers = players;
     showScreen('game');
-    const overlay = $('gameOverOverlay');
-    if (overlay) {
-        overlay.classList.add('hidden');
-        overlay.style.display = 'none';
-    }
-    
-    allPlayers.forEach(p => {
-        p.cardCount = 13;
-        p.hasPassed = false;
-    });
-
     updateSeats(allPlayers, currentPlayerId);
     renderHand();
 
@@ -248,6 +246,7 @@ socket.on('play_made', ({ playerId, cards, isPass }) => {
         renderHand();
     }
     
+    // 渲染桌面最後出的牌
     const contentEl = $('lastPlayContent');
     if (!isPass) {
         const cardsHtml = cards.map(c => {
@@ -262,7 +261,7 @@ socket.on('play_made', ({ playerId, cards, isPass }) => {
         }).join('');
         contentEl.innerHTML = `<div class="played-cards-wrapper">${cardsHtml}</div>`;
     }
-    updateSeats(allPlayers, playerId); 
+    updateSeats(allPlayers, null); 
 });
 
 socket.on('new_round', () => {
@@ -273,88 +272,61 @@ socket.on('new_round', () => {
 
 socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
     const overlay = $('gameOverOverlay');
-    const statsEl = $('playerStats');
-    const winnerTitle = $('winnerTitle');
-    const timerDisplay = $('shutdownTimer');
-    const isMe = (winnerId === socket.id);
-
     if (overlay) {
         overlay.classList.remove('hidden');
         overlay.style.display = 'flex';
     }
     
-    winnerTitle.textContent = isMe ? "✨ 恭喜！你贏了 ✨" : `👑 贏家是：${winnerName}`;
-    winnerTitle.style.color = isMe ? "#f1c40f" : "#ffffff";
-
+    $('winnerTitle').textContent = (winnerId === socket.id) ? "✨ 你贏了！ ✨" : `👑 贏家：${winnerName}`;
+    
+    const statsEl = $('playerStats');
     statsEl.innerHTML = allPlayers.map(p => {
         const count = allHandCounts ? allHandCounts[p.id] : (p.id === winnerId ? 0 : p.cardCount);
-        const isWinner = (p.id === winnerId);
-        return `
-            <div class="stat-row ${isWinner ? 'winner-row' : ''}">
-                <span class="stat-name">${p.name} ${p.id === socket.id ? '(你)' : ''}</span>
-                <span class="count-tag">${isWinner ? '完賽' : count + ' 張'}</span>
-            </div>
-        `;
+        return `<div class="stat-row"><span>${p.name}</span> <span>${count} 張</span></div>`;
     }).join('');
 
-    selected.clear();
-
     let timeLeft = 30;
-    timerDisplay.textContent = timeLeft;
-    
-    if (countdownTimer) clearInterval(countdownTimer);
     countdownTimer = setInterval(() => {
         timeLeft--;
-        timerDisplay.textContent = timeLeft;
-        if (timeLeft <= 0) {
-            clearInterval(countdownTimer);
-            location.reload(); 
-        }
+        $('shutdownTimer').textContent = timeLeft;
+        if (timeLeft <= 0) location.reload();
     }, 1000);
 });
 
-// --- 按鈕事件 ---
+/* ============================================================
+   4. DOM 事件綁定
+   ============================================================ */
 
 $('createBtn').onclick = () => {
     const roomId = $('roomId').value.trim();
-    const name = $('name').value.trim() || 'Player';
-    if (!roomId) return alert('請填房間ID');
+    const name = $('name').value.trim();
+    if (!roomId || !name) return alert('請填寫完整資訊');
+    setConnectLoading(true);
     socket.emit('create_room', { roomId, name });
 };
 
 $('joinBtn').onclick = () => {
     const roomId = $('roomId').value.trim();
-    const name = $('name').value.trim() || 'Player';
-    if (!roomId) return alert('請填房間ID');
+    const name = $('name').value.trim();
+    if (!roomId || !name) return alert('請填寫完整資訊');
+    setConnectLoading(true);
     socket.emit('join_room', { roomId, name });
 };
 
 $('startBtn').onclick = () => {
-    if (currentRoom) {
-        socket.emit('toggle_ready', { roomId: currentRoom });
-    }
+    if (currentRoomId) socket.emit('toggle_ready', { roomId: currentRoomId });
 };
 
 $('playBtn').onclick = () => {
     const cards = myHand.filter(c => selected.has(c.id));
     if (cards.length === 0) return;
-    socket.emit('play_cards', { roomId: currentRoom, cards });
+    socket.emit('play_cards', { roomId: currentRoomId, cards });
     selected.clear();
 };
 
 $('passBtn').onclick = () => {
-    socket.emit('pass', { roomId: currentRoom });
+    socket.emit('pass', { roomId: currentRoomId });
     selected.clear();
 };
 
-$('restartBtn').onclick = () => {
-    if (countdownTimer) clearInterval(countdownTimer);
-    showScreen('roomArea');
-    if (currentRoom) {
-        socket.emit('toggle_ready', { roomId: currentRoom });
-    }
-};
-
-$('backToLobbyBtn').onclick = () => {
-    location.reload(); 
-};
+$('backToLobbyBtn').onclick = () => location.reload();
