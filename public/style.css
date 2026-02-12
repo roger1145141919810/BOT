@@ -11,7 +11,7 @@ body, html {
 .hidden { display: none !important; }
 
 /* ============================================================
-   2. 遊戲主容器：背景與全屏
+   2. 遊戲主容器
    ============================================================ */
 #game {
     position: relative;
@@ -21,84 +21,115 @@ body, html {
 }
 
 /* ============================================================
-   3. 專業牌桌區：寬橢圓鎖定
+   3. 專業牌桌區：修正牌桌過瘦 (修正問題 5)
    ============================================================ */
 .table-container {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    pointer-events: none; /* 讓點擊穿透到卡牌 */
+    pointer-events: none;
 }
 
-/* 出牌區：強制扁平橢圓，不隨內容變形 */
 #lastPlayContent {
     position: absolute;
     top: 42%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 70%; max-width: 850px; height: 180px;
+    /* 修正 5: 使用 min-width 確保牌桌不變瘦長 */
+    width: 65%; 
+    max-width: 850px; 
+    min-width: 580px; 
+    height: 170px;
     
     display: flex !important; flex-direction: row !important;
-    justify-content: center; align-items: center; gap: 10px;
+    justify-content: center; align-items: center; 
+    gap: 12px; /* 修正 2: 桌面牌的基礎間距 */
     
-    border: 2px solid rgba(212, 175, 55, 0.3);
+    border: 2px solid rgba(212, 175, 55, 0.4);
     border-radius: 100px;
-    background: rgba(0, 0, 0, 0.25);
-    box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.6);
     pointer-events: auto;
 }
 
-/* --- 玩家座位：絕對座標鎖定 (解決擠在一起的問題) --- */
+/* --- 玩家座位：縮短距離 (修正問題 1) --- */
 .player-seat {
     position: absolute !important;
     display: flex; flex-direction: column; align-items: center;
     z-index: 100; min-width: 120px;
 }
 
-.pos-top    { top: 5%;  left: 50%; transform: translateX(-50%); }
-.pos-left   { left: 4%; top: 42%; transform: translateY(-50%); }
-.pos-right  { right: 4%; top: 42%; transform: translateY(-50%); }
-.pos-bottom { bottom: 200px; left: 50%; transform: translateX(-50%); }
+/* 修正 1: 將 left/right 從 4% 拉回 12%，讓玩家靠近牌桌 */
+.pos-top    { top: 8%;  left: 50%; transform: translateX(-50%); }
+.pos-left   { left: 12%; top: 42%; transform: translateY(-50%); }
+.pos-right  { right: 12%; top: 42%; transform: translateY(-50%); }
+.pos-bottom { bottom: 195px; left: 50%; transform: translateX(-50%); }
 
+/* 修正 4: 玩家名稱顏色與對比 */
 .player-info-wrapper {
-    background: rgba(0, 0, 0, 0.8);
-    padding: 8px 16px; border: 1px solid #d4af37; border-radius: 8px;
+    background: rgba(0, 0, 0, 0.85);
+    padding: 8px 16px; border: 1.2px solid #d4af37; border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.6);
 }
 
-.active-turn { border-color: #ffcc33; box-shadow: 0 0 15px #ffcc33; }
+.player-info-wrapper span {
+    color: #ffffff !important; /* 名字改為純白 */
+    text-shadow: 0 1px 3px #000;
+}
+
+.player-info-wrapper .card-count {
+    color: #ffcc33 !important; /* 剩餘張數維持金黃 */
+    font-weight: bold;
+}
+
+.active-turn { border-color: #ffffff; box-shadow: 0 0 15px rgba(255, 255, 255, 0.5); }
 
 /* ============================================================
-   4. 卡牌系統：修正重疊順序與選取
+   4. 卡牌系統：修正花紋與顯示 (修正問題 2, 3)
    ============================================================ */
 .card {
     width: 76px; height: 110px;
     position: relative;
-    background: linear-gradient(145deg, #2a2a2a, #0a0a0a) !important;
+    background: #1a1a1a !important; /* 深黑底色提高易讀性 */
     border: 1px solid #d4af37; border-radius: 6px;
-    margin-left: -35px; /* 右疊左核心 */
+    margin-left: -38px; 
     transition: transform 0.2s cubic-bezier(0.1, 0.7, 0.1, 1);
     box-shadow: -3px 0 10px rgba(0,0,0,0.6);
     cursor: pointer;
 }
 
+/* 修正 3: 手牌龍紋花紋過度干擾，大幅降透明度 */
+.dragon-emblem {
+    position: absolute; 
+    top: 55%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 2.2rem; 
+    opacity: 0.08 !important; /* 僅保留淡淡的水印感 */
+    color: #d4af37; 
+    pointer-events: none; z-index: 1;
+}
+
 #hand .card:first-child { margin-left: 0; }
 
-/* 桌面出的牌：稍微縮小 */
-.card-mini { width: 60px; height: 88px; margin-left: -20px; pointer-events: none; }
+/* 修正 2: 桌面出的牌改為「正 margin」確保不重疊錯誤 */
+.card-mini { 
+    width: 62px; height: 90px; 
+    margin-left: 6px !important; 
+    pointer-events: none; 
+}
+.card-mini:first-child { margin-left: 0; }
 
-/* 選取狀態：強制置頂且向上彈 */
+/* 選取狀態 */
 .card.selected {
-    transform: translateY(-35px) !important;
+    transform: translateY(-38px) !important;
     z-index: 1000 !important;
     border-color: #fff !important;
-    box-shadow: 0 5px 20px rgba(212, 175, 55, 0.8) !important;
+    box-shadow: 0 5px 25px rgba(212, 175, 55, 0.8) !important;
 }
 
 /* ============================================================
-   5. 控制介面：完全透明化
+   5. 控制介面
    ============================================================ */
 .player-ui {
     position: fixed; bottom: 0; left: 0; width: 100%;
-    background: transparent !important; /* 確保沒黑底 */
+    background: transparent !important;
     display: flex; flex-direction: column; align-items: center;
     padding-bottom: 35px; z-index: 2000; pointer-events: none;
 }
