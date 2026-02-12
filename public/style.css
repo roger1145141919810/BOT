@@ -148,32 +148,95 @@ body #lobby, body #roomArea {
 .pos-right  { right: 5%; top: 40%; transform: translateY(-50%); }
 .pos-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); }
 /* ============================================================
-   4. 底部控制區 (確保按鈕與手牌正常)
+   4. 底部控制區 (去掉黑框背景)
    ============================================================ */
 .player-ui {
     width: 100%;
-    padding: 20px;
-    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 100%);
-    display: flex; flex-direction: column; align-items: center;
+    padding: 0 20px 20px 20px;
+    /* 關鍵：去掉背景漸層，改為完全透明 */
+    background: transparent !important; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center;
     z-index: 5000;
+    pointer-events: none; /* 讓點擊能穿透空白區域 */
+}
+
+/* 確保手牌與按鈕可以被點擊 */
+#hand, .controls {
     pointer-events: auto;
 }
 
 #hand { 
-    display: flex; gap: 8px; margin-bottom: 20px; 
-    min-height: 140px; /* 增加高度確保牌彈起時有空間 */
+    display: flex; 
+    gap: 0; /* 配合 card 的負 margin 使用 */
+    margin-bottom: 25px; 
+    min-height: 140px; 
     justify-content: center;
-    align-items: flex-end; /* 牌從底部對齊 */
+    align-items: flex-end;
 }
 
+/* 按鈕群組美化：讓按鈕更精緻 */
 .controls {
-    display: flex; gap: 20px; justify-content: center; width: 100%;
+    display: flex; 
+    gap: 30px; 
+    justify-content: center; 
+    width: 100%;
+    max-width: 600px;
 }
 
 #playBtn, #passBtn {
-    width: 150px; height: 45px; border-radius: 8px;
-    font-size: 1.1rem; font-weight: bold; cursor: pointer;
+    width: 140px; 
+    height: 48px; 
+    border-radius: 25px; /* 圓角膠囊造型更現代 */
+    font-size: 1.1rem; 
+    font-weight: bold; 
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
 }
 
-#playBtn { background: linear-gradient(135deg, #d4af37 0%, #aa8913 100%) !important; color: #000; border: none; }
-#passBtn { background: rgba(255, 255, 255, 0.1) !important; color: #d4af37; border: 2px solid #d4af37; }
+/* 出牌按鈕：金屬金 */
+#playBtn { 
+    background: linear-gradient(135deg, #d4af37 0%, #aa8913 100%) !important; 
+    color: #332200; 
+    border: 1px solid #ffe699; 
+}
+
+#playBtn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+    filter: brightness(1.1);
+}
+
+/* 過牌按鈕：半透明磨砂感 */
+#passBtn { 
+    background: rgba(255, 255, 255, 0.1) !important; 
+    color: #d4af37; 
+    border: 1px solid #d4af37; 
+    backdrop-filter: blur(5px); /* 加入磨砂玻璃效果 */
+}
+
+#passBtn:hover:not(:disabled) {
+    background: rgba(212, 175, 55, 0.2) !important;
+    transform: translateY(-3px);
+}
+
+#playBtn:disabled, #passBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    filter: grayscale(1);
+    transform: none;
+}
+
+#status {
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    color: #ffcc33;
+    text-shadow: 0 0 8px rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.4);
+    padding: 4px 15px;
+    border-radius: 20px;
+    pointer-events: none;
+}
