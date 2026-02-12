@@ -1,5 +1,5 @@
 /* ============================================================
-   1. 基礎環境與全局隱藏邏輯
+   1. 基礎環境
    ============================================================ */
 * { box-sizing: border-box; font-family: "Microsoft JhengHei", system-ui, sans-serif; }
 
@@ -9,169 +9,127 @@ body {
     color: #fff; height: 100vh; display: flex; justify-content: center; overflow: hidden;
 }
 
-.center { width: 100%; max-width: 1200px; position: relative; height: 100%; }
-
-/* 強力隱藏指令：確保權重高於下方所有 ID 選擇器 */
 body .hidden { display: none !important; pointer-events: none !important; }
 
 /* ============================================================
-   2. 大廳與房間區 (強制頂層遮罩)
+   2. 大廳與房間區 (維持黑金皮革質感)
    ============================================================ */
 body #lobby, body #roomArea {
     position: fixed;
     top: 0; left: 0;
     width: 100vw; height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: flex; justify-content: center; align-items: center;
     z-index: 6000;
     background: radial-gradient(circle at center, #163e32 0%, #051a14 100%);
-    pointer-events: auto;
 }
 
 .lobby-card {
-    background: 
-        url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
-        radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%) !important;
-    padding: 40px;
-    border-radius: 20px;
-    border: 2px solid #d4af37;
-    text-align: center;
-    width: 450px;
-    min-height: 420px;
+    background: url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
+                radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%) !important;
+    padding: 40px; border-radius: 20px; border: 2px solid #d4af37;
+    text-align: center; width: 450px;
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(212, 175, 55, 0.4);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
 }
 
 /* ============================================================
-   3. 遊戲牌桌與龍紋撲克牌
+   3. 遊戲牌桌 (修正一長條與座位偏移問題)
    ============================================================ */
 #game {
     position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
 }
 
 .table-container {
     position: relative; 
     flex: 1;
     width: 100%; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center;
+    display: flex; justify-content: center; align-items: center;
 }
 
-/* 龍紋黑金牌張 */
-.card {
+/* 修正：桌面出牌區 (確保水平排列) */
+#lastPlayContent {
+    display: flex !important;
+    flex-direction: row !important; /* 強制水平 */
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    min-height: 150px;
+}
+
+.played-cards-wrapper {
+    display: flex;
+    gap: 8px;
+}
+
+/* 龍紋黑金牌張 (維持你原本的樣式) */
+.card, .card-mini {
     width: 75px; height: 110px; position: relative;
     background: radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%) !important;
-    border: 1.5px solid #d4af37;
-    border-radius: 8px;
-    display: flex; flex-direction: column; 
-    align-items: center; justify-content: space-between; 
-    padding: 10px 5px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    transition: transform 0.2s, box-shadow 0.2s;
-    cursor: pointer;
-    overflow: hidden; /* 重要：防止龍紋超出邊界 */
+    border: 1.5px solid #d4af37; border-radius: 8px;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    padding: 10px 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    overflow: hidden;
 }
 
-/* 龍紋背景注入 */
+/* 桌面出的牌可以縮小一點點 */
+.card-mini { width: 60px; height: 88px; padding: 5px; }
+
+/* 龍紋背景 */
 .dragon-emblem {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2.5rem;
-    opacity: 0.12; /* 淡淡的金色感 */
-    pointer-events: none;
-    z-index: 1;
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 2.5rem; opacity: 0.12; pointer-events: none; z-index: 1;
 }
 
 .card-content { position: relative; z-index: 2; width: 100%; text-align: center; }
-.card .rank { font-size: 1.4rem; font-weight: bold; }
-.card .suit { font-size: 1.2rem; }
 
-.card.selected { transform: translateY(-20px); border-color: #fff; box-shadow: 0 0 15px #d4af37; }
+/* --- 修正座位座標 --- */
+.player-seat {
+    position: absolute;
+    display: flex; flex-direction: column; align-items: center;
+    z-index: 10;
+}
+
+.pos-top    { top: 5%;  left: 50%; transform: translateX(-50%); }
+.pos-left   { left: 5%; top: 40%; transform: translateY(-50%); }
+.pos-right  { right: 5%; top: 40%; transform: translateY(-50%); }
+.pos-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); }
+
+.player-info-wrapper {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 8px 15px; border-radius: 8px; border: 1px solid #d4af37;
+    text-align: center;
+}
+
+.player-info-wrapper.active-turn {
+    box-shadow: 0 0 15px #ffcc33;
+    border-color: #ffcc33;
+}
 
 /* ============================================================
-   4. 底部控制區 (修復過牌按鈕)
+   4. 底部控制區 (確保按鈕不見的問題解決)
    ============================================================ */
 .player-ui {
     width: 100%;
-    padding: 20px 10px;
+    padding: 20px;
     background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display: flex; flex-direction: column; align-items: center;
     z-index: 5000;
 }
 
 #hand { 
-    display: flex; 
-    gap: 8px; 
-    margin-bottom: 20px; 
-    min-height: 120px;
-    justify-content: center;
-    flex-wrap: nowrap; /* 確保手牌不換行 */
+    display: flex; gap: 5px; margin-bottom: 20px; 
+    min-height: 120px; justify-content: center;
 }
 
-/* 按鈕群組：確保出牌與過牌水平排列 */
 .controls {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    width: 100%;
-    max-width: 500px;
+    display: flex; gap: 20px; justify-content: center; width: 100%;
 }
 
 #playBtn, #passBtn {
-    flex: 1; /* 讓兩個按鈕等寬 */
-    height: 50px;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s;
+    width: 150px; height: 45px; border-radius: 8px;
+    font-size: 1.1rem; font-weight: bold; cursor: pointer;
 }
 
-#playBtn {
-    background: linear-gradient(135deg, #d4af37 0%, #aa8913 100%) !important;
-    border: none;
-    color: #000;
-}
-
-#passBtn {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 2px solid #d4af37;
-    color: #d4af37;
-}
-
-#playBtn:disabled, #passBtn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-    filter: grayscale(1);
-}
-
-#status {
-    margin-bottom: 10px;
-    font-size: 1rem;
-    color: #ffcc33;
-    text-shadow: 0 0 5px rgba(0,0,0,0.5);
-}
-
-/* 結算層 */
-#gameOverOverlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 9000;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(5px);
-}
+#playBtn { background: linear-gradient(135deg, #d4af37 0%, #aa8913 100%) !important; color: #000; border: none; }
+#passBtn { background: rgba(255, 255, 255, 0.1) !important; color: #d4af37; border: 2px solid #d4af37; }
