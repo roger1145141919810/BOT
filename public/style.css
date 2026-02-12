@@ -34,99 +34,113 @@ body #lobby, body #roomArea {
 /* ============================================================
    3. 遊戲牌桌 (修正一長條、選取動作與重疊樣式)
    ============================================================ */
+/* ============================================================
+   3. 遊戲牌桌：橢圓核心與專業佈局
+   ============================================================ */
 #game {
     position: relative;
     width: 100%; height: 100%;
     display: flex; flex-direction: column;
+    background: radial-gradient(circle at center, #1a4a3e 0%, #051a14 100%);
 }
 
+/* 建立一個視覺上的橢圓牌桌 */
 .table-container {
     position: relative; 
     flex: 1;
     width: 100%; 
     display: flex; justify-content: center; align-items: center;
-    /* 關鍵：設為 none 確保不會擋住下方手牌點擊 */
-    pointer-events: none; 
+    pointer-events: none; /* 確保點擊穿透 */
 }
 
-/* 桌面出牌區 (恢復點擊並強制水平) */
+/* 牌桌中心出牌區域：強制橫向並排 */
 #lastPlayContent {
     pointer-events: auto;
     display: flex !important;
     flex-direction: row !important; 
     justify-content: center;
     align-items: center;
-    gap: 10px;
-    min-height: 150px;
+    gap: 12px;
+    width: 50%;
+    height: 250px;
+    border: 2px solid rgba(212, 175, 55, 0.2);
+    border-radius: 150px; /* 形成中心橢圓感 */
+    background: rgba(0, 0, 0, 0.15);
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
 }
 
-/* 龍紋黑金牌張：修改為截圖中的皮革黑金質感 */
+/* --- 龍紋黑金牌張：重疊與質感增強 --- */
 .card {
     width: 80px; 
-    height: 120px; 
+    height: 115px; 
     position: relative;
-    /* 修改背景為深色漸層皮革感 */
     background: linear-gradient(145deg, #2a2a2a, #0a0a0a) !important;
     border: 1px solid #d4af37; 
     border-radius: 6px;
     display: flex; flex-direction: column; align-items: center; justify-content: space-between;
     padding: 8px 4px; 
-    box-shadow: 2px 0 8px rgba(0,0,0,0.6); /* 側邊陰影強化重疊感 */
-    
-    /* 修正動作：加入過渡動畫並確保 overflow 可見 */
+    box-shadow: -2px 0 10px rgba(0,0,0,0.7); /* 強化堆疊陰影 */
     cursor: pointer;
-    transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28), box-shadow 0.2s;
+    transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
     pointer-events: auto;
     
-    /* 關鍵：實現截圖中的重疊感 */
+    /* 關鍵：實現並排且緊密重疊 */
     margin-left: -35px; 
 }
 
-/* 第一張牌不需要左偏 */
-#hand .card:first-child {
-    margin-left: 0;
-}
+#hand .card:first-child { margin-left: 0; }
 
-/* 桌面出的牌縮放 */
+/* 桌面出的牌：稍微縮小並橫排 */
 .card-mini { 
-    width: 60px; height: 88px; padding: 5px; 
+    width: 65px; height: 95px; padding: 5px; 
     pointer-events: none; 
-    margin-left: -20px; /* 桌面出的牌也稍微重疊 */
+    margin-left: -15px; 
 }
 .card-mini:first-child { margin-left: 0; }
 
-/* 關鍵：選取後的位位移與層級切換 */
+/* 選取彈起動畫 */
 .card.selected {
-    transform: translateY(-35px) !important; /* 向上彈起 */
+    transform: translateY(-35px) !important; 
     border-color: #ffffff !important;
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.7) !important;
-    z-index: 500 !important; /* 確保選中的牌在重疊中處於最上層 */
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.8) !important;
+    z-index: 500 !important;
 }
 
-/* 懸停效果：讓玩家知道這張可以點 */
-.card:hover:not(.selected) {
-    transform: translateY(-10px);
-    z-index: 400;
-}
-
-/* 龍紋背景 */
+/* 龍紋裝飾 */
 .dragon-emblem {
     position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%);
     font-size: 2.2rem; opacity: 0.15; color: #d4af37; pointer-events: none; z-index: 1;
 }
 
-.card-content { position: relative; z-index: 2; width: 100%; text-align: center; pointer-events: none; }
-
-/* 字體顏色修正 */
+.card-content { position: relative; z-index: 2; width: 100%; text-align: center; }
 .card.red .rank, .card.red .suit { color: #ff4d4d; }
 .card.black .rank, .card.black .suit { color: #d4af37; }
 
-/* 座位定位 */
+/* --- 玩家座位精確定位 --- */
 .player-seat {
     position: absolute;
     display: flex; flex-direction: column; align-items: center;
     z-index: 10;
     pointer-events: auto;
+    min-width: 120px;
+}
+
+/* 北、西、東、南四方分佈 */
+.pos-top    { top: 5%;  left: 50%; transform: translateX(-50%); }
+.pos-left   { left: 8%; top: 45%; transform: translateY(-50%); }
+.pos-right  { right: 8%; top: 45%; transform: translateY(-50%); }
+.pos-bottom { bottom: 180px; left: 50%; transform: translateX(-50%); } /* 位於手牌上方 */
+
+.player-info-wrapper {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px 20px; border-radius: 12px; border: 1.5px solid #d4af37;
+    text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.player-info-wrapper.active-turn {
+    box-shadow: 0 0 15px #ffcc33;
+    border-color: #ffcc33;
+    background: rgba(212, 175, 55, 0.2);
 }
 
 .pos-top    { top: 5%;  left: 50%; transform: translateX(-50%); }
