@@ -32,7 +32,7 @@ body #lobby, body #roomArea {
 }
 
 /* ============================================================
-   3. 遊戲牌桌 (修正一長條與座位偏移問題)
+   3. 遊戲牌桌 (修正一長條與選取動作)
    ============================================================ */
 #game {
     position: relative;
@@ -45,49 +45,60 @@ body #lobby, body #roomArea {
     flex: 1;
     width: 100%; 
     display: flex; justify-content: center; align-items: center;
+    /* 關鍵：設為 none 確保不會擋住下方手牌點擊，子元素再設為 auto */
+    pointer-events: none; 
 }
 
-/* 修正：桌面出牌區 (確保水平排列) */
+/* 桌面出牌區 (恢復點擊並強制水平) */
 #lastPlayContent {
+    pointer-events: auto;
     display: flex !important;
-    flex-direction: row !important; /* 強制水平 */
+    flex-direction: row !important; 
     justify-content: center;
     align-items: center;
     gap: 10px;
     min-height: 150px;
 }
 
-.played-cards-wrapper {
-    display: flex;
-    gap: 8px;
-}
-
-/* 龍紋黑金牌張 (維持你原本的樣式) */
-.card, .card-mini {
+/* 龍紋黑金牌張 */
+.card {
     width: 75px; height: 110px; position: relative;
     background: radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%) !important;
     border: 1.5px solid #d4af37; border-radius: 8px;
     display: flex; flex-direction: column; align-items: center; justify-content: space-between;
     padding: 10px 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    overflow: hidden;
+    
+    /* 修正選取動作：加入過渡動畫並移除 overflow:hidden */
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28), box-shadow 0.2s;
+    pointer-events: auto;
 }
 
-/* 桌面出的牌可以縮小一點點 */
-.card-mini { width: 60px; height: 88px; padding: 5px; }
+/* 桌面出的牌缩放 */
+.card-mini { width: 60px; height: 88px; padding: 5px; pointer-events: none; }
 
-/* 龍紋背景 */
+/* 關鍵：選取後的位移動畫 */
+.card.selected {
+    transform: translateY(-30px) !important; /* 向上彈起 30px */
+    border-color: #ffffff !important;
+    box-shadow: 0 10px 25px rgba(212, 175, 55, 0.8) !important;
+    z-index: 100;
+}
+
+/* 龍紋背景 (改用不可點擊的裝飾層) */
 .dragon-emblem {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
     font-size: 2.5rem; opacity: 0.12; pointer-events: none; z-index: 1;
 }
 
-.card-content { position: relative; z-index: 2; width: 100%; text-align: center; }
+.card-content { position: relative; z-index: 2; width: 100%; text-align: center; pointer-events: none; }
 
-/* --- 修正座位座標 --- */
+/* 座位定位 */
 .player-seat {
     position: absolute;
     display: flex; flex-direction: column; align-items: center;
     z-index: 10;
+    pointer-events: auto;
 }
 
 .pos-top    { top: 5%;  left: 50%; transform: translateX(-50%); }
@@ -95,31 +106,23 @@ body #lobby, body #roomArea {
 .pos-right  { right: 5%; top: 40%; transform: translateY(-50%); }
 .pos-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); }
 
-.player-info-wrapper {
-    background: rgba(0, 0, 0, 0.7);
-    padding: 8px 15px; border-radius: 8px; border: 1px solid #d4af37;
-    text-align: center;
-}
-
-.player-info-wrapper.active-turn {
-    box-shadow: 0 0 15px #ffcc33;
-    border-color: #ffcc33;
-}
-
 /* ============================================================
-   4. 底部控制區 (確保按鈕不見的問題解決)
+   4. 底部控制區 (確保按鈕與手牌正常)
    ============================================================ */
 .player-ui {
     width: 100%;
     padding: 20px;
-    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 100%);
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 100%);
     display: flex; flex-direction: column; align-items: center;
     z-index: 5000;
+    pointer-events: auto;
 }
 
 #hand { 
-    display: flex; gap: 5px; margin-bottom: 20px; 
-    min-height: 120px; justify-content: center;
+    display: flex; gap: 8px; margin-bottom: 20px; 
+    min-height: 140px; /* 增加高度確保牌彈起時有空間 */
+    justify-content: center;
+    align-items: flex-end; /* 牌從底部對齊 */
 }
 
 .controls {
