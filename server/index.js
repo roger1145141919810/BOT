@@ -73,6 +73,7 @@ function performStartGame(roomId) {
     const room = rooms[roomId];
     if (!room) return;
 
+    // 填充 AI 直到 4 人
     while (room.players.length < 4) {
         const aiId = `AI-${Math.random().toString(36).substr(2, 5)}`;
         room.players.push({ 
@@ -89,10 +90,12 @@ function performStartGame(roomId) {
     room.gameStarted = true;
     room.lastPlay = null;
     room.passCount = 0;
+    room.hands = {}; // 清空舊手牌
 
     room.players.forEach((player, i) => {
         room.hands[player.id] = hands[i];
         if (!player.isAI) io.to(player.id).emit('deal', hands[i]);
+        // 梅花 3 先出
         if (hands[i].some(c => c.id === 'clubs-3')) room.turnIndex = i;
     });
 
@@ -108,11 +111,12 @@ function performStartGame(roomId) {
 // --- Socket 邏輯 ---
 io.on('connection', (socket) => {
     
+    // 建立房間
     socket.on('create_room', ({ roomId, name }) => {
         if (rooms[roomId]) {
-            socket.emit('error_msg', '該房間 ID 已被使用。');
-            return;
+            return socket.emit('error_msg', '該房間 ID 已存在，請嘗試其他名稱。');
         }
+        
         socket.join(roomId);
         rooms[roomId] = { 
             players: [{ id: socket.id, name, isAI: false, isReady: false }],
@@ -122,35 +126,49 @@ io.on('connection', (socket) => {
             passCount: 0,
             hands: {} 
         };
-        io.to(roomId).emit('room_update', rooms[roomId].players);
+        
         socket.emit('create_success', { roomId });
+        io.to(roomId).emit('room_update', rooms[roomId].players);
     });
 
+    // 加入房間
     socket.on('join_room', ({ roomId, name }) => {
         const room = rooms[roomId];
+        
         if (!room) return socket.emit('error_msg', '房間不存在。');
-        if (room.gameStarted || room.players.length >= 4) return socket.emit('error_msg', '無法加入。');
+        if (room.gameStarted) return socket.emit('error_msg', '遊戲已開始，無法加入。');
+        if (room.players.length >= 4) return socket.emit('error_msg', '房間已滿。');
+
+        // --- 解決 ID/名字重複邏輯 ---
+        const isNameTaken = room.players.some(p => p.name === name);
+        if (isNameTaken) return socket.emit('error_msg', '此名字已被房內玩家使用。');
 
         socket.join(roomId);
         room.players.push({ id: socket.id, name, isAI: false, isReady: false });
-        io.to(roomId).emit('room_update', room.players);
+        
         socket.emit('join_success', { roomId });
+        io.to(roomId).emit('room_update', room.players);
     });
 
+    // 準備/取消準備
     socket.on('toggle_ready', ({ roomId }) => {
         const room = rooms[roomId];
         if (!room || room.gameStarted) return;
+
         const player = room.players.find(p => p.id === socket.id);
         if (player) {
             player.isReady = !player.isReady;
             io.to(roomId).emit('room_update', room.players);
+
+            // 檢查是否所有真人玩家都準備好了
             const humans = room.players.filter(p => !p.isAI);
-            if (humans.every(p => p.isReady) && humans.length >= 1) { 
+            if (humans.length >= 1 && humans.every(p => p.isReady)) {
                 performStartGame(roomId);
             }
         }
     });
 
+    // 出牌邏輯
     socket.on('play_cards', ({ roomId, cards }) => {
         const room = rooms[roomId];
         if (!room || !room.gameStarted) return;
@@ -158,29 +176,35 @@ io.on('connection', (socket) => {
 
         const isFirstTurn = !room.lastPlay && room.passCount === 0 && room.hands[socket.id].length === 13;
         if (!Rules.canPlay(cards, room.lastPlay, isFirstTurn)) {
-            socket.emit('error_msg', '牌組不合法！');
-            return; 
+            return socket.emit('error_msg', '出牌不符合規則！');
         }
 
+        // 更新手牌
         room.hands[socket.id] = room.hands[socket.id].filter(c => !cards.find(pc => pc.id === c.id));
         room.lastPlay = cards;
         room.passCount = 0;
+        
         io.to(roomId).emit('play_made', { playerId: socket.id, cards, isPass: false });
 
         if (room.hands[socket.id].length === 0) {
-            io.to(roomId).emit('game_over', { winnerName: room.players[room.turnIndex].name, winnerId: socket.id });
+            io.to(roomId).emit('game_over', { 
+                winnerName: room.players[room.turnIndex].name, 
+                winnerId: socket.id 
+            });
             room.gameStarted = false;
             return;
         }
         nextTurn(roomId);
     });
 
+    // 過牌邏輯
     socket.on('pass', ({ roomId }) => {
         const room = rooms[roomId];
         if (!room || !room.gameStarted || room.players[room.turnIndex].id !== socket.id || !room.lastPlay) return;
 
         room.passCount++;
         io.to(roomId).emit('play_made', { playerId: socket.id, cards: [], isPass: true });
+        
         if (room.passCount >= room.players.length - 1) {
             room.lastPlay = null;
             room.passCount = 0;
@@ -189,33 +213,32 @@ io.on('connection', (socket) => {
         nextTurn(roomId);
     });
 
+    // 斷線處理 (最重要)
     socket.on('disconnect', () => {
         for (const roomId in rooms) {
             const room = rooms[roomId];
             const index = room.players.findIndex(p => p.id === socket.id);
             
             if (index !== -1) {
+                // 移除該玩家
                 room.players.splice(index, 1);
+                
+                // 檢查房間是否還有真人
                 const hasHumans = room.players.some(p => !p.isAI);
                 
                 if (room.players.length === 0 || !hasHumans) {
-                    console.log(`房間 ${roomId} 已無真人，正在刪除並釋放 ID`);
+                    console.log(`房間 ${roomId} 已無真人，徹底清除資料。`);
                     delete rooms[roomId];
                 } else {
+                    // 如果遊戲正在進行，可能需要強制終止或跳過回合
+                    if (room.gameStarted) {
+                        io.to(roomId).emit('error_msg', '有玩家斷線，遊戲終止。');
+                        room.gameStarted = false;
+                    }
                     io.to(roomId).emit('room_update', room.players);
                 }
                 break;
             }
-        }
-    });
-
-    socket.on('leave_room', ({ roomId }) => {
-        socket.leave(roomId);
-        if (rooms[roomId]) {
-            rooms[roomId].players = rooms[roomId].players.filter(p => p.id !== socket.id);
-            const hasHumans = rooms[roomId].players.some(p => !p.isAI);
-            if (!hasHumans) delete rooms[roomId];
-            else io.to(roomId).emit('room_update', rooms[roomId].players);
         }
     });
 });
