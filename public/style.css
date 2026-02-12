@@ -32,7 +32,7 @@ body #lobby, body #roomArea {
 }
 
 /* ============================================================
-   3. 遊戲牌桌 (修正一長條與選取動作)
+   3. 遊戲牌桌 (修正一長條、選取動作與重疊樣式)
    ============================================================ */
 #game {
     position: relative;
@@ -45,7 +45,7 @@ body #lobby, body #roomArea {
     flex: 1;
     width: 100%; 
     display: flex; justify-content: center; align-items: center;
-    /* 關鍵：設為 none 確保不會擋住下方手牌點擊，子元素再設為 auto */
+    /* 關鍵：設為 none 確保不會擋住下方手牌點擊 */
     pointer-events: none; 
 }
 
@@ -60,38 +60,66 @@ body #lobby, body #roomArea {
     min-height: 150px;
 }
 
-/* 龍紋黑金牌張 */
+/* 龍紋黑金牌張：修改為截圖中的皮革黑金質感 */
 .card {
-    width: 75px; height: 110px; position: relative;
-    background: radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%) !important;
-    border: 1.5px solid #d4af37; border-radius: 8px;
+    width: 80px; 
+    height: 120px; 
+    position: relative;
+    /* 修改背景為深色漸層皮革感 */
+    background: linear-gradient(145deg, #2a2a2a, #0a0a0a) !important;
+    border: 1px solid #d4af37; 
+    border-radius: 6px;
     display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-    padding: 10px 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    padding: 8px 4px; 
+    box-shadow: 2px 0 8px rgba(0,0,0,0.6); /* 側邊陰影強化重疊感 */
     
-    /* 修正選取動作：加入過渡動畫並移除 overflow:hidden */
+    /* 修正動作：加入過渡動畫並確保 overflow 可見 */
     cursor: pointer;
     transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28), box-shadow 0.2s;
     pointer-events: auto;
+    
+    /* 關鍵：實現截圖中的重疊感 */
+    margin-left: -35px; 
 }
 
-/* 桌面出的牌缩放 */
-.card-mini { width: 60px; height: 88px; padding: 5px; pointer-events: none; }
+/* 第一張牌不需要左偏 */
+#hand .card:first-child {
+    margin-left: 0;
+}
 
-/* 關鍵：選取後的位移動畫 */
+/* 桌面出的牌縮放 */
+.card-mini { 
+    width: 60px; height: 88px; padding: 5px; 
+    pointer-events: none; 
+    margin-left: -20px; /* 桌面出的牌也稍微重疊 */
+}
+.card-mini:first-child { margin-left: 0; }
+
+/* 關鍵：選取後的位位移與層級切換 */
 .card.selected {
-    transform: translateY(-30px) !important; /* 向上彈起 30px */
+    transform: translateY(-35px) !important; /* 向上彈起 */
     border-color: #ffffff !important;
-    box-shadow: 0 10px 25px rgba(212, 175, 55, 0.8) !important;
-    z-index: 100;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.7) !important;
+    z-index: 500 !important; /* 確保選中的牌在重疊中處於最上層 */
 }
 
-/* 龍紋背景 (改用不可點擊的裝飾層) */
+/* 懸停效果：讓玩家知道這張可以點 */
+.card:hover:not(.selected) {
+    transform: translateY(-10px);
+    z-index: 400;
+}
+
+/* 龍紋背景 */
 .dragon-emblem {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    font-size: 2.5rem; opacity: 0.12; pointer-events: none; z-index: 1;
+    position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 2.2rem; opacity: 0.15; color: #d4af37; pointer-events: none; z-index: 1;
 }
 
 .card-content { position: relative; z-index: 2; width: 100%; text-align: center; pointer-events: none; }
+
+/* 字體顏色修正 */
+.card.red .rank, .card.red .suit { color: #ff4d4d; }
+.card.black .rank, .card.black .suit { color: #d4af37; }
 
 /* 座位定位 */
 .player-seat {
@@ -105,7 +133,6 @@ body #lobby, body #roomArea {
 .pos-left   { left: 5%; top: 40%; transform: translateY(-50%); }
 .pos-right  { right: 5%; top: 40%; transform: translateY(-50%); }
 .pos-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); }
-
 /* ============================================================
    4. 底部控制區 (確保按鈕與手牌正常)
    ============================================================ */
