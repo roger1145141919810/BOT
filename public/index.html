@@ -1,94 +1,127 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 
 <head>
     <meta charset="utf-8" />
-    <title>BOT - Big Old Two</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    
+    <title>皇家大老二 | Big Old Two</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <link rel="stylesheet" href="/style.css" />
-    <link rel="stylesheet" href="/result.css" />
     <link rel="stylesheet" href="/lobby.css" />
+    <link rel="stylesheet" href="/result.css" />
 </head>
 
 <body>
-    <div class="center">
-        <div id="lobby">
-            <div class="lobby-card">
-                <h3>皇家大老二</h3>
+
+    <main class="app">
+
+        <!-- ===== 大廳 ===== -->
+        <section id="lobby" class="screen active">
+            <div class="card">
+                <h1 class="title">皇家大老二</h1>
                 <hr>
-                <div class="input-group">
-                    <input id="roomId" type="text" placeholder="房間ID (選填)">
+
+                <div class="form-group">
+                    <input id="roomId" type="text" placeholder="房間 ID（選填）">
                     <input id="name" type="text" placeholder="你的暱稱">
                 </div>
-                <div class="btn-group-vertical">
-                    <button id="createBtn" class="primary-btn">建立新對局</button>
-                    <button id="joinBtn" class="secondary-btn">加入現有房間</button>
+
+                <div class="btn-group vertical">
+                    <button id="createBtn" class="btn primary">建立新對局</button>
+                    <button id="joinBtn" class="btn secondary">加入現有房間</button>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <div id="roomArea" class="hidden">
-            <div class="lobby-card">
-                <h3>房間 ID: <span id="curRoom">-</span></h3>
+
+        <!-- ===== 房間內 ===== -->
+        <section id="roomArea" class="screen hidden">
+            <div class="card">
+                <h2>房間 ID：<span id="curRoom">-</span></h2>
                 <hr>
-                <div id="playersList"></div>
-                <div class="btn-group-vertical">
-                    <button id="startBtn" class="primary-btn">準備遊戲</button>
+
+                <div id="playersList" class="players-list"></div>
+
+                <div class="btn-group vertical">
+                    <button id="startBtn" class="btn primary">準備遊戲</button>
                 </div>
-                <p class="hint" style="margin-top: 15px; font-size: 0.85rem; color: #d4af37;">
-                    最少 2 人即可開局（自動補足 AI）
+
+                <p class="hint">
+                    最少 2 人即可開局（系統自動補足 AI）
                 </p>
             </div>
-        </div>
+        </section>
 
-        <div id="game" class="hidden">
-            <div class="table-container">
-                <div id="lastPlayContent">
-                    <div style="color: rgba(212,175,55,0.3); font-size: 1.2rem;">等待出牌...</div>
+
+        <!-- ===== 遊戲畫面 ===== -->
+        <section id="game" class="screen hidden">
+
+            <div class="table">
+
+                <!-- 上次出牌 -->
+                <div id="lastPlayContent" class="last-play">
+                    <span class="placeholder">等待出牌...</span>
                 </div>
 
-                <div class="player-seat pos-top" id="p2-seat"></div>
-                <div class="player-seat pos-left" id="p1-seat"></div>
-                <div class="player-seat pos-right" id="p3-seat"></div>
-                
-                <div class="player-seat pos-bottom" id="me-seat">
-                    <div id="me-info" class="player-info-wrapper">
-                        <div id="my-name" style="font-weight: bold; color: #fff;">玩家</div>
-                        <div id="my-status" style="font-size: 0.8rem; color: #ffcc33;">準備中</div>
+                <!-- 其他玩家位置 -->
+                <div class="seat top" id="p2-seat"></div>
+                <div class="seat left" id="p1-seat"></div>
+                <div class="seat right" id="p3-seat"></div>
+
+                <!-- 自己 -->
+                <div class="seat bottom" id="me-seat">
+                    <div class="player-info">
+                        <div id="my-name" class="player-name">玩家</div>
+                        <div id="my-status" class="player-status">準備中</div>
                     </div>
                 </div>
+
             </div>
 
-            <div class="player-ui">
-                <div id="status">等待開局...</div>
-                
-                <div id="hand"></div>
-                
-                <div class="controls">
-                    <button id="playBtn" disabled>出牌</button>
-                    <button id="passBtn" disabled>過牌 (Pass)</button>
+            <!-- 玩家操作區 -->
+            <div class="player-panel">
+
+                <div id="status" class="game-status">
+                    等待開局...
                 </div>
-            </div>
-        </div>
 
-        <div id="gameOverOverlay" class="overlay hidden">
-            <div class="result-box">
+                <div id="hand" class="hand-area"></div>
+
+                <div class="controls">
+                    <button id="playBtn" class="btn primary" disabled>出牌</button>
+                    <button id="passBtn" class="btn secondary" disabled>過牌 (Pass)</button>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ===== 遊戲結束 ===== -->
+        <section id="gameOverOverlay" class="overlay hidden">
+            <div class="result-card">
+
                 <h2 id="winnerTitle">遊戲結束</h2>
                 <hr>
+
                 <div id="playerStats"></div>
-                <p class="dissolve-hint">
+
+                <p class="countdown">
                     房間將在 <span id="shutdownTimer">30</span> 秒後自動解散
                 </p>
-                <div class="btn-group-vertical">
-                    <button id="restartBtn" class="primary-btn">再玩一局</button>
-                    <button id="backToLobbyBtn" class="secondary-btn">回到大廳</button>
+
+                <div class="btn-group vertical">
+                    <button id="restartBtn" class="btn primary">再玩一局</button>
+                    <button id="backToLobbyBtn" class="btn secondary">回到大廳</button>
                 </div>
+
             </div>
-        </div>
-    </div>
+        </section>
+
+    </main>
+
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="/client.js"></script>
+
 </body>
 </html>
