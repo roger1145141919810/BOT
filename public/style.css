@@ -38,7 +38,7 @@ body, html {
 /* 橢圓桌 */
 #lastPlayContent {
     position: relative;
-    top: -8% !important;
+    top: 10% !important;
     width: 55vw;
     max-width: 900px;
     min-width: 500px;
