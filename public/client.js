@@ -27,22 +27,16 @@ function showScreen(screenId) {
         if (el) {
             if (id === screenId) {
                 el.classList.remove('hidden');
-                el.style.display = 'flex'; 
-                el.style.pointerEvents = 'auto'; 
             } else {
                 el.classList.add('hidden');
-                el.style.display = 'none'; 
-                el.style.pointerEvents = 'none'; 
             }
         }
     });
     const overlay = $('gameOverOverlay');
     if (overlay && screenId !== 'game') {
         overlay.classList.add('hidden');
-        overlay.style.display = 'none';
     }
 }
-
 function setConnectLoading(isLoading) {
     const btns = [$('createBtn'), $('joinBtn')];
     btns.forEach(btn => {
@@ -259,7 +253,9 @@ socket.on('new_round', () => {
 
 socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
     const overlay = $('gameOverOverlay');
-    if (overlay) { showScreen('game'); overlay.classList.remove('hidden'); overlay.style.display = 'flex'; }
+    if (overlay) {
+        overlay.classList.remove('hidden');
+    }
     $('winnerTitle').textContent = (winnerId === socket.id) ? "✨ 你贏了！ ✨" : `👑 贏家：${winnerName}`;
     const statsEl = $('playerStats');
     statsEl.innerHTML = allPlayers.map(p => `<div>${p.name}: ${allHandCounts[p.id]} 張</div>`).join('');
@@ -270,7 +266,6 @@ socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
         if (timeLeft <= 0) location.reload();
     }, 1000);
 });
-
 /* ============================================================
    4. 事件綁定
    ============================================================ */
