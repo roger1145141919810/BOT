@@ -1,5 +1,5 @@
 /* ============================================================
-   1. 基礎環境：維持黑金質感
+    1. 基礎環境：維持黑金質感
    ============================================================ */
 * { box-sizing: border-box; font-family: "Microsoft JhengHei", system-ui, sans-serif; }
 
@@ -12,7 +12,7 @@ body, html {
 .hidden { display: none !important; }
 
 /* ============================================================
-   2. 遊戲主容器
+    2. 遊戲主容器
    ============================================================ */
 #game {
     position: relative;
@@ -21,7 +21,7 @@ body, html {
 }
 
 /* ============================================================
-   3. 牌桌與座位修正 (核心修正)
+    3. 牌桌與座位修正
    ============================================================ */
 .table-container {
     position: absolute;
@@ -34,25 +34,20 @@ body, html {
     top: 45% !important; 
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    
-    /* 1. 解決擋住：確保層級足夠 */
     z-index: 500 !important; 
     
-    /* 2. 膠囊桌子形狀控制 */
     width: 60vw !important;
     max-width: 800px !important;
     min-width: 500px !important;
     aspect-ratio: 2.2 / 1 !important;
     
-    /* 3. 解決排列：橫向重疊關鍵 */
     display: flex !important;
     flex-direction: row !important;
     justify-content: center !important;
     align-items: center !important;
-    gap: 0 !important; /* 必須為0， margin-left 負值才有效 */
-    padding-left: 40px !important; /* 修正重疊後的視覺重心 */
+    gap: 0 !important; /* 修正：必須為0讓 margin-left 生效 */
+    padding-left: 40px !important; 
 
-    /* 4. 質感設定 */
     background: radial-gradient(circle at center, #1a5a3e 0%, #0d3a28 100%) !important;
     border-radius: 150px !important;
     border: 8px solid #2a2a2a !important;
@@ -65,44 +60,31 @@ body, html {
     
     pointer-events: auto;
 }
-    box-shadow: 
-        0 20px 50px rgba(0,0,0,0.8), 
-        inset 0 0 40px rgba(0,0,0,0.6),
-        inset 0 0 0 5px rgba(212, 175, 55, 0.2) !important;
-    
-    pointer-events: auto;
-}
 
-/* 修正：玩家位置 (絕對定位還原) */
 .player-seat {
     position: absolute !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    z-index: 2000 !important; /* 確保在牌桌上面 */
+    z-index: 2000 !important;
 }
 
 .pos-top    { top: 5% !important;  left: 50% !important; transform: translateX(-50%) !important; }
 .pos-left   { left: 12% !important; top: 45% !important; transform: translateY(-50%) !important; }
 .pos-right  { right: 12% !important; top: 45% !important; transform: translateY(-50%) !important; }
 .pos-bottom { 
-    bottom: 20px !important; /* 從底部算起 */
+    bottom: 20px !important; 
     left: 50% !important; 
     transform: translateX(-50%) !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    gap: 15px !important; /* 核心修正：讓名字、手牌、按鈕之間有固定間距 */
+    gap: 15px !important; 
     width: 100% !important;
-}
-.pos-bottom .player-info-wrapper {
-    position: relative !important;
-    z-index: 1001 !important;
-    margin-bottom: 5px !important; /* 與手牌保持距離 */
 }
 
 /* ============================================================
-   4. 玩家資訊與卡牌 (保留原有豪華質感)
+    4. 玩家資訊與卡牌 (修正桌面重疊)
    ============================================================ */
 .player-info-wrapper {
     background: rgba(0, 0, 0, 0.85) !important;
@@ -119,6 +101,7 @@ body, html {
     text-shadow: 0 2px 4px #000 !important;
 }
 
+/* 通用卡牌樣式 */
 .card {
     width: 78px; height: 112px;
     position: relative;
@@ -131,11 +114,15 @@ body, html {
     transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28) !important;
 }
 
+/* 修正重點：桌面上出的牌變回重疊感 */
 #lastPlayContent .card {
-    margin: 0 5px !important; /* 桌面出的牌張張分開 */
-    width: 65px !important; height: 95px !important;
+    margin-left: -45px !important; /* 負邊距製造疊牌效果 */
+    width: 75px !important; height: 105px !important;
     transform: none !important;
+    display: flex !important;
 }
+
+#lastPlayContent .card:first-child { margin-left: 0 !important; }
 
 .dragon-emblem {
     position: absolute !important; top: 55% !important; left: 50% !important;
@@ -153,36 +140,42 @@ body, html {
 }
 
 /* ============================================================
-   5. 底部控制區：漸層質感
+    5. 底部控制區
    ============================================================ */
 .player-ui {
-    position: fixed; bottom: 0; left: 0; width: 100%;
-    display: flex; flex-direction: column; align-items: center;
-    padding-bottom: 35px; z-index: 5000; pointer-events: none;
+    position: fixed !important;
+    bottom: 25px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    z-index: 9999 !important;
+    pointer-events: none !important;
+}
+
+#status, #hand, .controls {
+    pointer-events: auto !important;
+    position: relative !important;
+    margin: 0 !important;
 }
 
 #status {
-    margin-bottom: 15px; font-weight: bold; color: #ffcc33;
+    font-weight: bold; color: #ffcc33;
     background: rgba(0, 0, 0, 0.5); padding: 5px 20px; border-radius: 20px;
     border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
 #hand { 
+    height: 130px !important; 
     display: flex !important; 
-    justify-content: center !important; 
     align-items: flex-end !important; 
-    width: auto !important;
-    min-height: 120px !important; /* 預留卡牌彈起的高度 */
-    margin: 0 auto !important;
-    position: relative !important;
-    pointer-events: auto !important;
 }
-.controls { 
-    margin-top: 10px !important;
-    display: flex !important; 
-    gap: 20px !important; 
-    pointer-events: auto !important; 
-}
+
+.controls { margin-top: 10px !important; display: flex !important; gap: 20px !important; }
 
 #playBtn, #passBtn {
     width: 150px; height: 48px; border-radius: 8px;
@@ -200,40 +193,8 @@ body, html {
     color: #d4af37; border: 1px solid #d4af37;
     backdrop-filter: blur(4px);
 }
-.pos-bottom .player-info-wrapper,
-#me-seat .player-info-wrapper,
-#me-info {
+
+/* 隱藏自己的資訊 */
+.pos-bottom .player-info-wrapper, #me-seat .player-info-wrapper, #me-info {
     display: none !important;
-}
-
-/* 2. 重排底部 UI，防止狀態、手牌、按鈕互相打架 */
-.player-ui {
-    position: fixed !important;
-    bottom: 25px !important; /* 距離螢幕底部 */
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 100% !important;
-    height: auto !important;
-    
-    /* 垂直垂直堆疊：狀態 -> 手牌 -> 按鈕 */
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    gap: 12px !important; /* 每個元素間的固定距離 */
-    z-index: 9999 !important;
-    pointer-events: none !important;
-}
-
-/* 確保按鈕、手牌、狀態標籤本身可以被點擊 */
-#status, #hand, .controls {
-    pointer-events: auto !important;
-    position: relative !important;
-    margin: 0 !important; /* 移除原本衝突的 margin */
-}
-
-/* 確保手牌有固定空間，不壓迫上方標籤 */
-#hand {
-    height: 130px !important; 
-    align-items: flex-end !important;
 }
