@@ -33,21 +33,39 @@ body, html {
 /* 修正 5: 強化牌桌質感並鎖定寬度 */
 #lastPlayContent {
     position: absolute !important;
-    top: 42% !important; left: 50% !important;
+    top: 45% !important; 
+    left: 50% !important;
     transform: translate(-50%, -50%) !important;
     
-    width: 65% !important; min-width: 600px !important; height: 180px !important;
-    display: flex !important; flex-direction: row !important;
-    justify-content: center !important; align-items: center !important;
-    gap: 12px !important; 
+    /* 核心修復：使用固定寬度或寬比例，防止變成長條 */
+    width: 70% !important;
+    max-width: 900px !important;
+    min-width: 600px !important; /* 保證即使沒牌也是橫向的 */
+    height: 200px !important;   /* 固定高度 */
     
-    border: 2px solid rgba(212, 175, 55, 0.4) !important;
-    border-radius: 100px !important;
-    background: rgba(0, 0, 0, 0.3) !important;
-    box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 0 0 20px rgba(212, 175, 55, 0.1) !important;
+    /* 修正排列方向：強制橫向排列桌面出的牌 */
+    display: flex !important;
+    flex-direction: row !important; 
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 15px !important;
+    
+    border: 3px solid rgba(212, 175, 55, 0.4) !important;
+    border-radius: 120px !important; /* 增加圓角半徑，維持橢圓感 */
+    background: rgba(0, 0, 0, 0.35) !important;
+    box-shadow: inset 0 0 60px rgba(0,0,0,0.8), 0 0 20px rgba(212, 175, 55, 0.1) !important;
     pointer-events: auto;
+    z-index: 5;
 }
 
+/* 確保桌面上出的牌是橫向並排，不繼承手牌的負邊距 */
+#lastPlayContent .card, 
+#lastPlayContent .card-mini {
+    margin: 0 !important;
+    position: relative !important;
+    flex-shrink: 0 !important; /* 防止卡牌被擠扁 */
+    transform: none !important;
+}
 /* 修正 1: 拉近座位距離 (4% -> 15%) */
 .player-seat {
     position: absolute !important;
