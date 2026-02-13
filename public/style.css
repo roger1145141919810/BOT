@@ -29,21 +29,19 @@ body, html {
 .table-container {
     position: absolute;
     inset: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    /* 移除 display: flex 與 align-items: center; */
     pointer-events: none;
 }
 
 /* 橢圓桌 - 修正位移與高度跑掉問題 */
 #lastPlayContent {
-    /* 1. 改為絕對定位，使其不再受手牌推擠 */
-    position: absolute; 
-    
-    /* 2. 定位在畫面中心偏下 */
-    left: 50%;
-    top: 55% !important; /* 原本是 0% 或負數，改成 55% 讓它往下移 */
-    transform: translate(-50%, -50%); /* 確保真正的中心點對齊 */
+    position: absolute !important; 
+    left: 50% !important;
+    /* 往下移：原本 55% 改為 62% 會有明顯下移感，可根據需求調整此數字 */
+    top: 62% !important; 
+    transform: translate(-50%, -50%) !important;
 
     /* 3. 維持豪華外觀與比例 */
     width: 55vw;
