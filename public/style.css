@@ -92,15 +92,15 @@ body, html {
 
 /* 左 */
 .pos-left {
-    left: 55%;
+    left: 18%;
     top: 48%;
     transform: translateY(-50%);
 }
 
 /* 右 */
 .pos-right {
-    right: 50%;
-    top: 50%;
+    right: 18%;
+    top: 48%;
     transform: translateY(-50%);
 }
 
