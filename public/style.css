@@ -169,10 +169,14 @@ body, html {
     5. 底部控制區
    ============================================================ */
 .player-ui {
-    position: absolute;
-    bottom: 3%;
+    position: fixed;
+    bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
 }
 
 #status, #hand, .controls {
@@ -182,17 +186,13 @@ body, html {
 }
 
 #status {
-    position: absolute;
-    bottom: -35px;
-    left: 50%;
-    transform: translateX(-50%);
-
     font-weight: bold;
     color: #ffcc33;
     background: rgba(0,0,0,0.6);
     padding: 6px 20px;
     border-radius: 20px;
 }
+
 
 #hand { 
     height: 130px !important; 
