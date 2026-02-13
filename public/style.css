@@ -36,23 +36,32 @@ body, html {
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     
-    /* 修正：鎖定為豪華膠囊比例 */
+    /* 修正：提升層級，確保牌不被牌桌背景擋住 */
+    z-index: 500 !important; 
+    
+    /* 修正：維持膠囊比例 */
     width: 60vw !important;
     max-width: 800px !important;
     min-width: 500px !important;
-    aspect-ratio: 2.2 / 1 !important; 
+    aspect-ratio: 2.2 / 1 !important;
     
+    /* 修正：橫向重疊排列 */
     display: flex !important;
     flex-direction: row !important;
     justify-content: center !important;
     align-items: center !important;
-    gap: 10px !important;
-    
+    gap: 0 !important; /* 必須為 0 負邊距才會生效 */
+    padding-left: 40px !important; /* 補償第一張牌重疊後的視覺中心偏移 */
+
     background: radial-gradient(circle at center, #1a5a3e 0%, #0d3a28 100%) !important;
     border-radius: 150px !important;
     border: 8px solid #2a2a2a !important;
     outline: 3px solid #d4af37 !important;
     outline-offset: -11px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.6);
+    
+    pointer-events: auto;
+}
     
     box-shadow: 
         0 20px 50px rgba(0,0,0,0.8), 
@@ -225,29 +234,4 @@ body, html {
 #hand {
     height: 130px !important; 
     align-items: flex-end !important;
-}
-#lastPlayContent {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: center !important;
-    align-items: center !important;
-    /* 移除 gap，讓負邊距生效 */
-    gap: 0 !important; 
-    padding-left: 40px !important; /* 補償第一張牌的負邊距偏移 */
-}
-
-#lastPlayContent .card {
-    /* 變回重疊樣式：使用負邊距 */
-    margin-left: -40px !important; 
-    width: 78px !important; 
-    height: 112px !important;
-    position: relative !important;
-    transform: scale(0.85) !important; /* 桌面牌稍微縮小，維持膠囊空間 */
-    box-shadow: -4px 0 12px rgba(0,0,0,0.7) !important;
-    flex-shrink: 0 !important;
-}
-
-/* 確保桌面第一張牌不要左移過頭 */
-#lastPlayContent .card:first-child {
-    margin-left: 0 !important;
 }
