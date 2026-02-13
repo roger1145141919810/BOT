@@ -78,22 +78,22 @@ body, html {
 
 /* 上 */
 .pos-top {
-    top: 20%;
+    top: 12%;
     left: 50%;
     transform: translateX(-50%);
 }
 
 /* 下（自己） */
 .pos-bottom {
-    bottom: 12%;
-    left: 50%;
+    bottom: 18%;
+    left: 48%;
     transform: translateX(-50%);
 }
 
 /* 左 */
 .pos-left {
-    left: 20%;
-    top: 50%;
+    left: 18%;
+    top: 48%;
     transform: translateY(-50%);
 }
 
