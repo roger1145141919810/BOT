@@ -84,7 +84,7 @@ body, html {
 
 /* 下（自己） */
 .pos-bottom {
-    bottom: 50%;
+    bottom: 12%;
     left: 50%;
     transform: translateX(-50%);
 }
