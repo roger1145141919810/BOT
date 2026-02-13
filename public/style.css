@@ -226,3 +226,41 @@ body, html {
     height: 130px !important; 
     align-items: flex-end !important;
 }
+#lastPlayContent {
+    /* 強制橫向排列 */
+    display: flex !important;
+    flex-direction: row !important; 
+    flex-wrap: nowrap !important; /* 不准換行 */
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 15px !important; /* 牌與牌之間的間距 */
+    
+    /* 確保容器寬度足夠，不被擠扁 */
+    width: 60vw !important;
+    min-width: 500px !important;
+    padding: 20px !important;
+}
+
+/* 針對桌面出的每一張牌進行修正 */
+#lastPlayContent .card, 
+#lastPlayContent .card-mini {
+    /* 移除所有可能導致垂直偏移或重疊的設定 */
+    margin: 0 !important;
+    position: relative !important;
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
+    
+    /* 統一桌面牌的大小 */
+    width: 70px !important;
+    height: 100px !important;
+    flex-shrink: 0 !important; /* 防止牌被擠小 */
+}
+
+/* 如果你的牌內部數字也是垂直的，強制修正內容排列 */
+#lastPlayContent .card-content {
+    display: flex !important;
+    flex-direction: column !important; /* 卡牌內部的數字和花色維持上下排列 */
+    justify-content: center !important;
+    align-items: center !important;
+}
