@@ -77,28 +77,28 @@ body, html {
 
 /* 上 */
 .pos-top {
-    top: 12%;
+    top: 50%;
     left: 50%;
     transform: translateX(-50%);
 }
 
 /* 下（自己） */
 .pos-bottom {
-    bottom: 12%;
+    bottom: 50%;
     left: 50%;
     transform: translateX(-50%);
 }
 
 /* 左 */
 .pos-left {
-    left: 10%;
+    left: 20%;
     top: 50%;
     transform: translateY(-50%);
 }
 
 /* 右 */
 .pos-right {
-    right: 10%;
+    right: 20%;
     top: 50%;
     transform: translateY(-50%);
 }
