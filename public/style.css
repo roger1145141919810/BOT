@@ -258,9 +258,12 @@ body, html {
 
 
 #hand { 
-    height: 130px !important; 
+    height: 160px !important;    /* 固定高度，給卡牌彈起的空間 */
     display: flex !important; 
-    align-items: flex-end !important; 
+    align-items: flex-end !important; /* 確保牌底對齊 */
+    padding-bottom: 20px;
+    width: 100vw;               /* 撐滿寬度 */
+    justify-content: center;
 }
 
 .controls { margin-top: 10px !important; display: flex !important; gap: 20px !important; }
