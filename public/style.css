@@ -1,140 +1,158 @@
 /* ============================================================
-   1. 核心與底層：解決背景與比例
+   1. 基礎環境：維持黑金質感
    ============================================================ */
-* { box-sizing: border-box; font-family: "Microsoft JhengHei", sans-serif; }
+* { box-sizing: border-box; font-family: "Microsoft JhengHei", system-ui, sans-serif; }
 
 body, html { 
     margin: 0; padding: 0; width: 100vw; height: 100vh; 
-    overflow: hidden; background: #051a14; 
-}
-
-#game {
-    position: relative;
-    width: 100vw; height: 100vh;
-    background: radial-gradient(circle at center, #1a4a3e 0%, #051a14 100%);
+    overflow: hidden; 
+    background: radial-gradient(circle at center, #163e32 0%, #051a14 100%); 
 }
 
 .hidden { display: none !important; }
 
 /* ============================================================
-   2. 牌桌鎖定：解決 5.牌桌過瘦
+   2. 遊戲主容器：背景與全屏
    ============================================================ */
+#game {
+    position: relative;
+    width: 100vw; height: 100vh;
+    background: radial-gradient(circle at center, #1a4a3e 0%, #051a14 100%);
+    display: flex; flex-direction: column;
+}
+
+/* ============================================================
+   3. 牌桌與座位：修正 1.過遠、5.過瘦
+   ============================================================ */
+.table-container {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+}
+
+/* 修正 5: 強化牌桌質感並鎖定寬度 */
 #lastPlayContent {
     position: absolute !important;
     top: 42% !important; left: 50% !important;
     transform: translate(-50%, -50%) !important;
     
-    /* 修正：強制橫向寬橢圓 */
-    width: 60% !important;
-    min-width: 600px !important; 
-    height: 180px !important;
-    
+    width: 65% !important; min-width: 600px !important; height: 180px !important;
     display: flex !important; flex-direction: row !important;
     justify-content: center !important; align-items: center !important;
-    gap: 15px !important; /* 修正 2: 桌上牌張張分開 */
+    gap: 12px !important; 
     
     border: 2px solid rgba(212, 175, 55, 0.4) !important;
     border-radius: 100px !important;
     background: rgba(0, 0, 0, 0.3) !important;
-    box-shadow: inset 0 0 50px rgba(0,0,0,0.6) !important;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 0 0 20px rgba(212, 175, 55, 0.1) !important;
+    pointer-events: auto;
 }
 
-/* ============================================================
-   3. 玩家位置：解決 1.過遠 與 4.文字顏色
-   ============================================================ */
+/* 修正 1: 拉近座位距離 (4% -> 15%) */
 .player-seat {
     position: absolute !important;
-    display: flex !important; flex-direction: column !important;
-    align-items: center !important;
-    z-index: 100 !important;
+    display: flex; flex-direction: column; align-items: center;
+    z-index: 100; min-width: 120px;
 }
+.pos-top    { top: 6% !important;  left: 50% !important; transform: translateX(-50%) !important; }
+.pos-left   { left: 15% !important; top: 42% !important; transform: translateY(-50%) !important; }
+.pos-right  { right: 15% !important; top: 42% !important; transform: translateY(-50%) !important; }
+.pos-bottom { bottom: 205px !important; left: 50% !important; transform: translateX(-50%) !important; }
 
-/* 修正 1: 拉近玩家距離 (從原本的 4% 縮減到 18%) */
-.pos-top    { top: 8% !important;  left: 50% !important; transform: translateX(-50%) !important; }
-.pos-left   { left: 18% !important; top: 42% !important; transform: translateY(-50%) !important; }
-.pos-right  { right: 18% !important; top: 42% !important; transform: translateY(-50%) !important; }
-.pos-bottom { bottom: 200px !important; left: 50% !important; transform: translateX(-50%) !important; }
-
-/* 修正 4: 玩家文字顯色 */
+/* 修正 4: 名字顯色 - 確保高對比 */
 .player-info-wrapper {
     background: rgba(0, 0, 0, 0.85) !important;
-    padding: 8px 16px !important;
+    padding: 10px 18px !important;
     border: 1.5px solid #d4af37 !important;
     border-radius: 10px !important;
-    text-align: center !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.6) !important;
+    text-align: center;
 }
-
-/* 針對 HTML 內部的文字節點 */
-.player-info-wrapper div, 
-.player-info-wrapper span, 
-#my-name {
-    color: #ffffff !important; /* 修正：名字強制純白 */
+.player-info-wrapper div, .player-info-wrapper span {
+    color: #ffffff !important;
     font-weight: bold !important;
-    text-shadow: 1px 1px 3px #000 !important;
+    text-shadow: 0 2px 4px #000 !important;
 }
-
-#my-status, .card-count {
-    color: #ffcc33 !important; /* 張數與狀態金黃色 */
-}
+.card-count, #my-status { color: #ffcc33 !important; }
 
 /* ============================================================
-   4. 卡牌系統：解決 2.桌面牌錯誤 與 3.手牌花紋
+   4. 卡牌系統：修正 2.桌面牌、3.花紋
    ============================================================ */
 .card {
-    width: 76px; height: 110px;
-    background: #1a1a1a !important; /* 加深底色 */
+    width: 78px; height: 112px;
+    position: relative;
+    background: linear-gradient(145deg, #2a2a2a, #0a0a0a) !important; /* 回復金屬黑質感 */
     border: 1.5px solid #d4af37 !important;
-    border-radius: 6px !important;
-    margin-left: -38px !important;
-    position: relative !important;
-    transition: transform 0.2s ease !important;
-    box-shadow: -3px 0 10px rgba(0,0,0,0.6) !important;
+    border-radius: 8px !important;
+    margin-left: -40px !important; 
+    box-shadow: -4px 0 12px rgba(0,0,0,0.7) !important;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28) !important;
 }
 
-/* 修正 3: 大幅降低龍紋透明度，不干擾數字 */
+/* 修正 3: 龍紋降噪，作為高級水印 */
 .dragon-emblem {
-    opacity: 0.05 !important; 
-    color: #d4af37 !important;
+    position: absolute !important; top: 55% !important; left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    font-size: 2.2rem !important; 
+    opacity: 0.08 !important; /* 修正：極低透明度 */
+    color: #d4af37 !important; z-index: 1 !important;
 }
 
-/* 修正 2: 桌面上出的牌絕對不準重疊 */
+.card-content { position: relative; z-index: 10; width: 100%; text-align: center; }
+
+/* 修正 2: 桌面牌不准重疊 */
 #lastPlayContent .card, .card-mini {
-    margin-left: 8px !important;
     width: 65px !important; height: 95px !important;
+    margin: 0 5px !important; /* 確保桌面牌張張分開 */
     pointer-events: none !important;
 }
 
-/* 手牌第一張不偏移 */
 #hand .card:first-child { margin-left: 0 !important; }
 
-/* 選取卡牌 */
 .card.selected {
     transform: translateY(-40px) !important;
     z-index: 1000 !important;
     border-color: #ffffff !important;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.8) !important;
 }
 
 /* ============================================================
-   5. 底部 UI
+   5. 底部控制區：回復原有的漸層質感
    ============================================================ */
 .player-ui {
     position: fixed; bottom: 0; left: 0; width: 100%;
     background: transparent !important;
     display: flex; flex-direction: column; align-items: center;
-    padding-bottom: 30px; z-index: 5000; pointer-events: none;
+    padding-bottom: 35px; z-index: 5000; pointer-events: none;
 }
 
-#hand { pointer-events: auto; }
-
-.controls {
-    display: flex; gap: 20px; pointer-events: auto;
+#status {
+    margin-bottom: 15px; font-weight: bold; color: #ffcc33;
+    background: rgba(0, 0, 0, 0.5); padding: 5px 20px; border-radius: 20px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
 }
+
+#hand { display: flex; justify-content: center; align-items: flex-end; width: 90%; margin-bottom: 25px; pointer-events: auto; }
+
+.controls { display: flex; gap: 25px; pointer-events: auto; }
 
 #playBtn, #passBtn {
-    width: 140px; height: 46px; border-radius: 30px;
-    font-weight: bold; cursor: pointer; border: none;
+    width: 150px; height: 48px; border-radius: 8px;
+    font-size: 1.1rem; font-weight: bold; cursor: pointer;
+    transition: all 0.2s ease; border: none;
 }
 
-#playBtn { background: linear-gradient(135deg, #d4af37, #aa8913) !important; color: #1a1a1a; }
-#passBtn { background: rgba(0,0,0,0.6) !important; color: #d4af37; border: 1px solid #d4af37; }
+#playBtn {
+    background: linear-gradient(135deg, #d4af37 0%, #aa8913 100%) !important;
+    color: #1a1a1a; border: 1px solid #ffe699;
+}
+
+#passBtn {
+    background: rgba(20, 20, 20, 0.7) !important;
+    color: #d4af37; border: 1px solid #d4af37;
+    backdrop-filter: blur(4px);
+}
+
+#playBtn:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.1); box-shadow: 0 6px 15px rgba(212, 175, 55, 0.4); }
 #playBtn:disabled, #passBtn:disabled { opacity: 0.3; filter: grayscale(1); }
