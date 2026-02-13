@@ -189,3 +189,40 @@ body, html {
     color: #d4af37; border: 1px solid #d4af37;
     backdrop-filter: blur(4px);
 }
+.pos-bottom .player-info-wrapper,
+#me-seat .player-info-wrapper,
+#me-info {
+    display: none !important;
+}
+
+/* 2. 重排底部 UI，防止狀態、手牌、按鈕互相打架 */
+.player-ui {
+    position: fixed !important;
+    bottom: 25px !important; /* 距離螢幕底部 */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+    height: auto !important;
+    
+    /* 垂直垂直堆疊：狀態 -> 手牌 -> 按鈕 */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 12px !important; /* 每個元素間的固定距離 */
+    z-index: 9999 !important;
+    pointer-events: none !important;
+}
+
+/* 確保按鈕、手牌、狀態標籤本身可以被點擊 */
+#status, #hand, .controls {
+    pointer-events: auto !important;
+    position: relative !important;
+    margin: 0 !important; /* 移除原本衝突的 margin */
+}
+
+/* 確保手牌有固定空間，不壓迫上方標籤 */
+#hand {
+    height: 130px !important; 
+    align-items: flex-end !important;
+}
