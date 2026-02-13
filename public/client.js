@@ -55,7 +55,7 @@ function setConnectLoading(isLoading) {
 }
 
 /**
- * 更新按鈕狀態 (解決過牌鍵不見問題)
+ * 更新按鈕狀態 (修正判斷邏輯，對接黑金卡牌類名)
  */
 function updateControls(isMyTurn) {
     const playBtn = $('playBtn');
@@ -64,21 +64,21 @@ function updateControls(isMyTurn) {
 
     if (playBtn) playBtn.disabled = !isMyTurn;
     if (passBtn) {
-        // 邏輯：只有輪到你，且桌面上「已經有牌」時才能過牌
-        const hasCardsOnTable = $('lastPlayContent').innerHTML.includes('card-mini');
+        // 邏輯：檢查中央桌面上是否有 .card 類別的元素
+        const hasCardsOnTable = $('lastPlayContent').querySelector('.card') !== null;
         passBtn.disabled = !isMyTurn || !hasCardsOnTable;
     }
     
     if (statusEl) {
         statusEl.textContent = isMyTurn ? '您的回合！' : '等待對手出牌...';
-        statusEl.style.color = isMyTurn ? '#ffcc33' : '#fff';
+        statusEl.style.color = isMyTurn ? '#d4af37' : '#fff';
     }
 }
 
 window.onload = () => { showScreen('lobby'); };
 
 /* ============================================================
-   2. 渲染邏輯 (含龍紋視覺)
+   2. 渲染邏輯 (對接豪華黑金 CSS 與龍紋視覺)
    ============================================================ */
 
 function rankText(r) {
@@ -93,19 +93,16 @@ function renderHand() {
 
     myHand.forEach((c) => {
         const card = document.createElement('div');
-        const isBlack = (c.suit === 'spades' || c.suit === 'clubs');
-        card.className = `card ${isBlack ? 'black' : 'red'}`;
+        // 統一使用 .card 類名以觸發 CSS 紋路
+        card.className = `card`;
         
         const info = SUIT_DATA[c.suit] || { symbol: c.suit, color: 'white' };
-        card.style.color = info.color;
 
-        // --- 注入龍紋結構 ---
+        // --- 注入龍紋與豪華結構 ---
         card.innerHTML = `
             <div class="dragon-emblem">🐉</div> 
-            <div class="card-content">
-                <div class="rank">${rankText(c.rank)}</div>
-                <div class="suit">${info.symbol}</div>
-            </div>
+            <div class="card-value">${rankText(c.rank)}</div>
+            <div class="card-suit" style="color: ${info.color}">${info.symbol}</div>
         `;
         
         card.dataset.id = c.id;
@@ -232,20 +229,24 @@ socket.on('play_made', ({ playerId, cards, isPass }) => {
     }
     const contentEl = $('lastPlayContent');
     if (!isPass) {
-        contentEl.innerHTML = `<div class="played-cards-wrapper">` + cards.map(c => `
-            <div class="card-mini" style="color: ${SUIT_DATA[c.suit].color};">
-                <div class="rank-mini">${rankText(c.rank)}</div>
-                <div class="suit-mini">${SUIT_DATA[c.suit].symbol}</div>
-            </div>`).join('') + `</div>`;
+        // 直接生成 .card 結構，讓 CSS 的 #lastPlayContent .card 堆疊效果生效
+        contentEl.innerHTML = cards.map(c => {
+            const info = SUIT_DATA[c.suit];
+            return `
+                <div class="card">
+                    <div class="dragon-emblem" style="font-size:2rem !important;">🐉</div>
+                    <div class="card-value">${rankText(c.rank)}</div>
+                    <div class="card-suit" style="color: ${info.color}">${info.symbol}</div>
+                </div>`;
+        }).join('');
     }
     updateSeats(allPlayers, null);
 });
 
 socket.on('new_round', () => {
     allPlayers.forEach(p => p.hasPassed = false);
-    $('lastPlayContent').innerHTML = '<span class="new-round">全新回合 (自由出牌)</span>';
+    $('lastPlayContent').innerHTML = '<span class="new-round" style="color: #d4af37; font-weight: bold; text-shadow: 0 0 10px rgba(212,175,55,0.5);">全新回合 (自由出牌)</span>';
     updateSeats(allPlayers, null);
-    // 全新回合時，過牌按鈕應禁用 (updateControls 會處理)
 });
 
 socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
@@ -257,8 +258,12 @@ socket.on('game_over', ({ winnerName, winnerId, allHandCounts }) => {
     let timeLeft = 30;
     countdownTimer = setInterval(() => {
         timeLeft--;
-        $('shutdownTimer').textContent = timeLeft;
-        if (timeLeft <= 0) location.reload();
+        const timerEl = $('shutdownTimer');
+        if (timerEl) timerEl.textContent = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(countdownTimer);
+            location.reload();
+        }
     }, 1000);
 });
 
