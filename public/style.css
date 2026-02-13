@@ -123,17 +123,22 @@ body, html {
 
 /* 通用卡牌樣式 */
 .card {
-    width: 78px; height: 112px;
+    width: 78px;
+    height: 112px;
     position: relative;
-    background: linear-gradient(145deg, #2a2a2a, #0a0a0a) !important;
-    border: 1.5px solid #d4af37 !important;
-    border-radius: 8px !important;
-    margin-left: -40px !important; 
-    box-shadow: -4px 0 12px rgba(0,0,0,0.7) !important;
-    cursor: pointer;
-    transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28) !important;
-}
 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 8px;
+
+    background: linear-gradient(145deg, #2a2a2a, #0a0a0a);
+    border: 1.5px solid #d4af37;
+    border-radius: 8px;
+
+    margin-left: -40px;
+    box-shadow: -4px 0 12px rgba(0,0,0,0.7);
+}
 /* 修正重點：桌面上出的牌變回重疊感 */
 #lastPlayContent .card {
     margin-left: -45px !important; /* 負邊距製造疊牌效果 */
