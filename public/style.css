@@ -17,8 +17,9 @@ body, html {
    ============================================================ */
 #game {
     position: relative;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
 }
 
 /* ============================================================
@@ -29,36 +30,34 @@ body, html {
 .table-container {
     position: absolute;
     inset: 0;
-    width: 100vw;
-    height: 100vh;
-    /* 移除 display: flex 與 align-items: center; */
-    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* 讓點擊可以穿透到下層 */
 }
 
 /* 橢圓桌 - 修正位移與高度跑掉問題 */
 #lastPlayContent {
-    position: absolute !important; 
+    position: absolute !important;
     left: 50% !important;
-    /* 往下移：原本 55% 改為 62% 會有明顯下移感，可根據需求調整此數字 */
-    top: 62% !important; 
+    top: 62% !important; /* 調整此數值來控制桌子高度 */
     transform: translate(-50%, -50%) !important;
 
     /* 3. 維持豪華外觀與比例 */
     width: 55vw;
     max-width: 900px;
-    min-width: 500px;
     aspect-ratio: 2.2 / 1;
-
     display: flex;
     justify-content: center;
     align-items: center;
-
-    /* 綠絨布質感 */
     background: radial-gradient(circle at center, #1a5a3e 0%, #0d3a28 100%);
     border-radius: 200px;
     border: 8px solid #2a2a2a;
     outline: 3px solid #d4af37;
     outline-offset: -11px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    pointer-events: auto; /* 恢復桌子內部的點擊 */
+    z-index: 5;
+}
 
     box-shadow:
         0 20px 50px rgba(0,0,0,0.8),
@@ -81,7 +80,7 @@ body, html {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    z-index: 10;
 }
 
 /* 上 */
