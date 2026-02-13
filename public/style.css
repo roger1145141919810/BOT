@@ -27,7 +27,6 @@ body, html {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
     pointer-events: none;
-    /* 修正：移除 flex，還原絕對定位環境 */
 }
 
 #lastPlayContent {
@@ -36,33 +35,36 @@ body, html {
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     
-    /* 修正：提升層級，確保牌不被牌桌背景擋住 */
+    /* 1. 解決擋住：確保層級足夠 */
     z-index: 500 !important; 
     
-    /* 修正：維持膠囊比例 */
+    /* 2. 膠囊桌子形狀控制 */
     width: 60vw !important;
     max-width: 800px !important;
     min-width: 500px !important;
     aspect-ratio: 2.2 / 1 !important;
     
-    /* 修正：橫向重疊排列 */
+    /* 3. 解決排列：橫向重疊關鍵 */
     display: flex !important;
     flex-direction: row !important;
     justify-content: center !important;
     align-items: center !important;
-    gap: 0 !important; /* 必須為 0 負邊距才會生效 */
-    padding-left: 40px !important; /* 補償第一張牌重疊後的視覺中心偏移 */
+    gap: 0 !important; /* 必須為0， margin-left 負值才有效 */
+    padding-left: 40px !important; /* 修正重疊後的視覺重心 */
 
+    /* 4. 質感設定 */
     background: radial-gradient(circle at center, #1a5a3e 0%, #0d3a28 100%) !important;
     border-radius: 150px !important;
     border: 8px solid #2a2a2a !important;
     outline: 3px solid #d4af37 !important;
     outline-offset: -11px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.6);
+    box-shadow: 
+        0 20px 50px rgba(0,0,0,0.8), 
+        inset 0 0 40px rgba(0,0,0,0.6),
+        inset 0 0 0 5px rgba(212, 175, 55, 0.2) !important;
     
     pointer-events: auto;
 }
-    
     box-shadow: 
         0 20px 50px rgba(0,0,0,0.8), 
         inset 0 0 40px rgba(0,0,0,0.6),
