@@ -106,7 +106,7 @@ body, html {
 
 
 /* ============================================================
-    4. 玩家資訊與卡牌 (修正桌面重疊)
+    4. 玩家資訊與卡牌 (手牌紋路豪華重製版)
    ============================================================ */
 .player-info-wrapper {
     background: rgba(0, 0, 0, 0.85) !important;
@@ -123,49 +123,101 @@ body, html {
     text-shadow: 0 2px 4px #000 !important;
 }
 
-/* 通用卡牌樣式 */
+/* 通用卡牌基礎樣式 */
 .card {
     width: 78px;
     height: 112px;
     position: relative;
-
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     padding: 8px;
 
-    background: linear-gradient(145deg, #2a2a2a, #0a0a0a);
-    border: 1.5px solid #d4af37;
-    border-radius: 8px;
+    /* 重製紋路：碳纖維/絲綢漸層底色 */
+    background: 
+        radial-gradient(circle at 50% 50%, rgba(60, 60, 60, 0.2) 0%, transparent 80%),
+        linear-gradient(145deg, #2c2c2c 0%, #0a0a0a 100%) !important;
+    
+    /* 強化金屬框：立體拉絲金 */
+    border: 1.8px solid #d4af37 !important;
+    border-radius: 9px !important;
+    outline: 0.5px solid rgba(212, 175, 55, 0.4);
+    outline-offset: -3px;
 
-    margin-left: -40px;
-    box-shadow: -4px 0 12px rgba(0,0,0,0.7);
+    margin-left: -42px; /* 增加一點重疊度 */
+    
+    /* 強化立體感：側邊深陰影 */
+    box-shadow: 
+        -4px 0 15px rgba(0, 0, 0, 0.8),
+        inset 0 0 10px rgba(212, 175, 55, 0.1) !important;
+    
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28) !important;
+    overflow: hidden; /* 確保內部紋路不溢出 */
 }
-/* 修正重點：桌面上出的牌變回重疊感 */
+
+/* 增加卡牌表面反光絲綢感 */
+.card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 2px,
+        rgba(255, 255, 255, 0.02) 2px,
+        rgba(255, 255, 255, 0.02) 4px
+    );
+    pointer-events: none;
+}
+
+/* 桌面出的牌：稍微縮小並維持立體感 */
 #lastPlayContent .card {
-    margin-left: -45px !important; /* 負邊距製造疊牌效果 */
-    width: 75px !important; height: 105px !important;
+    margin-left: -45px !important;
+    width: 75px !important; 
+    height: 105px !important;
     transform: none !important;
     display: flex !important;
+    box-shadow: -6px 0 20px rgba(0, 0, 0, 0.9) !important; /* 桌面牌陰影加深 */
 }
 
 #lastPlayContent .card:first-child { margin-left: 0 !important; }
 
+/* 龍紋水印：重製為燙金浮雕質感 */
 .dragon-emblem {
-    position: absolute !important; top: 55% !important; left: 50% !important;
+    position: absolute !important;
+    top: 50% !important; 
+    left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    font-size: 2.2rem !important; opacity: 0.08 !important;
-    color: #d4af37 !important; z-index: 1 !important;
+    font-size: 2.8rem !important;
+    
+    /* 燙金效果：微發光並降低透明度 */
+    color: #d4af37 !important;
+    opacity: 0.12 !important; 
+    filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.5)) !important;
+    z-index: 1 !important;
+}
+
+/* 數字與花色文字強化 */
+.card .card-value, .card .card-suit {
+    position: relative;
+    z-index: 5;
+    color: #d4af37 !important; /* 文字改為一致的金色 */
+    text-shadow: 1px 1px 3px rgba(0,0,0,1) !important;
+    font-weight: 900 !important;
 }
 
 #hand .card:first-child { margin-left: 0 !important; }
 
+/* 選取手牌：彈出並伴隨外發光 */
 .card.selected {
-    transform: translateY(-40px) !important;
+    transform: translateY(-45px) scale(1.05) !important;
     z-index: 1000 !important;
     border-color: #ffffff !important;
+    box-shadow: 
+        0 15px 35px rgba(0,0,0,0.8),
+        0 0 15px rgba(212, 175, 55, 0.6) !important;
 }
-
 /* ============================================================
     5. 底部控制區
    ============================================================ */
