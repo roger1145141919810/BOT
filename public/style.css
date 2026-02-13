@@ -39,7 +39,7 @@ body, html {
 #lastPlayContent {
     position: absolute !important; 
     left: 50% !important;
-    top: 56% !important; /* 從 62% 調回 56% */
+    top: 50% !important; /* 從 62% 調回 56% */
     transform: translate(-50%, -50%) !important;
 
     /* 3. 維持豪華外觀與比例 */
