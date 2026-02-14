@@ -210,18 +210,28 @@ body, html {
     top: 50% !important; 
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    font-size: 2.8rem !important;
-    
-    /* 關鍵修正：從 -1 改為 0。
-       -1 會掉到 .card 的背景色下面，0 則會浮在背景上面 */
+    font-size: 3.2rem !important;
     z-index: 0 !important; 
     
-    color: #d4af37 !important;
-    /* 提高一點點不透明度，讓燙金感更明顯 */
-    opacity: 0.12 !important;  
-    filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.4)) !important;
-    
-    pointer-events: none; /* 確保不會干擾點擊 */
+    /* 關鍵：濾鏡組合拳，把 Emoji 轉為金色 */
+    filter: 
+        grayscale(100%)          /* 1. 先把馬變成黑白 */
+        sepia(100%)             /* 2. 染色成褐色底 */
+        saturate(500%)          /* 3. 強力飽和化 */
+        brightness(1.2)         /* 4. 增加亮度 */
+        hue-rotate(5deg)        /* 5. 微調色相到金黃色 */
+        drop-shadow(0 0 3px rgba(212, 175, 55, 0.8)); /* 加上金光外顯 */
+
+    /* 控制透明度，0.15~0.2 之間會有淡淡的浮雕感 */
+    opacity: 0.15 !important; 
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+/* 當卡牌被選中時，馬也可以跟著發光 */
+.card.selected .dragon-emblem {
+    opacity: 0.4 !important;
+    filter: grayscale(100%) sepia(100%) saturate(800%) brightness(1.5) drop-shadow(0 0 8px #d4af37);
 }
 
 /* 額外提醒：請務必檢查你的數字與花色樣式，確保它們的 z-index 比 0 大 */
