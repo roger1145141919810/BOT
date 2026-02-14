@@ -240,12 +240,19 @@ body, html {
     z-index: 2 !important; /* 確保數字在龍紋之上 */
 }
 /* 數字與花色文字強化 */
+.card .card-value {
+    color: #d4af37 !important; /* 只有數字維持金色 */
+}
+
+.card .card-suit {
+    /* 移除 color: #d4af37 !important; 讓它讀取 JS 的 style 屬性 */
+    text-shadow: 1px 1px 3px rgba(0,0,0,1) !important;
+    font-weight: 900 !important;
+}
+
 .card .card-value, .card .card-suit {
     position: relative;
     z-index: 5;
-    color: #d4af37 !important; /* 文字改為一致的金色 */
-    text-shadow: 1px 1px 3px rgba(0,0,0,1) !important;
-    font-weight: 900 !important;
 }
 
 #hand .card:first-child { margin-left: 0 !important; }
