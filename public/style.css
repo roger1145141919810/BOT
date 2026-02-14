@@ -140,28 +140,41 @@ body, html {
     justify-content: space-between;
     padding: 8px;
 
-    /* 重製紋路：碳纖維/絲綢漸層底色 */
-    background-color: #0a0a0a !important; /* 加上純黑底色，防止穿透 */
+    /* 關鍵修正 1：移除背景透明度，改用純實色底擋住後面的牌 */
+    background-color: #0a0a0a !important; 
     background: 
-        radial-gradient(circle at 50% 50%, #2c2c2c 0%, transparent 80%),
+        radial-gradient(circle at 50% 50%, #2c2c2c 0%, #0a0a0a 80%), /* 將 transparent 改成實色 #0a0a0a */
         linear-gradient(145deg, #2c2c2c 0%, #0a0a0a 100%) !important;
     
-    /* 強化金屬框：立體拉絲金 */
+    /* 關鍵修正 2：確保卡牌本身有層級基準，且不使用 isolation: isolate */
+    z-index: 1; 
+
+    /* 強化金屬框 */
     border: 1.8px solid #d4af37 !important;
     border-radius: 9px !important;
     outline: 0.5px solid rgba(212, 175, 55, 0.4);
     outline-offset: -3px;
 
-    margin-left: -42px; /* 增加一點重疊度 */
+    margin-left: -42px; 
     
-    /* 強化立體感：側邊深陰影 */
-    box-shadow: 
-        -4px 0 15px rgba(0, 0, 0, 0.8),
-        inset 0 0 10px rgba(212, 175, 55, 0.1) !important;
+    /* 關鍵修正 3：強化左側陰影，這會讓重疊處看起來像實體牌壓在一起 */
+    box-shadow: -6px 0 15px rgba(0, 0, 0, 1) !important;
     
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28) !important;
-    overflow: hidden; /* 確保內部紋路不溢出 */
+    overflow: hidden; 
+}
+
+/* 龍紋補丁：確保它浮在背景上 */
+.dragon-emblem {
+    z-index: 0 !important; /* 從 -1 改回 0，讓它出現在背景之上 */
+    pointer-events: none;
+}
+
+/* 內容補丁：確保數字跟花色在龍紋之上 */
+.card .card-value, .card .card-suit {
+    position: relative;
+    z-index: 2 !important; 
 }
 
 /* 增加卡牌表面反光絲綢感 */
@@ -199,17 +212,23 @@ body, html {
     transform: translate(-50%, -50%) !important;
     font-size: 2.8rem !important;
     
-    /* 關鍵修正：確保龍紋在卡牌內部的最底層 */
-    z-index: -1 !important; 
+    /* 關鍵修正：從 -1 改為 0。
+       -1 會掉到 .card 的背景色下面，0 則會浮在背景上面 */
+    z-index: 0 !important; 
     
     color: #d4af37 !important;
-    /* 稍微降低一點點透明度，減少重疊時的干擾 */
-    opacity: 0.08 !important;  
-    filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.3)) !important;
+    /* 提高一點點不透明度，讓燙金感更明顯 */
+    opacity: 0.12 !important;  
+    filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.4)) !important;
     
     pointer-events: none; /* 確保不會干擾點擊 */
 }
 
+/* 額外提醒：請務必檢查你的數字與花色樣式，確保它們的 z-index 比 0 大 */
+.card .card-value, .card .card-suit {
+    position: relative;
+    z-index: 2 !important; /* 確保數字在龍紋之上 */
+}
 /* 數字與花色文字強化 */
 .card .card-value, .card .card-suit {
     position: relative;
