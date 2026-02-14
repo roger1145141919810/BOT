@@ -91,7 +91,7 @@ function renderHand() {
 
         // 重新調整 HTML 結構以配合 CSS 選擇器
         card.innerHTML = `
-            <div class="dragon-emblem">🐉</div> 
+            <div class="dragon-emblem">🐎</div> 
             <div class="card-value">${rankText(c.rank)}</div>
             <div class="card-suit" style="color: ${info.color}">${info.symbol}</div>
         `;
