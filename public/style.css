@@ -252,15 +252,15 @@ body, html {
     padding: 6px 20px;
     border-radius: 20px;
 
-    /* 關鍵修改：往下一點點 */
-    margin-top: 200px !important;  /* 增加頂部間距，數值越大越往下移 */
-    margin-bottom: 5px !important; /* 縮小與下方手牌的距離，避免推擠太嚴重 */
+    position: relative;
+    top: 15px; /* 這裡直接控制往下的距離，數字越大越低 */
     
-    /* 確保文字不會換行 */
+    /* 移除無效的 margin-top */
+    margin-bottom: 20px !important; /* 增加一點跟下方手牌的距離，防止重疊 */
+    
     white-space: nowrap;
-    z-index: 10;
+    z-index: 100; /* 提高層級，確保字在桌子邊緣之上 */
 }
-
 
 #hand { 
     height: 160px !important;    /* 固定高度，給卡牌彈起的空間 */
