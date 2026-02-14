@@ -199,11 +199,15 @@ body, html {
     transform: translate(-50%, -50%) !important;
     font-size: 2.8rem !important;
     
-    /* 燙金效果：微發光並降低透明度 */
+    /* 關鍵修正：確保龍紋在卡牌內部的最底層 */
+    z-index: -1 !important; 
+    
     color: #d4af37 !important;
-    opacity: 0.12 !important; 
-    filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.5)) !important;
-    z-index: 1 !important;
+    /* 稍微降低一點點透明度，減少重疊時的干擾 */
+    opacity: 0.08 !important;  
+    filter: drop-shadow(0 0 2px rgba(212, 175, 55, 0.3)) !important;
+    
+    pointer-events: none; /* 確保不會干擾點擊 */
 }
 
 /* 數字與花色文字強化 */
