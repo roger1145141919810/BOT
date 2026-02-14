@@ -141,8 +141,9 @@ body, html {
     padding: 8px;
 
     /* 重製紋路：碳纖維/絲綢漸層底色 */
+    background-color: #0a0a0a !important; /* 加上純黑底色，防止穿透 */
     background: 
-        radial-gradient(circle at 50% 50%, rgba(60, 60, 60, 0.2) 0%, transparent 80%),
+        radial-gradient(circle at 50% 50%, #2c2c2c 0%, transparent 80%),
         linear-gradient(145deg, #2c2c2c 0%, #0a0a0a 100%) !important;
     
     /* 強化金屬框：立體拉絲金 */
