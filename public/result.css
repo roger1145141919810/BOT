@@ -1,80 +1,64 @@
-/* --- 結算畫面專用樣式 --- */
-
+ /* --- 結算畫面專用樣式 (已隔離，不污染大廳) --- */
 .overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background: rgba(0, 0, 0, 0.92); /* 稍微加深遮罩，排除背景干擾 */
-    display: flex; 
-    justify-content: center;
-    align-items: center;
-    z-index: 9998;
-    pointer-events: auto;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    z-index: 9998; /* 比大廳稍微低一點點 */
+    pointer-events: auto;
 }
 
+/* 確保隱藏標籤優先級最高 */
+.hidden { display: none !important; }
+
 .result-box {
-    background: 
-        url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
-        radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%);
-    padding: 40px; /* 增加留白感 */
-    border-radius: 20px;
-    border: 2.5px solid #d4af37; /* 邊框加粗一點 */
-    text-align: center;
-    min-width: 350px;
-    /* 強化外發光，讓盒子從黑暗中跳出來 */
-    box-shadow: 0 0 50px rgba(0, 0, 0, 1), 0 0 30px rgba(212, 175, 55, 0.3);
-    position: relative;
-    z-index: 10000;
+    background: 
+        url('https://www.transparenttextures.com/patterns/dark-leather.png'), 
+        radial-gradient(circle at center, #2c2520 0%, #0a0a0a 100%);
+    padding: 30px;
+    border-radius: 20px;
+    border: 2px solid #d4af37;
+    text-align: center;
+    min-width: 320px;
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.4), inset 0 0 15px rgba(212, 175, 55, 0.2);
+    position: relative;
+    z-index: 10000;
 }
 
 #winnerTitle {
-    color: #ffffff; /* 標題改為純白 */
-    font-size: 2.4rem;
-    margin-bottom: 20px;
-    font-weight: 900;
-    /* 金色光暈與黑影併用，確保在任何背景都清晰 */
-    text-shadow: 
-        0 0 15px rgba(212, 175, 55, 0.8),
-        2px 2px 4px rgba(0, 0, 0, 1);
-    letter-spacing: 2px;
+    color: #ffcc33;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px rgba(255, 204, 51, 0.5);
 }
 
-/* 強烈建議：針對顯示「幾張牌」的區域進行優化 */
-#playerStats {
-    color: #e0e0e0;
-    font-size: 1.2rem;
-    line-height: 1.8;
-    margin-bottom: 25px;
-    background: rgba(0, 0, 0, 0.4); /* 給文字一個半透明底色 */
-    padding: 15px;
-    border-radius: 10px;
-    border: 1px solid rgba(212, 175, 55, 0.2);
+/* --- 隔離按鈕樣式：加上 #gameOverOverlay 限定範圍 --- */
+#gameOverOverlay .btn-group-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-#playerStats div {
-    text-shadow: 1px 1px 2px #000;
-    border-bottom: 1px dashed rgba(212, 175, 55, 0.2);
-    padding: 5px 0;
-}
-
-#playerStats div:last-child {
-    border-bottom: none;
-}
-
-/* 倒數計時文字 */
-#gameOverOverlay p {
-    color: #aaa;
-    font-size: 0.9rem;
-    margin-top: 15px;
-}
-
-#shutdownTimer {
-    color: #ffcc33;
-    font-weight: bold;
-}
-
-/* 按鈕樣式維持，但增加文字陰影提升清晰度 */
 #gameOverOverlay .btn-group-vertical button {
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    letter-spacing: 1px;
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    cursor: pointer !important;
+    border: none;
+    color: white;
+    font-weight: bold;
+}
+
+/* 只在結算畫面顯示橘色和藍色 */
+#gameOverOverlay .primary-btn { background: #e67e22; box-shadow: 0 4px #d35400; }
+#gameOverOverlay .secondary-btn { background: #3498db; box-shadow: 0 4px #2980b9; }
+
+#gameOverOverlay button:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
 }
