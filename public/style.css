@@ -253,7 +253,7 @@ body, html {
     border-radius: 20px;
 
     position: relative;
-    top: 15px; /* 這裡直接控制往下的距離，數字越大越低 */
+    top: 30px; /* 這裡直接控制往下的距離，數字越大越低 */
     
     /* 移除無效的 margin-top */
     margin-bottom: 20px !important; /* 增加一點跟下方手牌的距離，防止重疊 */
