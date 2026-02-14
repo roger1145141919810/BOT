@@ -128,7 +128,7 @@ socket.on('play_made', ({ playerId, cards, isPass }) => {
             const info = SUIT_DATA[c.suit];
             return `
                 <div class="card">
-                    <div class="dragon-emblem" style="opacity: 0.1;">🐉</div>
+                    <div class="dragon-emblem" style="opacity: 0.1;">🐎</div>
                     <div class="card-value">${rankText(c.rank)}</div>
                     <div class="card-suit" style="color: ${info.color}">${info.symbol}</div>
                 </div>`;
